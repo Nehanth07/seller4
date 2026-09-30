@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GSAP Curtain Transition</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Content Sections for Context */
+        .hero {
+            height: 100vh;
+            background-color: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .content {
+            height: 100vh;
+            background-color: #333;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        /* TRIGGER SECTION 
+           This section acts as the scroll distance buffer.
+           The curtain is fixed, but this section dictates when the animation plays.
+        */
+        .transition-section {
+            height: 100vh; /* Needs height to scroll through */
+            width: 100%;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* --- YOUR CSS --- */
+        
+        /* Container for the stripes */
+        .curtain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            z-index: 20;
+            pointer-events: none;
+        }
+
+        /* Individual Peach Stripes */
+        .curtain-panel {
+            flex: 1;
+            height: 100%;
+            background-color: #FF9E80; /* Peach */
+            transform-origin: top;
+            will-change: transform;
+            position: relative;
+            overflow: hidden;
+            outline: 2px solid #000; /* Black Border */
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Initial Content -->
+    <div class="hero">
+        <h1>Scroll Down</h1>
+    </div>
+
+    <!-- The Trigger Section for ScrollTrigger -->
+    <div class="transition-section">
+        <!-- The Fixed Curtain Overlay -->
+        <div class="curtain">
+            <div class="curtain-panel"></div> <!-- Index 0 -->
+            <div class="curtain-panel"></div> <!-- Index 1 -->
+            <div class="curtain-panel"></div> <!-- Index 2 -->
+            <div class="curtain-panel"></div> <!-- Index 3 -->
+            <div class="curtain-panel"></div> <!-- Index 4 -->
+            <div class="curtain-panel"></div> <!-- Index 5 -->
+        </div>
+    </div>
+
+    <!-- Content revealed after transition -->
+    <div class="content">
+        <h1>Welcome to the Next Section</h1>
+    </div>
+
+    <!-- GSAP Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <script>
+        // --- YOUR JS CONFIG & LOGIC ---
+
+        const CONFIG = {
+            STAGGER: 0.1,         // INCREASED from 0.004 so you can actually see the wave effect clearly
+            SCROLL_END: "+=110%", // How much scroll distance controls the animation
+            EASE: "power4.inOut"  // Snappy, premium easing
+        };
+
+        function initTransition() {
+            gsap.registerPlugin(ScrollTrigger);
+
+            const tl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: ".transition-section",
+                    start: "top top",
+                    end: CONFIG.SCROLL_END,
+                    pin: true,           // Pins the trigger section while animating
+                    scrub: 1,            // Smooth scrubbing linked to scrollbar
+                    anticipatePin: 1
+                }
+            });
+
+            // Custom Order: 1, 3, 6, 2, 4, 5 (Indices are 0-based)
+            // Note: Your array had indices up to 5, so we need 6 panels in HTML.
+            const panels = document.querySelectorAll(".curtain-panel");
+            
+            // Your custom order: [0, 2, 5, 1, 3, 4]
+            const order = [0, 2, 5, 1, 3, 4]; 
+            
+            // Map the DOM elements to your custom order
+            const orderedPanels = order.map(index => panels[index]);
+
+            // The Sliding Animation
+            tl.to(orderedPanels, {
+                yPercent: -100,        // Slide UP completely
+                stagger: CONFIG.STAGGER,
+                duration: 1,
+                ease: CONFIG.EASE
+            });
+        }
+
+        // Initialize on load
+        window.addEventListener('load', initTransition);
+    </script>
+</body>
+</html>

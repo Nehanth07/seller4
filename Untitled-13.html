@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Junni Landing Page Rebuild | Codegrid</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@800&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      overflow: hidden;
+      background-color: #000;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: "Plus Jakarta Sans", sans-serif;
+    }
+
+    /* --- Board / Grid --- */
+    .landing-wrapper {
+      width: 100vw;
+      height: 100vh;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .board {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      perspective: 1200px;
+      background-color: #000;
+      position: relative;
+    }
+
+    .row {
+      flex: 1;
+      display: flex;
+    }
+
+    .tile {
+      flex: 1;
+      position: relative;
+      transform-style: preserve-3d;
+      will-change: transform; 
+    }
+
+    .tile-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      overflow: hidden;
+      transform-origin: center center;
+      /* Initial state handled by JS */
+      border-radius: 0px; 
+    }
+
+    /* FRONT FACE (The Image) */
+    .tile-front {
+      background-color: #111;
+      transform: rotateX(0deg);
+    }
+    
+    .tile-front::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("https://images.unsplash.com/photo-1492571350019-22de08371fd3?q=80&w=1000&auto=format&fit=crop");
+      background-size: 600% 600%; /* 6x6 grid */
+      background-position: inherit;
+      filter: brightness(0.9);
+    }
+
+    /* BACK FACE (The Black Screen / Logo) */
+    .tile-back {
+      background-color: #000;
+      transform: rotateX(180deg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Optional: Subtle pattern on back so you see the tiles moving */
+    .tile-back::before {
+      content: "";
+      position: absolute;
+      width: 100%; height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E");
+      opacity: 0.3;
+    }
+
+    /* --- Center Button / Icon Container --- */
+    .center-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 100;
+      pointer-events: none;
+      width: 120px;
+      height: 120px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      perspective: 800px; /* Added perspective to allow Z-axis depth falling */
+    }
+
+    .icon-wrapper {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transform-style: preserve-3d; /* Essential for Z translation */
+    }
+
+    .lv-logo {
+      width: 80%;
+      height: auto;
+      fill: #ffffff;
+      filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- 1. The 6x6 Board -->
+  <div class="landing-wrapper">
+    <section class="board"></section>
+  </div>
+
+  <!-- 2. The Floating Icon -->
+  <div class="center-overlay">
+    <div class="icon-wrapper js-icon">
+      <!-- LV Logo SVG -->
+      <svg class="lv-logo" viewBox="0 0 100 85" xmlns="http://www.w3.org/2000/svg">
+        <path d="M38.5,15 L32,15 L32,18 C34,18 35,19 35,21 L35,62 C35,64 34,65 31,65 L28,65 L28,68 L58,68 L58,60 L56,60 C53,60 52,59 52,56 L52,54 L44,54 L44,21 C44,19 45,18 47.5,18 L47.5,15 L38.5,15 Z" />
+        <path d="M42,15 L32,15 L32,18 C34,18 35.5,18.5 37,22 L52,58 L66,22 C67.5,18.5 68,18 71,18 L71,15 L56,15 L56,18 C58.5,18 59,19 58,22 L49,46 L40,22 C39,19 40,18 42,18 L42,15 Z" />
+      </svg>
+    </div>
+  </div>
+
+  <script>
+    const ROWS = 6;
+    const COLS = 6;
+
+    class App {
+      constructor() {
+        this.board = document.querySelector(".board");
+        this.icon = document.querySelector(".js-icon");
+        this.overlay = document.querySelector(".center-overlay");
+        this.tiles = [];
+
+        this.init();
+      }
+
+      init() {
+        this.createBoard();
+        this.runOpeningSequence();
+      }
+
+      createBoard() {
+        for (let r = 0; r < ROWS; r++) {
+          const rowEl = document.createElement("div");
+          rowEl.className = "row";
+          
+          for (let c = 0; c < COLS; c++) {
+            const tileEl = document.createElement("div");
+            tileEl.className = "tile";
+            
+            tileEl.innerHTML = `
+              <div class="tile-face tile-front"></div>
+              <div class="tile-face tile-back"></div>
+            `;
+            
+            const bgPos = `${c * 20}% ${r * 20}%`;
+            tileEl.querySelector(".tile-front").style.backgroundPosition = bgPos;
+
+            rowEl.appendChild(tileEl);
+            this.tiles.push(tileEl);
+          }
+          this.board.appendChild(rowEl);
+        }
+      }
+
+      runOpeningSequence() {
+        // --- 1. INITIAL STATE ---
+        // Tiles facing BACK (Black), Full Scale (Wall), No Gaps
+        gsap.set(".tile", { rotateX: 180 });
+        gsap.set(".tile-face", { 
+          scale: 1, 
+          borderRadius: "0px",
+          boxShadow: "none"
+        });
+        
+        // Icon starts slightly smaller (0.85)
+        gsap.set(this.icon, { scale: 0.85, z: 0 });
+        
+        const tl = gsap.timeline({ delay: 0.5 });
+
+        // --- PHASE 2: EXPAND (The Inhale) ---
+        // Scales up slowly
+        tl.addLabel("expand");
+        
+        tl.to(this.icon, {
+          scale: 1.2,
+          duration: 2.5,
+          ease: "power2.in" // Slow build-up
+        }, "expand");
+
+        // Sync: Tiles shrink to "Curved Glass" grid during the expand
+        tl.to(".tile-face", {
+          scale: 0.94,
+          borderRadius: "12px",
+          boxShadow: "inset 0px 0px 20px rgba(50,50,50,0.5), inset 1px 1px 2px rgba(255,255,255,0.3), inset -1px -1px 2px rgba(255,255,255,0.1)",
+          duration: 2.5,
+          ease: "power2.in"
+        }, "expand");
+
+
+        // --- PHASE 3: HIT (The Impact) ---
+        // Snaps back down quickly
+        tl.addLabel("hit");
+        tl.to(this.icon, {
+          scale: 1.0,
+          duration: 0.15,
+          ease: "power4.out" // Hard snap
+        }, "hit");
+
+
+        // --- PHASE 4: FALL (Z-Axis Depth Drop) ---
+        // Logo falls "through" the floor into the distance (Z-axis)
+        tl.to(this.icon, {
+          z: -1000, // Move deeply away from camera
+          rotation: Math.random() * 360, // Tumble
+          rotationX: Math.random() * 360, // Tumble in 3D
+          scale: 0.1, // Shrink to nothing in perspective
+          opacity: 0,
+          duration: 0.8,
+          ease: "power3.in" // Accelerate into abyss
+        }, "hit+=0.05");
+
+
+        // --- PHASE 5: CHAOTIC BANG (The Wave) ---
+        // Triggered exactly at the "hit"
+        tl.to(".tile", {
+          // Chaotic Rotation Logic for "Bang" feel
+          rotateX: () => {
+            const r = Math.random();
+            // 40% chance of standard flip (0 or 360) to keep some grounding
+            if (r < 0.4) {
+               return Math.random() < 0.5 ? 0 : 360;
+            }
+            // 60% chance of WILD spin (up to 4 rotations)
+            const wildSpins = [-720, 720, -1080, 1080, 1440, -1440];
+            return wildSpins[Math.floor(Math.random() * wildSpins.length)];
+          },
+          duration: 2.2, 
+          ease: "power4.out", 
+          stagger: {
+            grid: [6, 6],
+            from: "center", 
+            amount: 0.8,    
+            axis: null
+          }
+        }, "hit+=0.05");
+
+
+        // --- PHASE 6: RESOLVE (Home Screen) ---
+        // Tiles expand back to seamless image
+        tl.to(".tile-face", {
+          scale: 1,
+          borderRadius: "0px",
+          boxShadow: "none",
+          duration: 1.0,
+          ease: "power3.inOut"
+        }, ">-0.5");
+
+        // Hide overlay container completely after animation
+        tl.set(this.overlay, { display: "none" });
+      }
+    }
+
+    window.addEventListener('load', () => new App());
+  </script>
+</body>
+</html>

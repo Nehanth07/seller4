@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exclusive - Garage Section Only</title>
+  
+  <!-- GSAP Animation Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <style>
+    /* MOVE @import to the top of the stylesheet */
+    @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+    /* Base styling and typography */
+    body {
+      margin: 0;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      background-color: #fff;
+      color: #000;
+      overflow-x: hidden;
+    }
+
+    html {
+      overflow-x: hidden;
+      font-size: clamp(14px, 0.85vw, 20px);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    /* =========================================
+       --- Garage Section Styles ---
+       ========================================= */
+    .garage-section {
+      padding: 10vh 5vw;
+      background-color: #fff;
+      min-height: 100vh;
+      position: relative;
+      z-index: 2; /* Keeps Garage on top of the fixed footer */
+    }
+
+    .garage-heading {
+      font-size: 3.5vw;
+      font-weight: 400;
+      margin: 0 0 4vw 0;
+      letter-spacing: -0.02em;
+    }
+
+    .garage-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2vw;
+    }
+
+    .garage-card {
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-image-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      overflow: hidden;
+      margin-bottom: 1.5vw;
+      border-radius: 0.25rem;
+    }
+
+    .card-image-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+    }
+
+    .garage-title {
+      font-size: 1.5vw;
+      font-weight: 400;
+      margin: 0;
+      letter-spacing: -0.01em;
+    }
+
+    .garage-details {
+      opacity: 0;
+      visibility: hidden;
+      max-height: 0;
+      transform: translateY(-10px);
+      transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+      margin-top: 0;
+      overflow: hidden;
+    }
+
+    .garage-details p {
+      font-size: 1.1vw;
+      line-height: 1.5;
+      color: #555;
+      margin: 0;
+    }
+
+    .garage-card:hover .card-image-container img {
+      transform: scale(1.05);
+    }
+
+    .garage-card:hover .garage-details {
+      opacity: 1;
+      visibility: visible;
+      max-height: 12.5rem;
+      transform: translateY(0);
+      margin-top: 1vw;
+    }
+
+    @media (max-width: 768px) {
+      .garage-grid { grid-template-columns: 1fr; gap: 2rem; }
+    }
+
+    /* =========================================
+       --- Drive Section Styles ---
+       ========================================= */
+       
+    /* -- 🎛️ CONTROL PANEL FOR THE 4 SECTIONS 🎛️ --
+       Change these X (horizontal), Y (vertical), and Width values 
+       to easily move and resize the 4 panels on desktop!
+    */
+    :root {
+        /* Base Colors */
+        --drive-bg-color: #ffffff;
+        --drive-text-main: #000000;
+        --drive-sub-footer-bg: #f2f2ef;
+        --drive-sub-footer-text: #000000;
+
+        /* FINAL USER ADJUSTMENTS */
+        --text-pos-x: 4vw;
+        --text-pos-y: 30.3vh;
+        --text-width: 56.25rem;
+        --text-scale: 1.08;
+        --text-font-scale: 0.88;
+        --text-line1-scale: 1;
+        --text-line2-scale: 0.8;
+        --text-line3-scale: 0.8;
+        --map-pos-x: 35vw;
+        --map-pos-y: -8vh;
+        --map-width: 65vw;
+        --map-height: 60vh;
+        --map-scale: 1;
+        --follow-pos-x: 4.5vw;
+        --follow-pos-y: 54vh;
+        --follow-scale: 1;
+        --links-pos-x: 60vw;
+        --links-pos-y: 53.5vh;
+        --links-scale: 0.9;
+        /* Keep width/gap defaults for follow/links if needed */
+        --follow-width: 18.75rem;
+        --links-width: auto;
+        --links-gap: 3.5rem;
+        --links-font-size: 1.625rem;
+        --links-column-min-width: 14.9375rem;
+
+      }
+
+    .drive-section {
+        background-color: transparent;
+        color: var(--drive-text-main);
+        position: relative;
+      width: 100%;
+      overflow-x: clip;
+    }
+
+    .drive-dark-section {
+        background-color: var(--drive-bg-color);
+        position: relative;
+        z-index: 2; 
+      margin-bottom: 100px;
+      width: 100%;
+      overflow-x: clip;
+    }
+
+    .drive-noise-overlay {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        pointer-events: none;
+        z-index: 9999;
+        opacity: 0.03; 
+        background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+        clip-path: inset(0); 
+    }
+
+    /* NEW LAYOUT SYSTEM - Absolute positioning for panels */
+    .drive-page-wrapper {
+      position: relative;
+      width: 100%;
+      height: clamp(35rem, 80vh, 57.5rem);
+      min-height: 35rem;
+      max-width: 100%;
+      overflow: visible;
+      transition: height 0.35s ease;
+    }
+
+    .drive-panel {
+      position: absolute;
+      will-change: transform, left, top, width, height;
+      transition: left 0.35s ease, top 0.35s ease, width 0.35s ease, height 0.35s ease, transform 0.35s ease, box-shadow 0.2s;
+    }
+
+    /* --- SECTION 1: MAIN TEXT --- */
+    .panel-main-text {
+      left: var(--text-pos-x);
+      top: var(--text-pos-y);
+      width: min(var(--text-width), 92vw);
+      transform: scale(var(--text-scale));
+      transform-origin: top left;
+      z-index: 2;
+    }
+
+    .panel-main-text h1 {
+        font-family: "Arial Black", "Impact", sans-serif;
+      font-size: calc(clamp(1.35rem, 4.65vw, 5.25rem) * var(--text-font-scale));
+        line-height: 0.88;
+        letter-spacing: -0.04em;
+        text-transform: uppercase;
+        margin: 0;
+        color: var(--drive-text-main);
+    }
+
+    .panel-main-text h1 .headline-line {
+      display: block;
+      white-space: nowrap;
+    }
+
+    .panel-main-text h1 .headline-line-1 {
+      font-size: calc(1em * var(--text-line1-scale));
+    }
+
+    .panel-main-text h1 .headline-line-2 {
+      font-size: calc(1em * var(--text-line2-scale));
+    }
+    .panel-main-text h1 .headline-line-3 {
+      font-size: calc(1em * var(--text-line3-scale));
+    }
+
+    /* --- SECTION 2: MAP --- */
+    .panel-map {
+      left: var(--map-pos-x);
+      top: var(--map-pos-y);
+      width: min(var(--map-width), 95vw);
+      height: var(--map-height);
+      z-index: 0;
+      border: 1px dashed rgba(0, 0, 0, 0.1);
+      pointer-events: none;
+      background: radial-gradient(circle at center, rgba(0,0,0,0.02) 0%, transparent 70%);
+      transform: scale(var(--map-scale));
+      transform-origin: top left;
+    }
+    
+    #networkMapCanvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+
+    /* --- SECTION 3: FOLLOW US --- */
+    .panel-follow-us {
+      left: var(--follow-pos-x);
+      top: var(--follow-pos-y);
+      width: min(var(--follow-width), 92vw);
+      z-index: 2;
+      font-family: "Courier New", Courier, monospace;
+      color: var(--drive-text-main);
+      transform: scale(var(--follow-scale));
+      transform-origin: top left;
+    }
+
+    .panel-follow-us label {
+        display: block;
+        margin-bottom: 1rem;
+        letter-spacing: 0.05em;
+        font-size: 0.75rem; 
+        font-weight: 600;
+    }
+
+    .drive-follow-icons {
+        display: flex;
+      gap: 0.75rem;
+    }
+
+    .drive-follow-btn {
+      width: 2rem;
+      height: 2rem;
+        border-radius: 50%;
+        border: 1px solid var(--drive-text-main); 
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--drive-text-main);
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .drive-follow-btn svg {
+      width: 0.875rem;
+      height: 0.875rem;
+        fill: currentColor;
+    }
+
+    .drive-follow-btn:hover {
+        background-color: #F95335;
+        border-color: #F95335;
+        color: var(--drive-bg-color);
+    }
+
+    /* --- SECTION 4: LINKS --- */
+    .panel-links {
+      left: var(--links-pos-x);
+      top: var(--links-pos-y);
+      width: min(var(--links-width), 92vw);
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--links-gap);
+      z-index: 2;
+      font-family: "Inter", sans-serif;
+      transform: scale(var(--links-scale));
+      transform-origin: top left;
+      transition: gap 0.35s ease, transform 0.35s ease, left 0.35s ease, top 0.35s ease;
+    }
+
+
+    .drive-nav-col {
+        display: flex;
+        flex-direction: column;
+      min-width: var(--links-column-min-width);
+    }
+
+    .drive-nav-col h3 {
+      font-size: 0.625rem;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: rgba(0, 0, 0, 0.5); 
+        margin-bottom: 1.5rem;
+    }
+
+    .drive-nav-col ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .drive-nav-services a,
+    .drive-nav-sitemap a {
+      font-family: "Bricolage Grotesque", sans-serif;
+      font-size: var(--links-font-size);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--drive-text-main);
+      text-decoration: none;
+      transition: color 0.3s ease;
+      display: inline-block;
+      margin-bottom: 0.2rem;
+      line-height: 1.2;
+      position: relative;
+      transition: color 0.3s ease, font-size 0.35s ease;
+    }
+
+    @media (max-width: 1280px) and (min-width: 1025px) {
+      :root {
+        --text-pos-x: 3.2vw;
+        --text-pos-y: 33vh;
+        --text-width: 51.25rem;
+        --text-scale: 1;
+        --map-pos-x: 31vw;
+        --map-pos-y: -6vh;
+        --map-width: 68vw;
+        --map-height: 57vh;
+        --follow-pos-y: 56vh;
+        --follow-width: 17.5rem;
+        --links-pos-x: 56vw;
+        --links-pos-y: 56vh;
+        --links-scale: 0.82;
+        --links-gap: 2.75rem;
+        --links-font-size: 1.4375rem;
+        --links-column-min-width: 13.25rem;
+      }
+    }
+
+    @media (max-width: 1024px) and (min-width: 769px) {
+      :root {
+        --text-pos-x: 3vw;
+        --text-pos-y: 37vh;
+        --text-width: 45rem;
+        --text-scale: 0.93;
+        --text-font-scale: 0.85;
+        --map-pos-x: 24vw;
+        --map-pos-y: -2vh;
+        --map-width: 74vw;
+        --map-height: 52vh;
+        --follow-pos-x: 3.5vw;
+        --follow-pos-y: 61vh;
+        --follow-width: 15.3125rem;
+        --links-pos-x: 47vw;
+        --links-pos-y: 63vh;
+        --links-scale: 0.7;
+        --links-gap: 2.125rem;
+        --links-font-size: 1.25rem;
+        --links-column-min-width: 11rem;
+      }
+
+      .drive-page-wrapper {
+        height: clamp(38.75rem, 84vh, 58.75rem);
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1100px) and (orientation: portrait) {
+      .drive-page-wrapper {
+        height: clamp(43.75rem, 88vh, 63.75rem);
+      }
+    }
+
+    .drive-nav-services a::before,
+    .drive-nav-services a::after,
+    .drive-nav-sitemap a::before,
+    .drive-nav-sitemap a::after {
+      content: "";
+      position: absolute;
+      bottom: -0.25rem;
+      height: 0.09375rem;
+      background-color: #F95335;
+      width: 50%;
+      transform: scaleX(0);
+    }
+
+    .drive-nav-services a::before,
+    .drive-nav-sitemap a::before {
+      left: 0;
+      transform-origin: right;
+      transition: transform 0.24s ease-out;
+    }
+
+    .drive-nav-services a::after,
+    .drive-nav-sitemap a::after {
+      right: 0;
+      transform-origin: left;
+      transition: transform 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .drive-nav-services a:hover,
+    .drive-nav-sitemap a:hover {
+      color: #F95335;
+    }
+
+    .drive-nav-services a:hover::before,
+    .drive-nav-services a:hover::after,
+    .drive-nav-sitemap a:hover::before,
+    .drive-nav-sitemap a:hover::after {
+      transform: scaleX(1);
+    }
+
+    .drive-nav-sitemap {
+      min-width: clamp(7.875rem, 13.5vw, 11.25rem);
+    }
+
+    .drive-nav-sitemap li {
+        margin-bottom: 0;
+    }
+
+    .drive-nav-sitemap a {
+      padding: 0;
+    }
+
+    .drive-nav-sitemap a svg {
+      display: none;
+    }
+
+    /* =========================================
+       --- Sub-Footer (Desktop Base) ---
+       ========================================= */
+    .drive-light-sub-footer {
+        background-color: var(--drive-sub-footer-bg);
+        color: var(--drive-sub-footer-text);
+        padding: 0 3.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-family: "Courier New", Courier, monospace;
+        font-size: 0.85rem;
+        font-weight: 600;
+        
+        position: fixed; 
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 6.25rem;
+        z-index: 1; 
+    }
+
+    .drive-social-icons {
+        display: flex;
+      gap: 0.75rem;
+    }
+
+    .drive-social-btn {
+      width: 2rem;
+      height: 2rem;
+        border-radius: 50%;
+        border: 1px solid var(--drive-sub-footer-text);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--drive-sub-footer-text);
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .drive-social-btn:hover {
+        background-color: var(--drive-sub-footer-text);
+        color: var(--drive-sub-footer-bg);
+    }
+
+    .drive-social-btn svg {
+      width: 0.875rem;
+      height: 0.875rem;
+        fill: currentColor;
+    }
+
+    .drive-footer-address {
+        text-align: center;
+        letter-spacing: 0.05em;
+    }
+
+    .drive-footer-copyright {
+        text-align: right;
+        letter-spacing: 0.05em;
+    }
+
+    /* =========================================
+       --- Mobile & Tablet Fluid Layout ---
+       ========================================= */
+    @media (max-width: 768px) {
+      .drive-page-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        min-height: auto;
+        height: auto;
+        overflow-x: hidden;
+      }
+
+      .drive-panel {
+        position: relative !important;
+        left: auto !important;
+        top: auto !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        margin: 0 !important;
+        transform: none !important;
+      }
+
+      .panel-main-text {
+        order: 2;
+        margin-top: 0;
+        width: 100% !important;
+      }
+
+      .panel-main-text h1 {
+        line-height: 1.05;
+      }
+
+      .panel-main-text h1 .headline-line {
+        white-space: normal;
+        word-break: break-word;
+      }
+
+      .panel-map {
+        order: 1;
+        position: relative !important;
+        width: calc(100% + 3rem) !important;
+        margin: 2rem -1.5rem 2rem -1.5rem !important;
+        height: 40vh !important;
+        min-height: 14.375rem !important;
+        border: none;
+        background: transparent;
+        top: auto !important;
+        right: auto !important;
+        opacity: 1;
+      }
+
+      .panel-follow-us {
+        order: 3;
+        margin-top: 0;
+      }
+
+      .panel-follow-us label { margin-bottom: 1rem; }
+
+      .panel-links {
+        order: 4;
+        justify-content: flex-start;
+        gap: var(--links-gap);
+        width: 100% !important;
+        flex-wrap: nowrap;
+        align-items: flex-start;
+        transform: scale(var(--links-scale)) !important;
+        transform-origin: top left !important;
+      }
+
+      .panel-links .drive-nav-col {
+        flex: 1 1 0;
+        min-width: 0;
+      }
+
+      .drive-nav-services a,
+      .drive-nav-sitemap a {
+        font-size: var(--links-font-size);
+      }
+
+      .drive-nav-sitemap {
+        min-width: 0;
+      }
+
+      .drive-dark-section {
+        margin-bottom: 15.625rem;
+      }
+
+      .drive-light-sub-footer {
+        flex-direction: column;
+        justify-content: center;
+        gap: 1.5rem;
+        height: 15.625rem;
+        text-align: center;
+      }
+    }
+
+    /* Site Navigation Footer */
+    .site-footer-nav-top {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.98);
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1000;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .site-footer-nav-top a {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-decoration: none;
+      color: #000;
+      transition: color 0.3s ease;
+      text-transform: uppercase;
+    }
+
+    .site-footer-nav-top a:hover {
+      color: #F95335;
+    }
+
+    .garage-section {
+      margin-top: 6rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Site Navigation Header -->
+  <header class="site-footer-nav-top">
+    <a href="thirdpagefinal.html">← Back to Projects</a>
+    <a href="opening-animation.html">Home</a>
+  </header>
+
+  <section class="garage-section">
+    <h2 class="garage-heading">Garage</h2>
+    
+    <div class="garage-grid">
+      <!-- Card 1 -->
+      <div class="garage-card">
+        <div class="card-image-container">
+          <img src="https://images.unsplash.com/photo-1558442074-3c19857bc1dc?auto=format&fit=crop&q=80&w=800" alt="Comet Meetings" onerror="this.src='https://placehold.co/800x600/eeeeee/999999?text=Image+1'">
+        </div>
+        <h3 class="garage-title">Comet Meetings</h3>
+        <div class="garage-details">
+          <p>Innovative spaces for corporate meetings and creative team building.</p>
+        </div>
+      </div>
+      
+      <!-- Card 2 -->
+      <div class="garage-card">
+        <div class="card-image-container">
+          <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&q=80&w=800" alt="CEB" onerror="this.src='https://placehold.co/800x600/eeeeee/999999?text=Image+2'">
+        </div>
+        <h3 class="garage-title">CEB</h3>
+        <div class="garage-details">
+          <p>L'art de bien ranger. Premium custom organization solutions.</p>
+        </div>
+      </div>
+      
+      <!-- Card 3 -->
+      <div class="garage-card">
+        <div class="card-image-container">
+          <img src="https://images.unsplash.com/photo-1545607062-848e4b7b2586?auto=format&fit=crop&q=80&w=800" alt="Centrakor" onerror="this.src='https://placehold.co/800x600/eeeeee/999999?text=Image+3'">
+        </div>
+        <h3 class="garage-title">Centrakor</h3>
+        <div class="garage-details">
+          <p>Commercial retail spaces designed for optimized customer flow.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <section class="drive-section">
+      <!-- Added an ID here so ScrollTrigger can easily target this section -->
+      <div id="driveSectionTrigger" class="drive-dark-section">
+          <!-- Grain/Noise Texture -->
+          <div class="drive-noise-overlay"></div>
+
+          <div class="drive-page-wrapper">
+              
+              <!-- SECTION 2: MAP ANIMATION (Background) -->
+              <div class="drive-panel panel-map">
+                  <canvas id="networkMapCanvas"></canvas>
+              </div>
+
+              <!-- SECTION 1: MAIN TEXT -->
+              <div class="drive-panel panel-main-text">
+                  <h1>
+                    <span class="headline-line headline-line-1">SWITZERLAND'S</span>
+                    <span class="headline-line headline-line-2">MOST REFINEDS FLEET.</span>
+                    <span class="headline-line headline-line-3">DRIVEN BY PERFORMANCE.</span>
+                  </h1>
+              </div>
+
+              <!-- SECTION 3: FOLLOW US -->
+              <div class="drive-panel panel-follow-us">
+                  <label>FOLLOW US ON</label>
+                  <div class="drive-follow-icons">
+                      <a href="#" class="drive-follow-btn" aria-label="Instagram">
+                          <svg viewBox="0 0 24 24">
+                              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+                          </svg>
+                      </a>
+                      <a href="#" class="drive-follow-btn" aria-label="WhatsApp">
+                          <svg viewBox="0 0 24 24">
+                              <path d="M12.031 0C5.385 0 0 5.384 0 12.03c0 2.128.552 4.195 1.6 6.02L.031 24l6.103-1.599A11.967 11.967 0 0012.031 24c6.645 0 12.031-5.385 12.031-12.03S18.677 0 12.031 0zm0 21.996c-1.8 0-3.564-.484-5.111-1.401l-.367-.217-3.801.996.996-3.801-.217-.367A9.972 9.972 0 012.031 12.03c0-5.522 4.477-9.998 9.999-9.998 5.521 0 9.998 4.476 9.998 9.998s-4.477 9.998-9.998 9.998zm5.485-7.502c-.301-.151-1.782-.879-2.058-.979-.276-.1-.477-.151-.678.151-.201.302-.778.98-.954 1.18-.176.201-.352.227-.653.076-.301-.151-1.273-.469-2.426-1.498-.897-.8-1.503-1.787-1.68-2.088-.176-.301-.019-.464.132-.614.135-.135.301-.352.452-.527.151-.176.201-.302.301-.503.1-.201.05-.377-.025-.527-.075-.151-.678-1.633-.928-2.235-.244-.588-.492-.508-.678-.517-.176-.008-.377-.008-.578-.008-.201 0-.527.075-.803.377-.276.302-1.054 1.03-1.054 2.512 0 1.482 1.08 2.914 1.23 3.115.151.201 2.122 3.24 5.14 4.542.718.309 1.278.494 1.716.632.72.228 1.376.196 1.895.119.584-.087 1.782-.729 2.033-1.433.251-.703.251-1.306.176-1.432-.075-.126-.276-.201-.577-.352z"/>
+                          </svg>
+                      </a>
+                      <a href="#" class="drive-follow-btn" aria-label="Phone">
+                          <svg viewBox="0 0 24 24">
+                              <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                          </svg>
+                      </a>
+                  </div>
+              </div>
+
+              <!-- SECTION 4: SERVICES & SITEMAP -->
+              <div class="drive-panel panel-links">
+                  <div class="drive-nav-col drive-nav-services">
+                      <h3>Services</h3>
+                      <ul>
+                          <li><a href="#">Film</a></li>
+                          <li><a href="#">Advertising</a></li>
+                          <li><a href="#">Television</a></li>
+                          <li><a href="#">Documentary</a></li>
+                          <li><a href="#">Sonic Branding</a></li>
+                      </ul>
+                  </div>
+
+                  <div class="drive-nav-col drive-nav-sitemap">
+                      <h3>Sitemap</h3>
+                      <ul>
+                          <li>
+                              <a href="#">
+                                  <span>Index</span>
+                                  <svg fill="currentColor" viewBox="0 0 24 24"><path d="M5 19L19 5M19 5V15M19 5H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+                              </a>
+                          </li>
+                          <li>
+                              <a href="#">
+                                  <span>Work</span>
+                                  <svg fill="currentColor" viewBox="0 0 24 24"><path d="M5 19L19 5M19 5V15M19 5H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+                              </a>
+                          </li>
+                          <li>
+                              <a href="#">
+                                  <span>Team</span>
+                                  <svg fill="currentColor" viewBox="0 0 24 24"><path d="M5 19L19 5M19 5V15M19 5H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+                              </a>
+                          </li>
+                          <li>
+                              <a href="#">
+                                  <span>Studio</span>
+                                  <svg fill="currentColor" viewBox="0 0 24 24"><path d="M5 19L19 5M19 5V15M19 5H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+                              </a>
+                          </li>
+                          <li>
+                              <a href="#">
+                                  <span>Contact</span>
+                                  <svg fill="currentColor" viewBox="0 0 24 24"><path d="M5 19L19 5M19 5V15M19 5H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+                              </a>
+                          </li>
+                          <li>
+                              <a href="#">
+                                  <span>Awards</span>
+                                  <svg fill="currentColor" viewBox="0 0 24 24"><path d="M5 19L19 5M19 5V15M19 5H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+                              </a>
+                          </li>
+                      </ul>
+                  </div>
+              </div>
+
+          </div>
+      </div>
+
+      <div class="drive-light-sub-footer">
+          <div class="drive-social-icons">
+              <a href="#" class="drive-social-btn" aria-label="LinkedIn">
+                  <svg viewBox="0 0 24 24">
+                      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                  </svg>
+              </a>
+              <a href="#" class="drive-social-btn" aria-label="Twitter">
+                  <svg viewBox="0 0 24 24">
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                  </svg>
+              </a>
+              <a href="#" class="drive-social-btn" aria-label="YouTube">
+                  <svg viewBox="0 0 24 24">
+                      <path d="M21.582 6.186a2.684 2.684 0 0 0-1.884-1.895C17.985 3.846 12 3.846 12 3.846s-5.985 0-7.698.445a2.684 2.684 0 0 0-1.884 1.895C2 7.904 2 12 2 12s0 4.096.418 5.814a2.684 2.684 0 0 0 1.884 1.895c1.713.445 7.698.445 7.698.445s5.985 0 7.698-.445a2.684 2.684 0 0 0 1.884-1.895C22 16.096 22 12 22 12s0-4.096-.418-5.814zM9.912 15.174V8.826L15.38 12l-5.468 3.174z"/>
+                  </svg>
+              </a>
+          </div>
+          <div class="drive-footer-address">
+              629 N. HIGH STREET COLUMBUS, OH 43215
+          </div>
+          <div class="drive-footer-copyright">
+              ©2026
+          </div>
+      </div>
+  </section>
+
+  <script>
+    // Wait for window to completely load
+    window.onload = function() {
+      
+      // 1. Initialize GSAP ScrollTrigger Animations
+      if (typeof gsap !== 'undefined') {
+        gsap.registerPlugin(ScrollTrigger);
+
+        gsap.from(".garage-card", {
+          scrollTrigger: {
+            trigger: ".garage-section",
+            start: "top 95%", 
+          },
+          y: 60,
+          opacity: 0,
+          duration: 0.8,
+          stagger: 0.15, 
+          ease: "power3.out"
+        });
+      } else {
+        console.error("GSAP failed to load. Please check your internet connection or CDN links.");
+      }
+
+      // 2. Initialize Canvas Network Animation
+      const canvas = document.getElementById('networkMapCanvas');
+      if (canvas) {
+          const ctx = canvas.getContext('2d');
+          
+          let width, height;
+          // Base dimensions extracted from your SVG coordinates bounds
+          const baseW = 1150; 
+          const baseH = 700;  
+
+          // Extracted line segments from the SVG path data
+          const rawSegments = [
+              {x1: 140, y1: 120, x2: 940, y2: 100},
+              {x1: 260, y1: 380, x2: 1060, y2: 520},
+              {x1: 1060, y1: 520, x2: 540, y2: 40},
+              {x1: 540, y1: 40, x2: 560, y2: 600},
+              {x1: 560, y1: 600, x2: 100, y2: 560},
+              {x1: 100, y1: 560, x2: 480, y2: 120},
+              {x1: 480, y1: 120, x2: 480, y2: 420},
+              {x1: 560, y1: 600, x2: 1080, y2: 660},
+              {x1: 553.4, y1: 384.5, x2: 1092.3, y2: 385.3},
+              {x1: 551.7, y1: 384.5, x2: 19.6, y2: 392.1}
+          ];
+
+          let segments = [];
+
+          // Sets the internal resolution and scales the SVG coordinates to fit
+          function setCanvasSize() {
+              const container = canvas.parentElement;
+              canvas.width = container.clientWidth;
+              canvas.height = container.clientHeight;
+              width = canvas.width;
+              height = canvas.height;
+              
+              // Map SVG coordinates to the actual responsive canvas width/height
+              segments = rawSegments.map(seg => ({
+                  sx1: (seg.x1 / baseW) * width,
+                  sy1: (seg.y1 / baseH) * height,
+                  sx2: (seg.x2 / baseW) * width,
+                  sy2: (seg.y2 / baseH) * height
+              }));
+          }
+
+          window.addEventListener('resize', setCanvasSize);
+
+          let globalTime = 0;
+          let animationStarted = false;
+          let animationComplete = false;
+
+          // Animation loop for drawing the lines once
+          function animateCanvas() {
+              if (animationComplete) return; // Stop the loop once everything is fully drawn
+              
+              requestAnimationFrame(animateCanvas);
+              ctx.clearRect(0, 0, width, height);
+              
+              globalTime += 0.015; // Speed of the initial drawing animation
+              let allLinesFinished = true;
+              
+              // 1. Draw static faint background framework
+              ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
+              ctx.lineWidth = 1;
+              segments.forEach(seg => {
+                  ctx.beginPath();
+                  ctx.moveTo(seg.sx1, seg.sy1);
+                  ctx.lineTo(seg.sx2, seg.sy2);
+                  ctx.stroke();
+              });
+
+              // 2. Animate the forming lines
+              ctx.lineCap = 'round';
+              ctx.lineJoin = 'round';
+              ctx.lineWidth = 1.5;
+              
+              segments.forEach((seg, i) => {
+                  // Stagger the start time of each line segment based on its index
+                  // We removed the modulo (%) so it doesn't loop
+                  let lineTime = Math.max(0, globalTime - (i * 0.15)); 
+                  
+                  let progress = 0;
+
+                  // Animation State Machine: Draw from 0 to 1 and stop
+                  if (lineTime < 1.5) {
+                      progress = lineTime / 1.5; // Drawing phase duration
+                      allLinesFinished = false; // Still drawing
+                  } else {
+                      progress = 1; // Fully drawn
+                  }
+
+                  // Ease-out curve for a natural, decelerating drawing motion
+                  let easedProgress = 1 - Math.pow(1 - progress, 3);
+
+                  if (easedProgress > 0) {
+                      // Calculate current point of the moving line
+                      let curX = seg.sx1 + (seg.sx2 - seg.sx1) * easedProgress;
+                      let curY = seg.sy1 + (seg.sy2 - seg.sy1) * easedProgress;
+
+                      // Draw the main line trace
+                      ctx.strokeStyle = `rgba(0, 0, 0, 0.6)`;
+                      ctx.beginPath();
+                      ctx.moveTo(seg.sx1, seg.sy1);
+                      ctx.lineTo(curX, curY);
+                      ctx.stroke();
+
+                      // Draw "Data Node" head only while moving
+                      if (progress < 1) {
+                        ctx.fillStyle = `rgba(0, 0, 0, 0.8)`;
+                        ctx.beginPath();
+                        ctx.arc(curX, curY, 3, 0, Math.PI * 2);
+                        ctx.fill();
+                      }
+                      
+                      // Draw tiny stationary origin node
+                      ctx.beginPath();
+                      ctx.arc(seg.sx1, seg.sy1, 1.5, 0, Math.PI * 2);
+                      ctx.fillStyle = `rgba(0, 0, 0, 0.4)`;
+                      ctx.fill();
+                      
+                      // Draw destination node once finished
+                      if (progress === 1) {
+                         ctx.beginPath();
+                         ctx.arc(seg.sx2, seg.sy2, 2, 0, Math.PI * 2);
+                         ctx.fillStyle = `rgba(0, 0, 0, 0.4)`;
+                         ctx.fill();
+                      }
+                  }
+              });
+              
+              // If all lines have reached progress = 1, we can stop the requestAnimationFrame loop
+              if (allLinesFinished && globalTime > 2) {
+                  animationComplete = true;
+              }
+          }
+
+          // Initialize size
+          setCanvasSize();
+
+          // Use GSAP ScrollTrigger to start the animation only when the Drive section comes into view
+          if (typeof gsap !== 'undefined') {
+              ScrollTrigger.create({
+                  trigger: "#driveSectionTrigger",
+                  start: "top 60%", // Triggers when the top of the drive section hits 60% of viewport height
+                  onEnter: () => {
+                      if (!animationStarted) {
+                          animationStarted = true;
+                          animateCanvas();
+                      }
+                  },
+                  // Optional: Restart if you scroll all the way back up and down again
+                  onEnterBack: () => {
+                      if (!animationStarted) {
+                           animationStarted = true;
+                           animateCanvas();
+                      }
+                  },
+                  onLeaveBack: () => {
+                      // Reset animation if user scrolls back above the section
+                      animationStarted = false;
+                      animationComplete = false;
+                      globalTime = 0;
+                      ctx.clearRect(0, 0, width, height); // Clear so it draws again next time
+                  }
+              });
+          } else {
+              // Fallback if GSAP is missing
+              animateCanvas();
+          }
+      }
+    };
+  </script>
+
+</body>
+</html>

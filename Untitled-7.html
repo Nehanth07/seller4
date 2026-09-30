@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deconstructing Slab Transition</title>
+    <style>
+        /* --- Reset and Base Styles --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #121212; 
+            color: #ffffff;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            overflow-x: hidden; /* Prevent scroll bars during animation */
+        }
+
+        /* --- Navigation --- */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+            background: rgba(18, 18, 18, 0.8);
+            backdrop-filter: blur(5px);
+            border-bottom: 1px solid #333;
+        }
+
+        .logo { font-weight: bold; letter-spacing: 2px; }
+
+        .nav-links a {
+            color: #888;
+            text-decoration: none;
+            margin-left: 30px;
+            font-size: 14px;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+            cursor: pointer;
+        }
+
+        .nav-links a:hover, .nav-links a.active { color: #fff; }
+
+        /* --- Main Content --- */
+        #main-content {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding-top: 60px;
+            position: relative;
+            z-index: 1; 
+        }
+
+        h1.hero-text {
+            font-size: 10vw;
+            font-weight: 900;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            color: #e0e0e0;
+            text-shadow: 2px 2px 0px #333, -2px -2px 0px #000;
+        }
+
+        p.subtitle { color: #888; margin-top: 20px; letter-spacing: 1px;}
+
+        /* --- THE TRANSITION OVERLAY --- */
+        #transition-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 999;
+            pointer-events: none;
+            display: grid;
+            /* We use a smaller base unit (50px) but blocks will span multiple units */
+            grid-template-columns: repeat(auto-fill, 100px); 
+            /* DENSE is critical: it fits smaller blocks into holes left by big ones */
+            grid-auto-flow: dense; 
+            /* Start with a small gap to emphasize the "pieces" look */
+            gap: 10px; 
+            align-content: start;
+        }
+
+        /* --- BLOCK STYLES --- */
+        .block {
+            background-color: #121212; 
+            
+            /* Start as rounded "debris" */
+            border-radius: 15px; 
+            
+            /* Subtle border to see the shapes */
+            border: 1px solid #2a2a2a;
+
+            width: 100%;
+            height: 100%;
+            
+            /* Start Position: Far above the screen */
+            transform: translateY(-120vh) rotate(10deg);
+            opacity: 0; /* Fade in as they fall */
+            
+            /* Slower, heavier animation for big blocks */
+            transition: 
+                transform 1s cubic-bezier(0.19, 1, 0.22, 1), 
+                border-radius 0.6s ease,
+                gap 0.6s ease,
+                opacity 0.4s;
+                
+            transition-delay: var(--delay);
+            will-change: transform, border-radius;
+        }
+
+        /* --- SIZE VARIATIONS (Applied by JS) --- */
+        .size-1 { grid-column: span 1; grid-row: span 1; } /* Standard */
+        .size-2 { grid-column: span 2; grid-row: span 1; } /* Wide */
+        .size-3 { grid-column: span 1; grid-row: span 2; } /* Tall */
+        .size-4 { grid-column: span 2; grid-row: span 2; } /* Big Box */
+
+        /* --- PHASE 1: FORM THE SLAB (Covering) --- */
+        #transition-overlay.is-covering {
+            pointer-events: auto;
+            gap: 0px; /* Remove gaps to form solid slab */
+        }
+
+        #transition-overlay.is-covering .block {
+            /* 1. Move to natural grid position (0).
+               2. Remove rotation.
+               3. Scale slightly (1.05) to ensure they overlap and seal any light leaks.
+            */
+            transform: translateY(0) rotate(0deg) scale(1.05);
+            opacity: 1;
+            border-radius: 0px; /* Become sharp square edges */
+            border-color: transparent; /* Hide borders to look like one seamless page */
+        }
+
+        /* --- PHASE 2: DECONSTRUCT (Revealing) --- */
+        #transition-overlay.is-revealing .block {
+            /* Go UP (-120vh) to reveal the page underneath */
+            transform: translateY(-120vh) rotate(-10deg);
+            opacity: 1;
+            
+            /* Turn back into rounded debris as they leave */
+            border-radius: 20px; 
+            transition: transform 0.8s cubic-bezier(0.55, 0.055, 0.675, 0.19);
+            transition-delay: var(--delay);
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">JUNNI.CO</div>
+        <div class="nav-links">
+            <a class="nav-item active" data-page="home">HOME</a>
+            <a class="nav-item" data-page="about">ABOUT</a>
+            <a class="nav-item" data-page="works">WORKS</a>
+            <a class="nav-item" data-page="recruit">RECRUIT</a>
+        </div>
+    </nav>
+
+    <main id="main-content">
+        <h1 class="hero-text">WELCOME</h1>
+        <p class="subtitle">Advanced technology with a playful spirit.</p>
+    </main>
+
+    <div id="transition-overlay"></div>
+
+    <script>
+        const BASE_SIZE = 100; // Pixels
+        const ANIMATION_DURATION = 1800; // Slightly longer for "heavy" feel
+
+        const overlay = document.getElementById('transition-overlay');
+        const mainContent = document.getElementById('main-content');
+        const navLinks = document.querySelectorAll('.nav-item');
+
+        const pageContent = {
+            home: `<h1 class="hero-text">WELCOME</h1><p class="subtitle">Advanced technology with a playful spirit.</p>`,
+            about: `<h1 class="hero-text" style="font-size: 6vw;">WHO WE ARE</h1><p class="subtitle">A creative studio pushing boundaries.</p>`,
+            works: `<h1 class="hero-text" style="font-size: 6vw;">OUR PROJECTS</h1><p class="subtitle">Showcase of digital innovation.</p>`,
+            recruit: `<h1 class="hero-text">RECRUIT</h1><p class="subtitle">We are currently recruiting members interested in technology.</p>`
+        };
+
+        function setupGrid() {
+            overlay.innerHTML = '';
+            
+            // Calculate how many 100px blocks we need.
+            // We multiply by 1.5 to generate EXTRA blocks because "grid-auto-flow: dense"
+            // effectively packs them, but irregular shapes need overflow to ensure full coverage.
+            const cols = Math.ceil(window.innerWidth / BASE_SIZE);
+            const rows = Math.ceil(window.innerHeight / BASE_SIZE);
+            const totalBlocks = (cols * rows) * 1.5; 
+
+            for (let i = 0; i < totalBlocks; i++) {
+                const block = document.createElement('div');
+                block.classList.add('block');
+                
+                // --- RANDOMIZE SHAPES ---
+                // 50% chance of being a 1x1 block
+                // 50% chance of being a larger shape (Wide, Tall, or Big)
+                const rand = Math.random();
+                if (rand < 0.5) {
+                    block.classList.add('size-1'); // 1x1
+                } else if (rand < 0.7) {
+                    block.classList.add('size-2'); // Wide
+                } else if (rand < 0.9) {
+                    block.classList.add('size-3'); // Tall
+                } else {
+                    block.classList.add('size-4'); // Big 2x2
+                }
+
+                // Random delay (0s to 0.6s)
+                const randomDelay = Math.random() * 0.6;
+                block.style.setProperty('--delay', `${randomDelay}s`);
+                
+                overlay.appendChild(block);
+            }
+        }
+
+        window.addEventListener('load', setupGrid);
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(setupGrid, 200);
+        });
+
+        function triggerTransition(destinationPageId) {
+            if (overlay.classList.contains('is-covering') || overlay.classList.contains('is-revealing')) return;
+
+            // 1. Start Covering (Slam down)
+            overlay.classList.remove('is-revealing');
+            void overlay.offsetWidth; 
+            overlay.classList.add('is-covering');
+
+            // 2. Wait for slab to form, then Swap
+            setTimeout(() => {
+                navLinks.forEach(link => link.classList.remove('active'));
+                document.querySelector(`[data-page="${destinationPageId}"]`).classList.add('active');
+                mainContent.innerHTML = pageContent[destinationPageId];
+                window.scrollTo(0,0);
+
+                // 3. Deconstruct (Fly Up)
+                overlay.classList.remove('is-covering');
+                overlay.classList.add('is-revealing');
+
+            }, ANIMATION_DURATION / 2); 
+
+            setTimeout(() => {
+                 overlay.classList.remove('is-revealing');
+                 setupGrid(); // Regenerate random layout for next time
+            }, ANIMATION_DURATION + 200); 
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const pageId = link.getAttribute('data-page');
+                triggerTransition(pageId);
+            });
+        });
+    </script>
+</body>
+</html>

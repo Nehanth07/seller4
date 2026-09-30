@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindJoin Replica</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;800&display=swap" rel="stylesheet">
+    <!-- GSAP & ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: '#F6F4E8', 
+                    },
+                    fontFamily: {
+                        'display': ['Anton', 'sans-serif'],
+                        'mono': ['Space Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #050505;
+            color: #F6F4E8;
+            overflow-x: hidden;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #050505;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+        }
+
+        .clip-text-container {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        /* --- INTEGRATED NAV BAR STYLES --- */
+        :root {
+            --nav-scale: 0.6;
+            --nav-x: 20px;     
+            --nav-y: 20px;      
+            --nav-right: auto;  
+            --nav-top: auto;    
+            --color-black: #231E25;
+            --color-white: #FFF;
+            --color-brand-1: #FF55F8;
+            --color-brand-2: #FF4337;
+            --font-family-gellix: 'Gellix', 'Inter', sans-serif;
+            --large-height: calc(5.2222rem * var(--nav-scale)); 
+            --small-height: calc(3.8rem * var(--nav-scale));
+            --btn-width: calc(190px * var(--nav-scale));
+            --stripe-height: calc(6px * var(--nav-scale));
+        }
+
+        .s__bar {
+            background-color: var(--color-white); 
+            border-top: 1px solid var(--color-black);
+            border-right: 1px solid var(--color-black);
+            border-bottom: 0; 
+            border-left: 0;
+            display: flex; 
+            align-items: stretch;
+            position: fixed;
+            left: var(--nav-x);
+            right: var(--nav-right);
+            bottom: var(--nav-y);
+            top: var(--nav-top);
+            z-index: 100;
+            height: var(--large-height);
+            transition: height 0.6s cubic-bezier(0.16, 1, 0.3, 1), 
+                        left 0.3s ease, right 0.3s ease, bottom 0.3s ease, top 0.3s ease;
+            font-family: var(--font-family-gellix);
+        }
+
+        .s__bar::after {
+            content: '';
+            position: absolute;
+            right: calc(-2.5px * var(--nav-scale));
+            top: 0;
+            width: calc(5px * var(--nav-scale));
+            height: 100%;
+            background-color: var(--color-brand-1);
+            box-shadow: 0 0 calc(12px * var(--nav-scale)) var(--color-brand-1), 0 0 calc(6px * var(--nav-scale)) var(--color-brand-1);
+            z-index: 101;
+            pointer-events: none;
+        }
+
+        .s__bar.scrolled {
+            height: var(--small-height);
+        }
+
+        .section {
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            border-right: 1px solid var(--color-black); 
+            height: 100%;
+        }
+        .section:last-child { border-right: none; }
+
+        .info-sec {
+            font-size: calc(1.05rem * var(--nav-scale));
+            line-height: 1.25;
+            font-weight: 400;
+            color: var(--color-black);
+            white-space: nowrap;
+            overflow: hidden;
+            max-width: calc(420px * var(--nav-scale));
+            padding: 0 calc(40px * var(--nav-scale));
+            opacity: 1;
+            transition: max-width 0.6s cubic-bezier(0.16, 1, 0.3, 1), padding 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease-out;
+        }
+
+        .s__bar.scrolled .info-sec {
+            max-width: 0;
+            padding: 0;
+            opacity: 0;
+            border-right: 0px solid transparent; 
+        }
+
+        .logo-sec { 
+            width: var(--large-height); 
+            flex-shrink: 0; 
+            transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .s__bar.scrolled .logo-sec { width: var(--small-height); }
+
+        .logo-circle {
+            width: 62%; height: 62%; border: 1.2px solid var(--color-black); border-radius: 50%;
+            display: flex; flex-direction: column; position: relative; color: var(--color-black); font-weight: 400;
+        }
+        .logo-line {
+            position: absolute; top: 50%; left: 0; width: 100%; height: 1.2px; background-color: var(--color-black); transform: translateY(-50%);
+        }
+        .logo-num { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 0.85em; line-height: 1; }
+        
+        .brand-sec { 
+            padding: 0 calc(35px * var(--nav-scale)); 
+            font-weight: 800; 
+            font-size: calc(1.9rem * var(--nav-scale)); 
+            letter-spacing: -0.055em; 
+            color: var(--color-black); 
+        }
+        .s__bar.scrolled .brand-sec { padding: 0 calc(25px * var(--nav-scale)); transition: padding 0.6s ease; }
+
+        .login-sec { padding: 0 calc(32px * var(--nav-scale)); }
+        .btn-login {
+            position: relative;
+            background: transparent; 
+            border: 1.2px solid var(--color-black);
+            border-radius: 100px; 
+            padding: calc(11px * var(--nav-scale)) calc(28px * var(--nav-scale)); 
+            font-size: calc(1rem * var(--nav-scale)); 
+            font-weight: 500;
+            color: var(--color-black); 
+            text-decoration: none;
+            overflow: hidden;
+            z-index: 1;
+            transition: color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: inline-block;
+        }
+        .btn-login::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 0;
+            background-color: var(--color-black);
+            z-index: -1;
+            transform: translateY(-50%);
+            transition: height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .btn-login:hover::before { height: 100%; }
+        .btn-login:hover { color: var(--color-white); }
+
+        .cta-sec { padding: 0 calc(28px * var(--nav-scale)); }
+
+        .btn-container {
+            position: relative;
+            width: var(--btn-width);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .s__bar.scrolled .btn-container { transform: scale(0.88); }
+
+        .stripe {
+            background-color: var(--color-brand-1);
+            height: var(--stripe-height);
+            display: block;
+            transform-origin: center;
+            will-change: transform;
+            transform: scaleX(1);
+            margin-top: -1px;
+            transition: transform 1.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+        
+        .s1 { margin-top: 0; }
+        .s1, .s8 { width: 88%; transition-delay: 0.1s; } 
+        .s2, .s7 { width: 94%; transition-delay: 0.05s; }
+        .s3, .s4, .s5, .s6 { width: 100%; transition-delay: 0s; }
+
+        .btn-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            color: var(--color-black);
+            font-family: var(--font-family-gellix);
+            font-weight: 500;
+            font-size: calc(1.15rem * var(--nav-scale));
+            letter-spacing: -0.01em;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        @keyframes beat-bass { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(1.16); } }
+        @keyframes beat-snare { 0%, 100% { transform: scaleX(1); } 20% { transform: scaleX(1.06); } 40% { transform: scaleX(0.96); } 60% { transform: scaleX(1.02); } }
+        @keyframes beat-jitter { 0%, 100% { transform: scaleX(1); } 25% { transform: scaleX(1.04); } 75% { transform: scaleX(0.98); } }
+
+        .btn-container:hover .stripe { transition: transform 0.15s ease-out; transition-delay: 0s !important; }
+        .btn-container:hover .s1 { animation: beat-jitter 0.4s infinite linear; }
+        .btn-container:hover .s2 { animation: beat-snare 0.6s infinite cubic-bezier(0.2, 0.8, 0.2, 1); animation-delay: 0.05s; }
+        .btn-container:hover .s3 { animation: beat-bass 0.8s infinite cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-container:hover .s4 { animation: beat-jitter 0.35s infinite linear; animation-delay: 0.1s; }
+        .btn-container:hover .s5 { animation: beat-bass 0.7s infinite cubic-bezier(0.4, 0, 0.2, 1); animation-delay: 0.15s; }
+        .btn-container:hover .s6 { animation: beat-snare 0.5s infinite cubic-bezier(0.2, 0.8, 0.2, 1); animation-delay: 0.2s; }
+        .btn-container:hover .s7 { animation: beat-jitter 0.45s infinite linear; animation-delay: 0.1s; }
+        .btn-container:hover .s8 { animation: beat-snare 0.65s infinite cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .btn-container:active { transform: scale(0.96); transition: transform 0.1s ease; }
+
+        @media (max-width: 767px) {
+            :root {
+                --nav-x: 0;
+                --nav-y: auto;
+                --nav-top: 0;
+                --nav-scale: 0.55; 
+            }
+            .s__bar { width: 100vw; border-top: none; border-right: none; border-bottom: 1px solid var(--color-black); justify-content: space-between; }
+            .s__bar::after { display: none; }
+            .section { border-right: none; }
+            .info-sec { display: none; }
+            .s__bar.scrolled { height: var(--large-height); }
+            .s__bar.scrolled .logo-sec { width: var(--large-height); }
+            .s__bar.scrolled .brand-sec { padding: 0 calc(35px * var(--nav-scale)); }
+            .s__bar.scrolled .btn-container { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Scrollable Space -->
+    <div class="h-[250vh] w-full relative">
+
+        <!-- Fixed UI Frame Wrapper -->
+        <div class="fixed inset-2 sm:inset-3 md:inset-4 z-50 pointer-events-none">
+            
+            <!-- Top Border -->
+            <div class="top-corner-left absolute top-0 left-0 w-[5vw] h-[1px] bg-brand/20"></div>
+            <div class="top-corner-right absolute top-0 right-0 w-[5vw] h-[1px] bg-brand/20"></div>
+            <div class="top-line-mid-left absolute top-0 left-[5vw] right-[50%] h-[1px] bg-brand/20 origin-left"></div>
+            <div class="top-line-mid-right absolute top-0 left-[50%] right-[5vw] h-[1px] bg-brand/20 origin-right"></div>
+            
+            <!-- Left Border -->
+            <div class="left-line-top absolute top-0 left-0 w-[1px] h-[8vh] bg-brand/20"></div>
+            <div class="left-line-bottom absolute bottom-0 left-0 w-[1px] h-[8vh] bg-brand/20"></div>
+            <div class="left-line-main absolute top-[8vh] bottom-[8vh] left-0 w-[1px] bg-brand/20 origin-center"></div>
+            
+            <!-- Right Border -->
+            <div class="right-line-top absolute top-0 right-0 w-[1px] h-[8vh] bg-brand/20"></div>
+            <div class="right-line-bottom absolute bottom-0 right-0 w-[1px] h-[8vh] bg-brand/20"></div>
+            <div class="right-line-main absolute top-[8vh] bottom-[8vh] right-0 w-[1px] bg-brand/20 origin-center"></div>
+            
+            <!-- Bottom Border -->
+            <div class="bottom-corner-left absolute bottom-0 left-0 w-[5vw] h-[1px] bg-brand/20"></div>
+            <div class="bottom-corner-right absolute bottom-0 right-0 w-[5vw] h-[1px] bg-brand/20"></div>
+            <div class="bottom-line-main absolute bottom-0 left-[5vw] right-[5vw] h-[1px] bg-brand/20 origin-center"></div>
+
+            <!-- Header Content -->
+            <header class="font-mono text-[8px] sm:text-[10px] uppercase flex items-center justify-between w-full p-4 sm:p-6 md:p-8 gap-x-2 sm:gap-x-8 relative z-50 text-brand mt-12 md:mt-0">
+                <span class="overflow-hidden"><div class="js-slide tracking-[0.2em]">Integrity</div></span>
+                <hr class="border-current flex-1 origin-right js-line opacity-30 mx-2 sm:mx-4">
+                
+                <span class="overflow-hidden"><div class="js-slide tracking-[0.2em] center-society inline-block">Society</div></span>
+                <hr class="border-current flex-1 origin-left js-line opacity-30 mx-2 sm:mx-4">
+                
+                <span class="overflow-hidden"><div class="js-slide tracking-[0.2em]">Advancement</div></span>
+            </header>
+            
+            <!-- Target container exactly where we want the fluid SVG to lock into -->
+            <div class="absolute left-1/2 top-0 pt-4 sm:pt-6 md:pt-8 -translate-x-1/2 w-[160px] sm:w-[180px] md:w-[220px] h-[30px] flex justify-center items-center pointer-events-none js-flip-target z-50">
+                <div class="logo-wrapper w-full h-full flex justify-center items-center origin-center">
+                    <svg viewBox="0 0 1652 472" class="logo-svg relative w-full h-auto origin-center mix-blend-normal drop-shadow-2xl opacity-0">
+                        <text x="50%" y="50%" dominant-baseline="central" text-anchor="middle" fill="#F6F4E8" style="font-family: 'Anton', sans-serif; font-size: 480px; letter-spacing: 0.02em;">MINDJOIN</text>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sticky Hero Container -->
+        <div class="sticky top-0 h-screen w-full overflow-hidden bg-[#0a0a0a]">
+            <img 
+                src="https://images.unsplash.com/photo-1605806616949-1e87b487cb2a?q=80&w=2000&auto=format&fit=crop" 
+                alt="Futuristic City" 
+                class="bg-image absolute w-full h-[120vh] object-cover opacity-60 top-[-10vh]" 
+            />
+            
+            <!-- The Source Arched Letters (Flattening Animation) -->
+            <div id="arch-wrapper" class="clip-text-container z-40">
+                <h1 class="main-title flex flex-row items-start justify-center gap-0 text-brand font-display uppercase m-0 text-center drop-shadow-2xl mix-blend-normal">
+                    <span class="text-[26vw] md:text-[22vw]" style="line-height: 0.75;">M</span>
+                    <span class="text-[22vw] md:text-[18vw]" style="line-height: 0.75;">I</span>
+                    <span class="text-[18vw] md:text-[14vw]" style="line-height: 0.75;">N</span>
+                    <span class="text-[14vw] md:text-[10vw]" style="line-height: 0.75;">D</span>
+                    <span class="text-[14vw] md:text-[10vw]" style="line-height: 0.75;">J</span>
+                    <span class="text-[18vw] md:text-[14vw]" style="line-height: 0.75;">O</span>
+                    <span class="text-[22vw] md:text-[18vw]" style="line-height: 0.75;">I</span>
+                    <span class="text-[26vw] md:text-[22vw]" style="line-height: 0.75;">N</span>
+                </h1>
+            </div>
+
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none"></div>
+        </div>
+    </div>
+
+    <!-- Integrated Nav Bar -->
+    <div class="s__bar" id="navbar">
+        <div class="section logo-sec">
+            <div class="logo-circle">
+                <div class="logo-num">24</div>
+                <div class="logo-line"></div>
+                <div class="logo-num">7</div>
+            </div>
+        </div>
+        <div class="section brand-sec">24/7Artists</div>
+        <div class="section info-sec">
+            A personalized music career<br>plan for independent artists.
+        </div>
+        <div class="section login-sec">
+            <a href="#" class="btn-login">Login</a>
+        </div>
+        <div class="section cta-sec">
+            <a href="#" class="btn-container">
+                <span class="btn-text">Create Account</span>
+                <span class="stripe s1"></span>
+                <span class="stripe s2"></span>
+                <span class="stripe s3"></span>
+                <span class="stripe s4"></span>
+                <span class="stripe s5"></span>
+                <span class="stripe s6"></span>
+                <span class="stripe s7"></span>
+                <span class="stripe s8"></span>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Nav bar scroll logic
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        gsap.registerPlugin(ScrollTrigger);
+
+        window.addEventListener("load", () => {
+            let mm = gsap.matchMedia();
+
+            mm.add({
+                isDesktop: "(min-width: 768px)",
+                isMobile: "(max-width: 767px)"
+            }, (context) => {
+                let { isDesktop } = context.conditions;
+
+                let tl = gsap.timeline({
+                    scrollTrigger: {
+                        trigger: "body",
+                        start: "top top",
+                        end: "bottom top",
+                        scrub: 1, 
+                        invalidateOnRefresh: true 
+                    }
+                });
+
+                // --- PHASE 1: FLATTEN THE LETTERS (0 to 35% of the scroll) ---
+                // We use flex items-start, so animating them to the same size makes them form a flat straight line!
+                tl.to(".main-title span", {
+                    fontSize: isDesktop ? "2.5vw" : "1.5vw", 
+                    duration: 0.55,
+                    y: "-43vh",
+                    ease: "power2.inOut"
+                }, 0);
+
+                tl.to(".main-title", {
+                    //x: isDesktop ? "-1.2vw" : "-10vw",
+                     // Optical center nudge
+                    duration: 1,
+                    ease: "power2.inOut"
+                }, 0);
+
+                // --- PHASE 2: REDUCE SIZE GRADUALLY (35% to 100% of the scroll) ---
+                // After the letters flatten out, smoothly reduce their font size as we keep scrolling
+            
+
+
+                // --- PHASE 3: FLUID DOCK TO HEADER & BORDERS ---
+                // Animate the border cuts symmetrically while the text is shrinking/docking
+                tl.to(".top-line-mid-left", { scaleX: isDesktop ? 0.69 : 0.45, x: isDesktop ? "2vw" : "4vw", ease: "power2.inOut" }, 0.4);
+                tl.to(".top-line-mid-right", { scaleX: isDesktop ? 0.69 : 0.45, x: isDesktop ? "-2vw" : "-4vw", ease: "power2.inOut" }, 0.4);
+                tl.to(".left-line-main, .right-line-main", { scaleY: isDesktop ? 0.93 : 0.88, ease: "power2.inOut" }, 0.4);
+                tl.to(".bottom-line-main", { scaleX: isDesktop ? 0.95 : 0.90, ease: "power2.inOut" }, 0.4);
+            });
+
+            // Intro Load Animations 
+            gsap.from(".main-title", { duration: 1.5, y: 50, opacity: 0, scale: 0.9, ease: "power3.out" });
+            gsap.from(".js-slide", { duration: 1, y: 20, opacity: 0, stagger: 0.1, delay: 0.5, ease: "power2.out" });
+            gsap.from(".js-line", { duration: 1, scaleX: 0, opacity: 0, stagger: 0.1, delay: 0.6, ease: "power2.out" });
+
+            // Parallax effect for the background image
+            gsap.to(".bg-image", {
+                scrollTrigger: {
+                    trigger: "body",
+                    start: "top top",
+                    end: "bottom top",
+                    scrub: 1,
+                },
+                y: "15vh", 
+                opacity: 0.2, 
+                ease: "none"
+            });
+        });
+    </script>
+</body>
+</html>

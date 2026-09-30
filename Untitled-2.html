@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Junni Rebuild - Interactive Prototype</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0f1717;
+            --brand-green: #d4ff00; 
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            background: var(--bg-dark);
+            overflow-x: hidden;
+            font-family: sans-serif;
+            cursor: none;
+        }
+
+        /* Custom Cursor */
+        #cursor-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 150px; 
+            height: 150px;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #cursor-svg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            fill: var(--brand-green);
+            font-size: 11.5px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* The permanent ring around the dot */
+        #cursor-ring-fixed {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 1.5px solid var(--brand-green);
+            border-radius: 50%;
+            opacity: 0.8;
+            transition: border-color 0.3s ease;
+        }
+
+        #cursor-dot {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--brand-green);
+            border-radius: 50%;
+            z-index: 2;
+        }
+
+        /* Layout */
+        .section {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .hero h1 {
+            color: white;
+            font-size: 5vw;
+        }
+
+        .board-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 10px;
+            perspective: 1500px;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .row {
+            flex: 1;
+            display: flex;
+            gap: 10px;
+        }
+
+        .tile {
+            flex: 1;
+            position: relative;
+            transform-style: preserve-3d;
+            border-radius: 12px;
+        }
+
+        .tile-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: inherit;
+        }
+
+        .tile-front { background: #232f2f; }
+        .tile-back {
+            background: var(--brand-green);
+            transform: rotateX(180deg);
+        }
+
+        .reveal-content {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 20;
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .reveal-content h2 {
+            font-size: 8vw;
+            margin: 0;
+            color: black;
+        }
+
+        .scroll-spacer { height: 400vh; }
+        
+        .hover-target {
+            pointer-events: auto;
+            color: white;
+            text-decoration: underline;
+            z-index: 30;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="cursor-wrapper">
+        <div id="cursor-dot"></div>
+        <div id="cursor-ring-fixed"></div>
+        <svg id="cursor-svg" viewBox="0 0 100 100">
+            <path id="circlePath" d="M 50, 50 m -40, 0 a 40,40 0 1,1 80,0 a 40,40 0 1,1 -80,0" fill="transparent"/>
+            <text>
+                <textPath href="#circlePath">SCROLL DOWN • SCROLL DOWN • SCROLL DOWN • </textPath>
+            </text>
+        </svg>
+    </div>
+
+    <section class="section hero">
+        <h1 class="hover-target">SCROLL TO MERGE</h1>
+    </section>
+
+    <div class="board-container" id="board"></div>
+
+    <div class="reveal-content" id="reveal">
+        <h2>JUNNI</h2>
+        <p style="color: black; font-weight: bold;">自由に、ユニークに。</p>
+    </div>
+
+    <div class="scroll-spacer"></div>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        const ROWS = 5, COLS = 6;
+        const board = document.getElementById('board');
+        for (let i = 0; i < ROWS; i++) {
+            const row = document.createElement('div');
+            row.className = 'row';
+            for (let j = 0; j < COLS; j++) {
+                const tile = document.createElement('div');
+                tile.className = 'tile';
+                tile.innerHTML = `<div class="tile-face tile-front"></div><div class="tile-face tile-back"></div>`;
+                row.appendChild(tile);
+            }
+            board.appendChild(row);
+        }
+
+        const tiles = document.querySelectorAll('.tile');
+        const rows = document.querySelectorAll('.row');
+        const reveal = document.getElementById('reveal');
+        const cursorSvg = document.getElementById('cursor-svg');
+        const cursorDot = document.getElementById('cursor-dot');
+        const cursorRing = document.getElementById('cursor-ring-fixed');
+
+        const tl = gsap.timeline({
+            scrollTrigger: {
+                trigger: ".scroll-spacer",
+                start: "top top",
+                end: "bottom bottom",
+                scrub: 1,
+            }
+        });
+
+        tl.to(tiles, {
+            rotateX: 180,
+            scale: 1.02,
+            stagger: { grid: [ROWS, COLS], from: "top", amount: 1.2 }
+        })
+        .to([board, rows], { gap: 0, padding: 0, duration: 0.5 }, "<0.5")
+        .to(tiles, { borderRadius: 0, duration: 0.3 }, "<")
+        .to([cursorSvg, cursorDot], { fill: "#000000", backgroundColor: "#000000", duration: 0.1 }, "<0.3")
+        .to(cursorRing, { borderColor: "#000000", duration: 0.1 }, "<")
+        .to(reveal, { opacity: 1, y: -20, duration: 0.5 })
+        .to(cursorSvg, { scale: 0, opacity: 0, duration: 0.4 })
+        .to(cursorDot, { scale: 2, duration: 0.4 }, "<")
+        .to(cursorRing, { width: 25, height: 25, duration: 0.4 }, "<");
+
+        // 3. Dynamic Cursor Logic
+        const cursor = document.getElementById('cursor-wrapper');
+        let mouseX = 0, mouseY = 0;
+        let pos = { x: 0, y: 0 };
+        let speed = 0;
+
+        window.addEventListener("mousemove", e => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        gsap.ticker.add(() => {
+            const dt = 1.0 - Math.pow(1.0 - 0.15, gsap.ticker.deltaRatio());
+            pos.x += (mouseX - pos.x) * dt;
+            pos.y += (mouseY - pos.y) * dt;
+            
+            const dx = mouseX - pos.x;
+            const dy = mouseY - pos.y;
+            speed = Math.sqrt(dx*dx + dy*dy);
+            
+            // Map speed to scale: fast move = smaller
+            const ringScale = gsap.utils.clamp(0.6, 1.0, 1.0 - (speed / 150));
+            const textScale = gsap.utils.clamp(0.8, 1.0, 1.0 - (speed / 100));
+            
+            gsap.set(cursor, { x: pos.x, y: pos.y });
+            
+            // Apply speed scaling to ring and text
+            gsap.set(cursorRing, { scale: ringScale });
+            if (ScrollTrigger.getAll()[0].progress < 0.9) {
+                gsap.set(cursorSvg, { scale: textScale });
+            }
+        });
+
+        gsap.to(cursorSvg, { rotation: 360, duration: 8, ease: "none", repeat: -1 });
+
+        // 4. Hover Interactions (Action Point Expansion & Ripple)
+        document.querySelectorAll('.hover-target').forEach(target => {
+            target.addEventListener('mouseenter', () => {
+                // Expand Dot
+                gsap.to(cursorDot, { scale: 4, duration: 0.3, ease: "power2.out" });
+                // Expand Ring and start ripple pulse
+                gsap.to(cursorRing, { 
+                    width: 80, 
+                    height: 80, 
+                    opacity: 0.4,
+                    duration: 0.4, 
+                    ease: "power2.out" 
+                });
+                
+                // Ripple animation loop
+                gsap.to(cursorRing, {
+                    scale: 1.2,
+                    repeat: -1,
+                    yoyo: true,
+                    duration: 0.6,
+                    ease: "sine.inOut",
+                    overwrite: "auto"
+                });
+            });
+
+            target.addEventListener('mouseleave', () => {
+                const isFinal = ScrollTrigger.getAll()[0].progress > 0.9;
+                
+                // Return Dot
+                gsap.to(cursorDot, { scale: isFinal ? 2 : 1, duration: 0.3 });
+                // Return Ring
+                gsap.killTweensOf(cursorRing);
+                gsap.to(cursorRing, { 
+                    width: isFinal ? 25 : 40, 
+                    height: isFinal ? 25 : 40, 
+                    scale: 1,
+                    opacity: 0.8,
+                    duration: 0.3 
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>Tutoring Admin Dashboard</title>
+
+<style>
+
+body {
+
+font-family: Arial;
+
+background: #f5f6fa;
+
+padding: 40px;
+
+}
+
+h1 {
+
+color: #2f3640;
+
+}
+
+.card {
+
+background: white;
+
+padding: 20px;
+
+margin-bottom: 30px;
+
+border-radius: 12px;
+
+box-shadow: 0px 2px 10px rgba(0,0,0,0.1);
+
+width: 400px;
+
+}
+
+input, select {
+
+display: block;
+
+margin: 10px 0;
+
+padding: 10px;
+
+width: 100%;
+
+border-radius: 8px;
+
+border: 1px solid #ccc;
+
+}
+
+button {
+
+padding: 12px 20px;
+
+background: #4cd137;
+
+color: white;
+
+border: none;
+
+border-radius: 8px;
+
+cursor: pointer;
+
+}
+
+button:hover {
+
+background: #44bd32;
+
+}
+
+#sessions {
+
+margin-top: 20px;
+
+white-space: pre-wrap;
+
+font-size: 14px;
+
+background: #fafafa;
+
+padding: 15px;
+
+border-radius: 8px;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>📊 Tutoring Admin Dashboard</h1>
+
+
+<div class="card">
+
+<h2>Create Session</h2>
+
+<input id="title" placeholder="Session Title">
+
+<input id="subject" placeholder="Subject">
+
+<input id="tutor" placeholder="Tutor ID">
+
+<input id="student" placeholder="Student ID">
+
+<input id="start" type="datetime-local">
+
+<input id="end" type="datetime-local">
+
+
+<select id="status">
+
+<option value="scheduled">scheduled</option>
+
+<option value="completed">completed</option>
+
+<option value="cancelled">cancelled</option>
+
+</select>
+
+
+<button onclick="createSession()">
+
+Create Session
+
+</button>
+
+</div>
+
+
+<div class="card">
+
+<h2>Fetch Sessions</h2>
+
+<button onclick="getSessions()">
+
+Load Sessions
+
+</button>
+
+<div id="sessions">
+
+Sessions will appear here...
+
+</div>
+
+</div>
+
+
+
+<script>
+
+/* ===============================
+CONFIGURATION SECTION
+Replace values below
+=============================== */
+
+const API_URL =
+
+"https://YOUR_SPACE_NAME.hf.space"
+
+
+const HF_TOKEN =
+
+"YOUR_HUGGINGFACE_ACCESS_TOKEN"
+
+
+const USER_TOKEN =
+
+"YOUR_SUPABASE_USER_JWT"
+
+
+
+/* ===============================
+CREATE SESSION
+=============================== */
+
+async function createSession() {
+
+try {
+
+const payload = {
+
+title:
+
+document.getElementById("title").value,
+
+subject:
+
+document.getElementById("subject").value,
+
+tutor_id:
+
+document.getElementById("tutor").value,
+
+student_id:
+
+document.getElementById("student").value,
+
+start_time:
+
+document.getElementById("start").value,
+
+end_time:
+
+document.getElementById("end").value,
+
+status:
+
+document.getElementById("status").value
+
+}
+
+
+const response = await fetch(
+
+`${API_URL}/create-session`,
+
+{
+
+method: "POST",
+
+headers: {
+
+Authorization:
+
+`Bearer ${HF_TOKEN}`,
+
+"X-User-Token":
+
+USER_TOKEN,
+
+"Content-Type":
+
+"application/json"
+
+},
+
+body:
+
+JSON.stringify(payload)
+
+}
+
+)
+
+
+const data = await response.json()
+
+
+alert("✅ Session created successfully")
+
+console.log(data)
+
+}
+
+catch(err) {
+
+alert("❌ Error creating session")
+
+console.log(err)
+
+}
+
+}
+
+
+
+/* ===============================
+GET SESSIONS
+=============================== */
+
+async function getSessions() {
+
+try {
+
+const response = await fetch(
+
+`${API_URL}/sessions`,
+
+{
+
+headers: {
+
+Authorization:
+
+`Bearer ${HF_TOKEN}`,
+
+"X-User-Token":
+
+USER_TOKEN
+
+}
+
+}
+
+)
+
+
+const data = await response.json()
+
+
+document.getElementById("sessions")
+
+.innerText = JSON.stringify(
+
+data,
+
+null,
+
+2
+
+)
+
+}
+
+catch(err) {
+
+alert("❌ Error fetching sessions")
+
+console.log(err)
+
+}
+
+}
+
+</script>
+
+</body>
+
+</html>

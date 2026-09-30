@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>INTERRENTCARS</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      overflow: hidden;
+      background: #060606;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    }
+
+    /* ─── DUMMY HOME PAGE ──────────────────────────────────────────── */
+    .home {
+      width: 100vw;
+      min-height: 100vh;
+      background: linear-gradient(155deg, #0d0d0d 0%, #0f1623 55%, #0d0d0d 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .home::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 50% 50%, rgba(180,140,80,0.055) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* Subtle grid lines */
+    .home::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 80px 80px;
+      pointer-events: none;
+    }
+
+    .home-nav {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      padding: 2rem 4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 2;
+    }
+
+    .home-nav .brand {
+      font-size: 0.65rem;
+      letter-spacing: 0.35em;
+      color: rgba(255,255,255,0.5);
+      font-weight: 300;
+      text-transform: uppercase;
+    }
+
+    .home-nav ul {
+      list-style: none;
+      display: flex;
+      gap: 2.5rem;
+    }
+
+    .home-nav ul li a {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      color: rgba(255,255,255,0.35);
+      text-decoration: none;
+      text-transform: uppercase;
+      font-weight: 300;
+      transition: color 0.3s;
+    }
+
+    .home-nav ul li a:hover { color: rgba(255,255,255,0.7); }
+
+    .home-hero {
+      text-align: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .home-hero .eyebrow {
+      font-size: 0.6rem;
+      letter-spacing: 0.65em;
+      color: rgba(195,155,90,0.85);
+      text-transform: uppercase;
+      font-weight: 300;
+      margin-bottom: 2.4rem;
+    }
+
+    .home-hero h1 {
+      font-size: clamp(2.5rem, 6vw, 7.5rem);
+      font-weight: 100;
+      letter-spacing: 0.32em;
+      color: #ffffff;
+      line-height: 1;
+      margin-bottom: 2rem;
+    }
+
+    .home-hero .sub {
+      font-size: 0.72rem;
+      letter-spacing: 0.45em;
+      color: rgba(255,255,255,0.28);
+      text-transform: uppercase;
+      font-weight: 300;
+    }
+
+    .home-scroll-hint {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+      z-index: 2;
+    }
+
+    .home-scroll-hint span {
+      font-size: 0.55rem;
+      letter-spacing: 0.4em;
+      color: rgba(255,255,255,0.2);
+      text-transform: uppercase;
+    }
+
+    .scroll-line {
+      width: 1px;
+      height: 40px;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.3), transparent);
+    }
+
+    /* ─── OVERLAY ─────────────────────────────────────────────────── */
+    #overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    .panel {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      width: 50vw;
+      background: #060606;
+      will-change: transform;
+    }
+
+    #panelLeft  { left: 0; }
+    #panelRight { right: 0; }
+
+    /* ─── LOGO ────────────────────────────────────────────────────── */
+    #logo-wrap {
+      position: fixed;
+      inset: 0;
+      z-index: 101;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    #logo-svg {
+      width: min(92vw, 1080px);
+      height: auto;
+      /* Optical drop-shadow: soft ambient glow + hard depth shadow */
+      filter:
+        drop-shadow(0 0 60px rgba(255,255,255,0.04))
+        drop-shadow(0 6px 30px rgba(0,0,0,0.95))
+        drop-shadow(0 1px 0px rgba(255,255,255,0.06));
+    }
+
+    /* Base stroke style applied to ALL SVG strokes */
+    #logo-svg line,
+    #logo-svg path {
+      stroke: #ffffff;
+      stroke-width: 8;
+      fill: none;
+      stroke-linecap: butt; /* crisp architectural flat cuts */
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─── DUMMY HOME PAGE ─────────────────────────────────────── -->
+  <main class="home" aria-hidden="true">
+    <nav class="home-nav">
+      <span class="brand">Interrentcars</span>
+      <ul>
+        <li><a href="#">Fleet</a></li>
+        <li><a href="#">Reserve</a></li>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </nav>
+    <div class="home-hero">
+      <p class="eyebrow">Established &middot; 1994 &middot; Geneva</p>
+      <h1>INTERRENTCARS</h1>
+      <p class="sub">Excellence in Motion</p>
+    </div>
+    <div class="home-scroll-hint">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </main>
+
+  <!-- ─── OVERLAY PANELS ──────────────────────────────────────── -->
+  <div id="overlay">
+    <div class="panel" id="panelLeft"></div>
+    <div class="panel" id="panelRight"></div>
+  </div>
+
+  <!-- ─── LOGO SVG ────────────────────────────────────────────── -->
+  <!--
+    ViewBox: 0 0 860 100
+    Letter slot: 55px wide  |  Gap: 12px  |  Step: 67px
+    Cap height y=10  |  Baseline y=90  |  Height: 80px
+
+    Letter x-offsets:
+      I=0   N=67   T=134  E=201  R=268
+      R=335  E=402  N=469  T=536
+      C=603  A=670  R=737  S=804
+  -->
+  <div id="logo-wrap">
+    <svg id="logo-svg"
+         viewBox="0 0 860 100"
+         xmlns="http://www.w3.org/2000/svg"
+         overflow="visible"
+         role="img"
+         aria-label="INTERRENTCARS">
+
+      <!-- ══ I ════════════════════════════════════════════════════ -->
+      <line class="horiz-line" x1="5"    y1="10" x2="50"   y2="10"/><!-- top serif  -->
+      <line class="vert-line"  x1="27.5" y1="10" x2="27.5" y2="90"/><!-- stem       -->
+      <line class="horiz-line" x1="5"    y1="90" x2="50"   y2="90"/><!-- base serif -->
+
+      <!-- ══ N ════════════════════════════════════════════════════ -->
+      <line class="vert-line" x1="67"  y1="10" x2="67"  y2="90"/><!-- left stem  -->
+      <line class="diag-line" x1="67"  y1="10" x2="122" y2="90"/><!-- diagonal   -->
+      <line class="vert-line" x1="122" y1="10" x2="122" y2="90"/><!-- right stem -->
+
+      <!-- ══ T ════════════════════════════════════════════════════ -->
+      <line class="horiz-line" x1="134"   y1="10" x2="189"   y2="10"/><!-- crossbar -->
+      <line class="vert-line"  x1="161.5" y1="10" x2="161.5" y2="90"/><!-- stem     -->
+
+      <!-- ══ E (1st) ═══════════════════════════════════════════════ -->
+      <line class="vert-line" x1="201" y1="10" x2="201" y2="90"/><!-- spine      -->
+      <line class="e-horiz"   x1="201" y1="10" x2="256" y2="10"/><!-- top bar    -->
+      <line class="e-horiz"   x1="201" y1="50" x2="242" y2="50"/><!-- mid bar    -->
+      <line class="e-horiz"   x1="201" y1="90" x2="256" y2="90"/><!-- base bar   -->
+
+      <!-- ══ R (1st) ═══════════════════════════════════════════════ -->
+      <line class="vert-line" x1="268" y1="10" x2="268" y2="90"/><!-- left stem  -->
+      <path class="curve"     d="M 268,10 L 305,10 C 323,10 323,18 323,30 C 323,44 316,50 302,50 L 268,50"/><!-- bump  -->
+      <line class="diag-line" x1="291" y1="50" x2="323" y2="90"/><!-- kick leg   -->
+
+      <!-- ══ R (2nd) ═══════════════════════════════════════════════ -->
+      <line class="vert-line" x1="335" y1="10" x2="335" y2="90"/>
+      <path class="curve"     d="M 335,10 L 372,10 C 390,10 390,18 390,30 C 390,44 383,50 369,50 L 335,50"/>
+      <line class="diag-line" x1="358" y1="50" x2="390" y2="90"/>
+
+      <!-- ══ E (2nd) ═══════════════════════════════════════════════ -->
+      <line class="vert-line" x1="402" y1="10" x2="402" y2="90"/>
+      <line class="e-horiz"   x1="402" y1="10" x2="457" y2="10"/>
+      <line class="e-horiz"   x1="402" y1="50" x2="443" y2="50"/>
+      <line class="e-horiz"   x1="402" y1="90" x2="457" y2="90"/>
+
+      <!-- ══ N (2nd) ═══════════════════════════════════════════════ -->
+      <line class="vert-line" x1="469" y1="10" x2="469" y2="90"/>
+      <line class="diag-line" x1="469" y1="10" x2="524" y2="90"/>
+      <line class="vert-line" x1="524" y1="10" x2="524" y2="90"/>
+
+      <!-- ══ T (2nd) ═══════════════════════════════════════════════ -->
+      <line class="horiz-line" x1="536"   y1="10" x2="591"   y2="10"/>
+      <line class="vert-line"  x1="563.5" y1="10" x2="563.5" y2="90"/>
+
+      <!-- ══ C ════════════════════════════════════════════════════ -->
+      <!--  Open arc, top-right → bottom-right                     -->
+      <path class="curve" d="M 655,14 C 638,8 603,22 603,50 C 603,78 638,92 655,86"/>
+
+      <!-- ══ A ════════════════════════════════════════════════════ -->
+      <line class="diag-line"  x1="670"   y1="90" x2="697.5" y2="10"/><!-- left leg  -->
+      <line class="diag-line"  x1="725"   y1="90" x2="697.5" y2="10"/><!-- right leg -->
+      <line class="horiz-line" x1="679"   y1="63" x2="716"   y2="63"/><!-- crossbar  -->
+
+      <!-- ══ R (3rd) ═══════════════════════════════════════════════ -->
+      <line class="vert-line" x1="737" y1="10" x2="737" y2="90"/>
+      <path class="curve"     d="M 737,10 L 774,10 C 792,10 792,18 792,30 C 792,44 785,50 771,50 L 737,50"/>
+      <line class="diag-line" x1="760" y1="50" x2="792" y2="90"/>
+
+      <!-- ══ S ════════════════════════════════════════════════════ -->
+      <!--  Single continuous cubic bezier forming the S            -->
+      <path class="curve" d="M 854,15 C 845,8 808,8 808,28 C 808,48 854,52 854,72 C 854,92 816,93 806,84"/>
+
+    </svg>
+  </div>
+
+  <script>
+    (() => {
+      'use strict';
+
+      /* ── 1. INIT: hide all strokes via stroke-dasharray/dashoffset ── */
+      const strokes = document.querySelectorAll(
+        '#logo-svg .vert-line, #logo-svg .horiz-line, #logo-svg .e-horiz, #logo-svg .curve, #logo-svg .diag-line'
+      );
+
+      strokes.forEach(el => {
+        const len = el.getTotalLength();
+        el.style.strokeDasharray  = len;
+        el.style.strokeDashoffset = len;
+      });
+
+      /* ── 2. GSAP TIMELINE ─────────────────────────────────────────── */
+      const tl = gsap.timeline();
+
+      tl
+        /*
+         * STEP 1 — Vertical strokes: strike gracefully into existence.
+         *   12 vert-lines | stagger 0.08 | last finishes @ ~2.88s
+         */
+        .to('#logo-svg .vert-line', {
+          strokeDashoffset : 0,
+          duration         : 2,
+          ease             : 'expo.out',
+          stagger          : 0.08
+        }, 0) /* absolute t = 0 */
+
+        /*
+         * STEP 2 — Horizontals & E-bars: slide right.
+         *   Heavily overlapping with verticals (start at t = 0.3s).
+         *   5 horiz-lines + 6 e-horiz = 11 items | stagger 0.06
+         */
+        .to('#logo-svg .horiz-line, #logo-svg .e-horiz', {
+          strokeDashoffset : 0,
+          duration         : 2,
+          ease             : 'expo.out',
+          stagger          : 0.06
+        }, 0.3) /* absolute t = 0.3 */
+
+        /*
+         * STEP 3 — Curves: wrap around.
+         *   5 paths (3×R-bump, C, S) | stagger 0.10 | last finishes @ ~3.4s
+         */
+        .to('#logo-svg .curve', {
+          strokeDashoffset : 0,
+          duration         : 2.2,
+          ease             : 'power3.inOut',
+          stagger          : 0.10
+        }, 0.8) /* absolute t = 0.8 */
+
+        /*
+         * STEP 4 — Diagonal slices.
+         *   7 diag-lines (2×N, 3×R-leg, 2×A) | stagger 0.08
+         */
+        .to('#logo-svg .diag-line', {
+          strokeDashoffset : 0,
+          duration         : 1.8,
+          ease             : 'expo.out',
+          stagger          : 0.08
+        }, 1.0) /* absolute t = 1.0 */
+
+        /*
+         * STEP 5 — Hold exactly 1.0 second.
+         *   Dummy tween positioned at the natural end of the drawing phase (~3.4s).
+         *   This starts AFTER all four groups above have completed.
+         */
+        .to({}, { duration: 1.0 })
+
+        /*
+         * STEP 6 — Fade out SVG logo.
+         */
+        .to('#logo-wrap', {
+          opacity  : 0,
+          duration : 0.55,
+          ease     : 'power2.in'
+        })
+
+        /*
+         * STEP 7 — Panels slide open like vault doors.
+         *   Both start simultaneously just as logo completes its fade.
+         */
+        .to('#panelLeft', {
+          xPercent : -100,
+          duration : 2,
+          ease     : 'power4.inOut'
+        }, '-=0.15')
+
+        .to('#panelRight', {
+          xPercent   : 100,
+          duration   : 2,
+          ease       : 'power4.inOut',
+          onComplete () {
+            /* Unlock scrolling and remove overlay from paint tree */
+            document.body.style.overflow   = '';
+            document.getElementById('overlay').style.display  = 'none';
+            document.getElementById('logo-wrap').style.display = 'none';
+            /* Navigate to index page after animation completes */
+            setTimeout(() => {
+              window.location.href = 'index.html';
+            }, 800);
+          }
+        }, '<'); /* '<' = same start time as panelLeft */
+
+    })();
+  </script>
+
+</body>
+</html>

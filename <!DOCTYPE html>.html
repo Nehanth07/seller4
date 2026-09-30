@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interrentcars Opening Animation</title>
+    <style>
+        /* CSS Reset and Base Styles */
+        body {
+            margin: 0;
+            overflow: hidden; /* Lock scrolling during animation */
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f4f4; /* Background of your actual site */
+        }
+
+        /* The Overlay Container */
+        .opening-sequence {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none; /* Allows clicking through after it's done */
+        }
+
+        /* The Split Backgrounds */
+        .panel {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 50vw;
+            background-color: #111; /* Dark background for the intro */
+            z-index: 1;
+        }
+        .left-panel { left: 0; }
+        .right-panel { right: 0; }
+
+        /* The Text Styling (Updated for SVG Drawing) */
+        .brand-svg {
+            position: relative;
+            z-index: 2;
+            width: 90vw;
+            max-width: 1000px;
+            height: auto;
+        }
+
+        #brandText {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-size: 80px;
+            font-weight: 800;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            fill: transparent; /* Start invisible */
+            stroke: #ffffff; /* White outline */
+            stroke-width: 2px;
+            stroke-dasharray: 400; /* Length of the text outline */
+            stroke-dashoffset: 400; /* Start fully hidden */
+        }
+
+        /* Styling the dummy home page */
+        .home-page {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .home-page h1 {
+            font-size: 3rem;
+            color: #222;
+            margin-bottom: 15px;
+        }
+
+        .home-page p {
+            font-size: 1.2rem;
+            color: #555;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        .replay-btn {
+            margin-top: 30px;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            background: #111;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .replay-btn:hover {
+            background: #333;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- The Animation Overlay -->
+    <div class="opening-sequence">
+        <!-- The two halves of the screen -->
+        <div class="panel left-panel"></div>
+        <div class="panel right-panel"></div>
+        
+        <!-- The Title as an SVG for the drawing effect -->
+        <svg class="brand-svg" viewBox="0 0 1000 200">
+            <text id="brandText" x="50%" y="50%" dominant-baseline="middle" text-anchor="middle">interrentcars</text>
+        </svg>
+    </div>
+
+    <!-- Your Actual Home Page Content -->
+    <main class="home-page">
+        <h1>Welcome to Interrentcars</h1>
+        <p>This is where your main website content will live. Notice how you can now scroll and interact with the page because the animation overlay has parted!</p>
+        <button class="replay-btn" onclick="location.reload()">Replay Animation</button>
+    </main>
+
+    <!-- Load GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", (event) => {
+            // Create the GSAP Timeline
+            const tl = gsap.timeline({
+                onComplete: () => {
+                    // Re-enable scrolling once the animation is fully finished
+                    document.body.style.overflow = 'auto';
+                }
+            });
+
+            // Step 1: Draw the outlines of all letters simultaneously
+            tl.to('#brandText', {
+                strokeDashoffset: 0,
+                duration: 3.0, // Adjust this to make the drawing slower/faster
+                ease: "power2.inOut" 
+            })
+
+            // Step 2: Fill the letters with color so they become solid text
+            .to('#brandText', {
+                fill: "#ffffff",
+                duration: 0.8,
+                ease: "power2.out"
+            }, "-=0.5") // Start filling slightly before the drawing finishes
+
+            // Step 3: Wait exactly 1 second after the word finishes forming
+            .to({}, { duration: 1.0 })
+
+            // Step 4: Fade out the text smoothly before splitting
+            .to('.brand-svg', {
+                opacity: 0,
+                duration: 0.4,
+                ease: "power2.inOut"
+            })
+
+            // Step 5: The Split! Left panel goes left, right panel goes right
+            .to('.left-panel', {
+                xPercent: -100,
+                duration: 1.2,
+                ease: "power4.inOut"
+            }, "-=0.1")
+            .to('.right-panel', {
+                xPercent: 100,
+                duration: 1.2,
+                ease: "power4.inOut"
+            }, "<");
+        });
+    </script>
+</body>
+</html>

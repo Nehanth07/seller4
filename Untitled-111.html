@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ops Timeline & Board</title>
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --bg-panel: #1e1e1e;
+            --bg-lighter: #2c2c2c;
+            --text-main: #e0e0e0;
+            --text-muted: #888;
+            --accent: #3b82f6;
+            --border: #333;
+            --timeline-track-height: 40px;
+            --timeline-header-height: 30px;
+            --px-per-min: 2px; /* Zoom level */
+        }
+
+        * { box-sizing: border-box; outline: none; }
+        
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- Header --- */
+        header {
+            background: var(--bg-panel);
+            border-bottom: 1px solid var(--border);
+            padding: 0 20px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .brand { font-weight: 700; letter-spacing: 1px; color: #fff; display: flex; align-items: center; gap: 10px; }
+        .center-controls { display: flex; align-items: center; gap: 15px; }
+        .clock { font-family: monospace; font-size: 1.2rem; color: var(--accent); }
+        
+        /* Date Picker Styling */
+        input[type="date"] {
+            background: var(--bg-lighter);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: inherit;
+            color-scheme: dark;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
+
+        nav button {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            border-bottom: 2px solid transparent;
+            transition: 0.2s;
+        }
+        nav button.active { color: #fff; border-bottom-color: var(--accent); }
+        nav button:hover { color: #fff; }
+
+        .action-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .action-btn:hover { opacity: 0.9; }
+
+        .btn-danger { 
+            background: #ef4444; 
+            color: white; 
+            border: none; 
+            padding: 6px 12px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-weight: 600; 
+        }
+        .btn-danger:hover { background: #dc2626; }
+
+        /* --- Main Layout --- */
+        main { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        .view-section { display: none; height: 100%; flex-direction: column; }
+        .view-section.active { display: flex; }
+
+        /* --- Board View (Top Half) --- */
+        .board-container {
+            flex: 0 0 40%;
+            border-bottom: 4px solid var(--bg-dark);
+            background: var(--bg-panel);
+            padding: 10px;
+            overflow-x: auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            min-height: 200px;
+            transition: background-color 0.3s;
+        }
+
+        .role-column {
+            background: var(--bg-lighter);
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .role-header {
+            padding: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .member-list { padding: 10px; overflow-y: auto; flex: 1; }
+
+        .member-card {
+            background: var(--bg-panel);
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .member-card:hover { border-color: var(--accent); transform: translateX(2px); }
+        
+        .member-card.busy .member-name {
+            text-decoration: line-through;
+            color: var(--text-muted);
+            opacity: 0.7;
+        }
+        
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #4caf50; }
+        .member-card.busy .status-dot { background: #f44336; }
+
+        /* Manual Strike Logic */
+        .member-card.manual-strike .member-name {
+            text-decoration: line-through;
+            color: var(--text-muted);
+            opacity: 0.6;
+        }
+        /* Status dot remains governed by .busy or default, so it stays green if available */
+
+        /* Highlight Logic */
+        .board-container.has-selection .member-card {
+            opacity: 0.2; /* Dim non-selected */
+        }
+        .board-container.has-selection .member-card.highlighted {
+            opacity: 1;
+            border-color: var(--accent);
+            background: rgba(59, 130, 246, 0.15);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
+            transform: scale(1.02);
+            font-weight: 600;
+        }
+
+        /* --- Timeline View (Bottom Half) --- */
+        .timeline-container {
+            flex: 1;
+            background: var(--bg-dark);
+            overflow: auto; /* Scroll both ways */
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .timeline-wrapper {
+            position: relative;
+            /* width set by JS based on zoom */
+            min-height: 100%;
+            background: 
+                repeating-linear-gradient(90deg, 
+                    var(--border) 0px, 
+                    var(--border) 1px, 
+                    transparent 1px, 
+                    transparent 120px /* 1 hour */
+                );
+        }
+
+        .ruler {
+            height: 30px;
+            background: var(--bg-lighter);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            width: 100%;
+            display: block;
+        }
+
+        .ruler-tick { position: absolute; bottom: 0; background: #666; width: 1px; }
+        .tick-lg { height: 15px; background: #aaa; }
+        .tick-md { height: 10px; }
+        .tick-sm { height: 5px; opacity: 0.5; }
+        .ruler-label { 
+            position: absolute; 
+            top: 2px; 
+            font-size: 10px; 
+            color: #aaa; 
+            transform: translateX(-50%);
+            font-family: monospace;
+        }
+
+        .tracks-area {
+            position: relative;
+            padding-top: 10px;
+        }
+
+        .event-block {
+            position: absolute;
+            height: 30px;
+            background: #374151;
+            border-radius: 4px;
+            border-left: 3px solid var(--accent);
+            padding: 0 8px;
+            font-size: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 28px;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            cursor: pointer;
+            z-index: 1;
+            transition: 0.2s;
+        }
+        .event-block:hover { z-index: 2; filter: brightness(1.2); }
+        .event-block.active {
+            border: 1px solid #fff;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+            z-index: 10;
+            filter: brightness(1.1);
+        }
+
+        .time-indicator {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #ef4444;
+            z-index: 20;
+            pointer-events: none;
+        }
+        .time-indicator::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -4px;
+            width: 10px; height: 10px;
+            background: #ef4444;
+            transform: rotate(45deg);
+        }
+
+        /* --- Member Modal --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 100;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.open { display: flex; }
+
+        .modal {
+            background: var(--bg-panel);
+            width: 600px;
+            max-width: 90%;
+            max-height: 80vh;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+
+        .modal-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-header h2 { margin: 0; font-size: 1.2rem; }
+        .close-btn { background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .shoot-row {
+            background: var(--bg-dark);
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr 1fr 1.5fr 30px; /* Added column for date */
+            gap: 10px;
+            align-items: center;
+            border: 1px solid transparent; 
+        }
+        .shoot-row.past { opacity: 0.5; }
+        
+        /* Status Highlighting in Modal */
+        .shoot-row.row-active {
+            border-color: #4caf50; /* Green */
+            background: rgba(76, 175, 80, 0.1);
+        }
+        
+        .shoot-row.row-selected {
+            border-color: #eab308; /* Yellow */
+            background: rgba(234, 179, 8, 0.15);
+        }
+
+        .input-group label { display: block; font-size: 10px; color: #888; margin-bottom: 2px; }
+        
+        input[type="text"], input[type="time"], select, textarea, input[type="date"] {
+            background: var(--bg-lighter);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 5px;
+            border-radius: 3px;
+            width: 100%;
+            font-family: inherit;
+        }
+        textarea { resize: vertical; min-height: 60px; }
+        input:focus, textarea:focus { border-color: var(--accent); }
+
+        .btn-delete { color: #ef4444; background: none; border: none; cursor: pointer; font-size: 1.2rem; }
+        .btn-delete:hover { color: #ff0000; }
+
+        .empty-state { text-align: center; color: var(--text-muted); padding: 20px; font-style: italic; }
+
+        /* --- Admin / Member Management --- */
+        .admin-panel {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        .form-row { display: flex; gap: 10px; margin-bottom: 20px; background: var(--bg-lighter); padding: 15px; border-radius: 6px; }
+        .member-list-admin { display: flex; flex-direction: column; gap: 5px; }
+        .member-row-admin {
+            display: flex; justify-content: space-between;
+            padding: 10px; background: var(--bg-lighter); border-radius: 4px;
+            align-items: center;
+        }
+
+        /* --- Create Shoot Modal --- */
+        .create-form { display: flex; flex-direction: column; gap: 15px; }
+        .create-form .row { display: flex; gap: 10px; }
+        .multi-select { 
+            height: 100px; overflow-y: auto; 
+            background: var(--bg-dark); border: 1px solid var(--border);
+            padding: 5px;
+        }
+        .checkbox-label { display: flex; align-items: center; gap: 8px; padding: 4px; font-size: 0.9rem; }
+        
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="brand">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
+            <polyline points="17 2 12 7 7 2"></polyline>
+        </svg>
+        OPS COMMAND
+    </div>
+    <div class="center-controls">
+        <input type="date" id="mainDateInput" onchange="app.changeDate(this.value)">
+        <div class="clock" id="mainClock">00:00</div>
+    </div>
+    <nav>
+        <button class="active" onclick="app.switchView('dashboard')">Dashboard</button>
+        <button onclick="app.switchView('admin')">Team Mgmt</button>
+    </nav>
+    <div style="display:flex; gap:10px;">
+        <button class="action-btn" style="background-color: #555;" onclick="app.resetStrikes()">Reset Strikes</button>
+        <button class="action-btn" onclick="app.openShootModal()">+ New Shoot</button>
+    </div>
+</header>
+
+<main>
+    <!-- Dashboard View -->
+    <div id="view-dashboard" class="view-section active">
+        <!-- Hierarchy Board -->
+        <div class="board-container" id="boardContainer">
+            <!-- Columns injected by JS -->
+        </div>
+
+        <!-- Timeline -->
+        <div class="timeline-container" id="timelineContainer" onclick="app.deselectShoot()">
+            <div class="timeline-wrapper" id="timelineWrapper">
+                <div class="ruler" id="ruler"></div>
+                <div class="time-indicator" id="timeIndicator"></div>
+                <div class="tracks-area" id="tracksArea"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin View -->
+    <div id="view-admin" class="view-section">
+        <div class="admin-panel">
+            <h3>Add Team Member</h3>
+            <div class="form-row">
+                <input type="text" id="newMemberName" placeholder="Name (e.g., John Doe)">
+                <select id="newMemberRole">
+                    <option value="Senior">Senior</option>
+                    <option value="Mid">Mid</option>
+                    <option value="Amateur">Amateur</option>
+                    <option value="Intern">Intern</option>
+                </select>
+                <button class="action-btn" onclick="app.addMember()">Add</button>
+            </div>
+
+            <h3>Existing Members</h3>
+            <div class="member-list-admin" id="adminMemberList">
+                <!-- List -->
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Member Details Modal -->
+<div class="modal-overlay" id="memberModal">
+    <div class="modal" style="width: 800px;"> <!-- Widened for Date column -->
+        <div class="modal-header">
+            <h2 id="modalMemberName">Member Name</h2>
+            <button class="close-btn" onclick="app.closeModals()">&times;</button>
+        </div>
+        <div class="modal-body" id="modalMemberShoots">
+            <!-- Shoots list injected here -->
+        </div>
+    </div>
+</div>
+
+<!-- Edit/Create Shoot Modal -->
+<div class="modal-overlay" id="createShootModal">
+    <div class="modal" style="width: 500px;">
+        <div class="modal-header">
+            <h2 id="shootModalTitle">Create New Shoot</h2>
+            <button class="close-btn" onclick="app.closeModals()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="create-form">
+                <input type="hidden" id="shootModalId">
+                <div class="input-group">
+                    <label>Shoot Name</label>
+                    <input type="text" id="csName" placeholder="e.g. Nike Campaign">
+                </div>
+                
+                <div class="input-group">
+                    <label>Date</label>
+                    <input type="date" id="csDate">
+                </div>
+
+                <div class="row">
+                    <div class="input-group" style="flex:1">
+                        <label>Start Time</label>
+                        <input type="time" id="csStart" value="09:00">
+                    </div>
+                    <div class="input-group" style="flex:1">
+                        <label>End Time</label>
+                        <input type="time" id="csEnd" value="11:00">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Location</label>
+                    <input type="text" id="csLoc" placeholder="Studio A">
+                </div>
+                <div class="input-group">
+                    <label>Notes</label>
+                    <textarea id="csNotes" placeholder="Additional details..."></textarea>
+                </div>
+                <div class="input-group">
+                    <label>Assign Creators</label>
+                    <input type="text" id="csSearch" placeholder="Search members..." onkeyup="app.filterMembers(this.value)" style="margin-bottom: 5px; font-size: 0.9rem;">
+                    <div class="multi-select" id="csMembers">
+                        <!-- Checkboxes -->
+                    </div>
+                </div>
+                <div style="display:flex; justify-content: space-between; margin-top: 15px;">
+                     <button class="btn-danger" id="shootDeleteBtn" style="display:none;" onclick="app.deleteShootFromModal()">Delete Event</button>
+                     <button class="action-btn" id="shootSaveBtn" onclick="app.saveShoot()">Save Shoot</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+/**
+ * Core Logic & Data Management
+ */
+class App {
+    constructor() {
+        // Default Data
+        this.data = {
+            members: [],
+            shoots: []
+        };
+        
+        // Settings
+        this.pxPerMin = 2;
+        this.roles = ['Senior', 'Mid', 'Amateur', 'Intern'];
+        this.activeShootId = null;
+        this.manualStrikes = new Set(); // Track manual strikes
+        
+        // Date State
+        this.selectedDate = new Date().toISOString().split('T')[0];
+
+        // Init
+        this.loadData();
+        this.initUI();
+        this.startClock();
+    }
+
+    // --- Persistence ---
+    loadData() {
+        const stored = localStorage.getItem('ops_dashboard_data');
+        if (stored) {
+            this.data = JSON.parse(stored);
+            
+            // Migration: Ensure all shoots have a date property
+            let modified = false;
+            this.data.shoots.forEach(s => {
+                if (!s.date) {
+                    s.date = new Date().toISOString().split('T')[0]; // Default to today
+                    modified = true;
+                }
+            });
+            if(modified) this.saveData();
+
+        } else {
+            // Start with empty data
+            this.data = { members: [], shoots: [] };
+            this.saveData();
+        }
+    }
+
+    saveData() {
+        localStorage.setItem('ops_dashboard_data', JSON.stringify(this.data));
+        this.renderAll();
+    }
+
+    uuid() {
+        return Math.random().toString(36).substr(2, 9);
+    }
+
+    // --- UI Init ---
+    initUI() {
+        document.getElementById('mainDateInput').value = this.selectedDate;
+
+        this.renderRuler();
+        this.renderAll();
+        
+        // Timeline Scrolling (Shift+Scroll to horizontal) & Zooming (Ctrl+Scroll)
+        const timelineCont = document.getElementById('timelineContainer');
+        timelineCont.addEventListener('wheel', (evt) => {
+            // ZOOM with Ctrl+Scroll
+            if (evt.ctrlKey) {
+                evt.preventDefault();
+                const delta = Math.sign(evt.deltaY) * -1; // -1 for zoom out, 1 for zoom in
+                const step = 0.2;
+                let newZoom = this.pxPerMin + (delta * step);
+                
+                // Clamp zoom limits
+                newZoom = Math.max(0.5, Math.min(newZoom, 10)); // 0.5px to 10px per min
+                
+                if (newZoom !== this.pxPerMin) {
+                    this.pxPerMin = newZoom;
+                    this.renderRuler();
+                    this.renderTimeline();
+                    this.updateCurrentTimeMarker();
+                }
+            } 
+            // HORIZONTAL SCROLL with simple scroll
+            else if (evt.deltaY !== 0) {
+                timelineCont.scrollLeft += evt.deltaY;
+                evt.preventDefault();
+            }
+        }, { passive: false });
+    }
+
+    startClock() {
+        const update = () => {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+            document.getElementById('mainClock').innerText = timeStr;
+            this.updateCurrentTimeMarker();
+            this.updateBoardStatus();
+        };
+        update();
+        setInterval(update, 30000); // Update every 30s
+    }
+    
+    changeDate(newDate) {
+        this.selectedDate = newDate;
+        this.activeShootId = null; // Clear selection on date change
+        this.renderAll();
+        // Reset scroll?
+        this.updateCurrentTimeMarker();
+    }
+    
+    // New methods for Manual Strikes
+    toggleManualStrike(id) {
+        if (this.manualStrikes.has(id)) {
+            this.manualStrikes.delete(id);
+        } else {
+            this.manualStrikes.add(id);
+        }
+        this.renderBoard();
+    }
+
+    resetStrikes() {
+        this.manualStrikes.clear();
+        this.renderBoard();
+    }
+
+    // --- Rendering ---
+    renderAll() {
+        this.renderBoard();
+        this.renderTimeline();
+        this.renderAdminList();
+    }
+
+    // 1. Board Render
+    renderBoard() {
+        const container = document.getElementById('boardContainer');
+        container.innerHTML = '';
+        
+        // Handle selection visuals on container
+        if (this.activeShootId) {
+            container.classList.add('has-selection');
+        } else {
+            container.classList.remove('has-selection');
+        }
+
+        const activeShoot = this.activeShootId ? this.data.shoots.find(s => s.id === this.activeShootId) : null;
+        
+        this.roles.forEach(role => {
+            const col = document.createElement('div');
+            col.className = 'role-column';
+            
+            const header = document.createElement('div');
+            header.className = 'role-header';
+            header.innerText = role;
+            
+            const list = document.createElement('div');
+            list.className = 'member-list';
+
+            let membersInRole = this.data.members.filter(m => m.role === role);
+
+            // SORT: If active shoot, move involved members to TOP of list
+            if (activeShoot) {
+                membersInRole.sort((a, b) => {
+                    const isA = activeShoot.members.includes(a.id);
+                    const isB = activeShoot.members.includes(b.id);
+                    return (isB ? 1 : 0) - (isA ? 1 : 0);
+                });
+            }
+
+            membersInRole.forEach(m => {
+                const card = document.createElement('div');
+                card.className = 'member-card';
+                card.id = `member-card-${m.id}`;
+                
+                // Add manual strike class
+                if (this.manualStrikes.has(m.id)) {
+                    card.classList.add('manual-strike');
+                }
+
+                card.innerHTML = `
+                    <span class="member-name">${m.name}</span>
+                    <span class="status-dot"></span>
+                `;
+                
+                // Add highlight class if applicable
+                if (activeShoot && activeShoot.members.includes(m.id)) {
+                    card.classList.add('highlighted');
+                }
+
+                card.title = "Click to strike/unstrike. Double-click for details.";
+                card.onclick = () => this.toggleManualStrike(m.id); // Single click strikes
+                card.ondblclick = () => this.openMemberModal(m.id); // Double click details
+                list.appendChild(card);
+            });
+
+            col.appendChild(header);
+            col.appendChild(list);
+            container.appendChild(col);
+        });
+
+        this.updateBoardStatus();
+    }
+
+    updateBoardStatus() {
+        const now = new Date();
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        // Board status shows who is busy on SELECTED DATE at CURRENT TIME
+        
+        this.data.members.forEach(member => {
+            const card = document.getElementById(`member-card-${member.id}`);
+            if(!card) return;
+
+            // Check if member is in any active shoot FOR THE SELECTED DATE
+            const isBusy = this.data.shoots.some(s => {
+                // Must match date
+                if (s.date !== this.selectedDate) return false;
+
+                if (!s.members.includes(member.id)) return false;
+                const start = this.timeToMin(s.start);
+                const end = this.timeToMin(s.end);
+                return currentMinutes >= start && currentMinutes < end;
+            });
+
+            if (isBusy) {
+                card.classList.add('busy');
+            } else {
+                card.classList.remove('busy');
+            }
+        });
+    }
+
+    // 2. Timeline Render
+    renderRuler() {
+        const ruler = document.getElementById('ruler');
+        ruler.innerHTML = ''; // Clear previous ticks
+        const totalMinutes = 24 * 60;
+        
+        // Update wrapper width based on zoom
+        document.getElementById('timelineWrapper').style.width = `${totalMinutes * this.pxPerMin}px`;
+
+        for (let i = 0; i <= totalMinutes; i += 5) { // 5 min ticks
+            const tick = document.createElement('div');
+            tick.className = 'ruler-tick';
+            tick.style.left = `${i * this.pxPerMin}px`;
+
+            if (i % 60 === 0) {
+                tick.classList.add('tick-lg');
+                const label = document.createElement('div');
+                label.className = 'ruler-label';
+                label.innerText = `${String(i/60).padStart(2, '0')}:00`;
+                label.style.left = `${i * this.pxPerMin}px`;
+                ruler.appendChild(label);
+            } else if (i % 30 === 0) {
+                tick.classList.add('tick-md');
+            } else {
+                tick.classList.add('tick-sm');
+            }
+            ruler.appendChild(tick);
+        }
+    }
+
+    updateCurrentTimeMarker() {
+        const now = new Date();
+        const mins = now.getHours() * 60 + now.getMinutes();
+        const marker = document.getElementById('timeIndicator');
+        marker.style.left = `${mins * this.pxPerMin}px`;
+        
+        // Only show indicator if today is selected, OR allow it to act as "Current time cursor" on any day
+        // Standard UX: Current time line usually persists to show relative time.
+        
+        // Auto scroll to time on load (once)
+        if (!window.scrolledToTime) {
+            const container = document.getElementById('timelineContainer');
+            container.scrollLeft = (mins * this.pxPerMin) - (container.clientWidth / 2);
+            window.scrolledToTime = true;
+        }
+    }
+
+    renderTimeline() {
+        const area = document.getElementById('tracksArea');
+        area.innerHTML = '';
+        
+        // Filter shoots by Selected Date
+        const dayShoots = this.data.shoots.filter(s => s.date === this.selectedDate);
+
+        // Sort shoots by start time
+        const sortedShoots = [...dayShoots].sort((a, b) => this.timeToMin(a.start) - this.timeToMin(b.start));
+        
+        // Calculate Tracks (No Overlap)
+        const tracks = []; // Array of end times for each track
+        
+        sortedShoots.forEach(shoot => {
+            const startMin = this.timeToMin(shoot.start);
+            const endMin = this.timeToMin(shoot.end);
+            const duration = endMin - startMin;
+            
+            // Find first track where this fits
+            let trackIndex = -1;
+            for (let i = 0; i < tracks.length; i++) {
+                if (tracks[i] <= startMin) {
+                    trackIndex = i;
+                    break;
+                }
+            }
+            
+            if (trackIndex === -1) {
+                trackIndex = tracks.length; // New track
+                tracks.push(0);
+            }
+            
+            tracks[trackIndex] = endMin; // Update track end time
+
+            // Render Block
+            const block = document.createElement('div');
+            block.className = 'event-block';
+            block.style.left = `${startMin * this.pxPerMin}px`;
+            block.style.width = `${duration * this.pxPerMin}px`;
+            block.style.top = `${trackIndex * 40}px`; // 40px track height
+            block.innerText = `${shoot.name} (${shoot.location})`;
+            // Add notes to tooltip
+            let tooltip = `${shoot.name}\n${shoot.start} - ${shoot.end}\n${shoot.location}`;
+            if(shoot.notes) tooltip += `\n\nNotes:\n${shoot.notes}`;
+            block.title = tooltip;
+            
+            // Generate color based on name hash
+            const hue = this.hashString(shoot.name) % 360;
+            block.style.borderLeftColor = `hsl(${hue}, 70%, 60%)`;
+            block.style.background = `hsla(${hue}, 70%, 60%, 0.2)`;
+
+            if (this.activeShootId === shoot.id) {
+                block.classList.add('active');
+            }
+
+            // Click to Highlight AND Open Modal
+            block.onclick = (e) => {
+                e.stopPropagation();
+                this.toggleHighlightShoot(shoot.id);
+                this.openShootModal(shoot.id);
+            };
+
+            
+            area.appendChild(block);
+        });
+
+        area.style.height = `${tracks.length * 40 + 50}px`;
+    }
+
+    // 3. Selection Logic
+    toggleHighlightShoot(shootId) {
+        if (this.activeShootId === shootId) {
+            this.activeShootId = null;
+        } else {
+            this.activeShootId = shootId;
+        }
+        this.renderAll();
+    }
+
+    deselectShoot() {
+        if (this.activeShootId) {
+            this.activeShootId = null;
+            this.renderAll();
+        }
+    }
+
+    // 4. Member Modal Interactions
+    openMemberModal(memberId) {
+        const member = this.data.members.find(m => m.id === memberId);
+        if(!member) return;
+
+        document.getElementById('modalMemberName').innerText = member.name;
+        const body = document.getElementById('modalMemberShoots');
+        body.innerHTML = '';
+
+        const shoots = this.data.shoots.filter(s => s.members.includes(memberId));
+        
+        // Sort: Active/Future first, then Past (Across all dates)
+        // Sort primarily by Date (desc), then Time
+        shoots.sort((a,b) => {
+             if (a.date !== b.date) {
+                 return b.date.localeCompare(a.date); // Newest date first
+             }
+             return this.timeToMin(b.start) - this.timeToMin(a.start);
+        });
+
+        if(shoots.length === 0) {
+            body.innerHTML = '<div class="empty-state">No shoots assigned.</div>';
+        }
+
+        const now = new Date();
+        const todayStr = now.toISOString().split('T')[0];
+        const nowMin = now.getHours() * 60 + now.getMinutes();
+
+        shoots.forEach(s => {
+            const start = this.timeToMin(s.start);
+            const end = this.timeToMin(s.end);
+            
+            const isToday = s.date === todayStr;
+            const isActive = isToday && (nowMin >= start && nowMin < end);
+            const isSelected = s.id === this.activeShootId;
+            const isPast = (s.date < todayStr) || (isToday && end < nowMin);
+
+            const row = document.createElement('div');
+            row.className = 'shoot-row';
+            
+            // Apply priority classes: Selected (Yellow) > Active (Green) > Past
+            if (isSelected) {
+                row.classList.add('row-selected');
+            } else if (isActive) {
+                row.classList.add('row-active');
+            } else if (isPast) {
+                row.classList.add('past');
+            }
+
+            row.innerHTML = `
+                <div class="input-group">
+                    <label>Date</label>
+                    <input type="date" value="${s.date}" onchange="app.updateShoot('${s.id}', 'date', this.value)">
+                </div>
+                <div class="input-group">
+                    <label>Shoot Name</label>
+                    <input type="text" value="${s.name}" onchange="app.updateShoot('${s.id}', 'name', this.value)">
+                </div>
+                <div class="input-group">
+                    <label>Start</label>
+                    <input type="time" value="${s.start}" onchange="app.updateShoot('${s.id}', 'start', this.value)">
+                </div>
+                <div class="input-group">
+                    <label>End</label>
+                    <input type="time" value="${s.end}" onchange="app.updateShoot('${s.id}', 'end', this.value)">
+                </div>
+                <div class="input-group">
+                    <label>Location</label>
+                    <input type="text" value="${s.location}" onchange="app.updateShoot('${s.id}', 'location', this.value)">
+                </div>
+                <button class="btn-delete" title="Remove Shoot" onclick="app.deleteShoot('${s.id}')">&times;</button>
+            `;
+            body.appendChild(row);
+        });
+
+        document.getElementById('memberModal').classList.add('open');
+    }
+
+    updateShoot(id, field, value) {
+        const shoot = this.data.shoots.find(s => s.id === id);
+        if(shoot) {
+            shoot[field] = value;
+            this.saveData();
+        }
+    }
+
+    deleteShoot(id) {
+        if(confirm("Delete this shoot permanently?")) {
+            this.data.shoots = this.data.shoots.filter(s => s.id !== id);
+            this.saveData();
+            document.getElementById('memberModal').classList.remove('open');
+        }
+    }
+
+    // 5. Shoot Modal Logic (Create & Edit)
+    openShootModal(shootId = null) {
+        const modal = document.getElementById('createShootModal');
+        const title = document.getElementById('shootModalTitle');
+        const btn = document.getElementById('shootSaveBtn');
+        const deleteBtn = document.getElementById('shootDeleteBtn');
+        const idInput = document.getElementById('shootModalId');
+        
+        // Populate member checkboxes
+        const container = document.getElementById('csMembers');
+        container.innerHTML = '';
+        
+        // Reset Search
+        const searchInput = document.getElementById('csSearch');
+        if(searchInput) {
+            searchInput.value = '';
+            this.filterMembers(''); // Show all
+        }
+        
+        // Find shoot if editing
+        let shoot = null;
+        if (shootId) {
+            shoot = this.data.shoots.find(s => s.id === shootId);
+        }
+
+        this.data.members.forEach(m => {
+            const label = document.createElement('label');
+            label.className = 'checkbox-label';
+            const isChecked = shoot && shoot.members.includes(m.id) ? 'checked' : '';
+            label.innerHTML = `<input type="checkbox" value="${m.id}" ${isChecked}> ${m.name} (${m.role})`;
+            container.appendChild(label);
+        });
+
+        if (shoot) {
+            // Edit Mode
+            title.innerText = 'Edit Shoot';
+            btn.innerText = 'Save Changes';
+            deleteBtn.style.display = 'block';
+            idInput.value = shoot.id;
+            
+            document.getElementById('csName').value = shoot.name;
+            document.getElementById('csDate').value = shoot.date;
+            document.getElementById('csStart').value = shoot.start;
+            document.getElementById('csEnd').value = shoot.end;
+            document.getElementById('csLoc').value = shoot.location;
+            document.getElementById('csNotes').value = shoot.notes || ''; // Load notes
+        } else {
+            // Create Mode
+            title.innerText = 'Create New Shoot';
+            btn.innerText = 'Create Shoot';
+            deleteBtn.style.display = 'none';
+            idInput.value = '';
+            
+            document.getElementById('csName').value = '';
+            // Default to currently selected date in view
+            document.getElementById('csDate').value = this.selectedDate;
+            document.getElementById('csStart').value = '09:00';
+            document.getElementById('csEnd').value = '11:00';
+            document.getElementById('csLoc').value = '';
+            document.getElementById('csNotes').value = ''; // Clear notes
+        }
+
+        modal.classList.add('open');
+    }
+
+    filterMembers(query) {
+        const labels = document.querySelectorAll('#csMembers .checkbox-label');
+        const lowerQuery = query.toLowerCase();
+        labels.forEach(label => {
+            const text = label.innerText.toLowerCase();
+            if (text.includes(lowerQuery)) {
+                label.style.display = 'flex';
+            } else {
+                label.style.display = 'none';
+            }
+        });
+    }
+
+    saveShoot() {
+        const id = document.getElementById('shootModalId').value;
+        const name = document.getElementById('csName').value;
+        const date = document.getElementById('csDate').value;
+        const start = document.getElementById('csStart').value;
+        const end = document.getElementById('csEnd').value;
+        const loc = document.getElementById('csLoc').value;
+        const notes = document.getElementById('csNotes').value;
+        
+        const checkboxes = document.querySelectorAll('#csMembers input:checked');
+        const selectedIds = Array.from(checkboxes).map(cb => cb.value);
+
+        if(!name) return alert("Shoot name required");
+        if(!date) return alert("Date required");
+
+        if (id) {
+            // Update
+            const shoot = this.data.shoots.find(s => s.id === id);
+            if (shoot) {
+                shoot.name = name;
+                shoot.date = date;
+                shoot.start = start;
+                shoot.end = end;
+                shoot.location = loc;
+                shoot.notes = notes;
+                shoot.members = selectedIds;
+            }
+        } else {
+            // Create
+            this.data.shoots.push({
+                id: this.uuid(),
+                name: name,
+                date: date,
+                start: start,
+                end: end,
+                location: loc,
+                notes: notes,
+                members: selectedIds
+            });
+        }
+
+        this.saveData();
+        this.closeModals();
+    }
+    
+    deleteShootFromModal() {
+        const id = document.getElementById('shootModalId').value;
+        if (id && confirm("Delete this shoot?")) {
+             this.data.shoots = this.data.shoots.filter(s => s.id !== id);
+             this.saveData();
+             this.closeModals();
+        }
+    }
+
+    // 6. Admin Logic
+    renderAdminList() {
+        const list = document.getElementById('adminMemberList');
+        list.innerHTML = '';
+        this.data.members.forEach(m => {
+            const div = document.createElement('div');
+            div.className = 'member-row-admin';
+            div.innerHTML = `
+                <span><b>${m.name}</b> <small style="color:#888">(${m.role})</small></span>
+                <button class="btn-delete" onclick="app.removeMember('${m.id}')">&times;</button>
+            `;
+            list.appendChild(div);
+        });
+    }
+
+    addMember() {
+        const nameInput = document.getElementById('newMemberName');
+        const roleInput = document.getElementById('newMemberRole');
+        const name = nameInput.value.trim();
+        
+        if (!name) return;
+        if (this.data.members.some(m => m.name === name)) return alert("Name exists");
+
+        this.data.members.push({
+            id: this.uuid(),
+            name: name,
+            role: roleInput.value
+        });
+        
+        nameInput.value = '';
+        this.saveData();
+    }
+
+    removeMember(id) {
+        if(confirm("Remove member? This will maintain their shoots but unassign them.")) {
+            // Remove from members list
+            this.data.members = this.data.members.filter(m => m.id !== id);
+            
+            // Remove ID from shoots
+            this.data.shoots.forEach(s => {
+                s.members = s.members.filter(mid => mid !== id);
+            });
+            
+            this.saveData();
+        }
+    }
+
+    // Helpers
+    closeModals() {
+        document.querySelectorAll('.modal-overlay').forEach(el => el.classList.remove('open'));
+    }
+
+    switchView(viewName) {
+        document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+        document.getElementById(`view-${viewName}`).classList.add('active');
+        document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+
+    timeToMin(timeStr) {
+        const [h, m] = timeStr.split(':').map(Number);
+        return h * 60 + m;
+    }
+
+    hashString(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        return Math.abs(hash);
+    }
+}
+
+// Instantiate
+const app = new App();
+
+</script>
+</body>
+</html>

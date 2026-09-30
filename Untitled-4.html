@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Junni Rebuild | Service List Implementation</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@800&family=Barlow+Condensed:wght@700&display=swap" rel="stylesheet">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background-color: #f0f0f0; overflow-x: hidden; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    .spacer { height: 100vh; display: flex; justify-content: center; align-items: center; color: #bbb; text-transform: uppercase; }
+
+    .home_service {
+      position: relative;
+      width: 100vw;
+      height: 450vh; /* Room for title merge + 5 items */
+      background: #f0f0f0;
+    }
+
+    .home_service_inner {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 8vh;
+      overflow: hidden;
+    }
+
+    /* --- Title Section --- */
+    .home_service_title {
+      position: relative;
+      font-size: 14vw;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: -0.05em;
+      margin-bottom: 2rem;
+      height: 14vw;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+
+    .service-layer {
+      position: absolute;
+      white-space: nowrap;
+      color: transparent;
+      -webkit-text-stroke: 1.5px rgba(26, 26, 26, 0.15);
+      will-change: transform, opacity;
+    }
+
+    .service-layer[data-ty="0"] { z-index: 10; -webkit-text-stroke: 1.5px rgba(26, 26, 26, 1); }
+    .service-layer.merged { color: #1a1a1a; -webkit-text-stroke: 0px transparent; }
+
+    /* --- Service List Section --- */
+    .home_service_list {
+      list-style: none;
+      width: 90%;
+      max-width: 1300px;
+      margin-top: 2vh;
+      opacity: 0;
+      transform: translateY(50px);
+    }
+
+    .home_service_item {
+      display: flex;
+      align-items: center;
+      padding: 1.8rem 0;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: background-color 0.4s ease;
+    }
+
+    .home_service_item:hover { background-color: #1a1a1a; padding-left: 2rem; }
+    
+    .home_service_num {
+      font-size: 3.5rem;
+      font-family: 'Barlow Condensed', sans-serif;
+      margin-right: 4rem;
+      color: #1a1a1a;
+      transition: color 0.3s;
+    }
+
+    .home_service_item:hover .home_service_num,
+    .home_service_item:hover .home_service_name_char,
+    .home_service_item:hover .home_service_detail { color: #D1FF00; }
+
+    .home_service_block { flex: 1; }
+
+    .home_service_name {
+      display: flex;
+      font-size: 3.8rem;
+      font-family: 'Barlow Condensed', sans-serif;
+      text-transform: uppercase;
+      color: #1a1a1a;
+      margin-bottom: 0.2rem;
+    }
+
+    .home_service_name_char { transition: color 0.3s; }
+
+    .home_service_detail {
+      font-size: 1rem;
+      color: #666;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    /* --- Flip Button logic from Screenshot 194010.png --- */
+    .home_service_btn {
+      margin-top: 3rem;
+      padding: 1.2rem 3.5rem;
+      border: 2px solid #1a1a1a;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.4rem;
+      text-transform: uppercase;
+      cursor: pointer;
+      background: transparent;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .home_service_btn:hover { background: #1a1a1a; color: #D1FF00; }
+  </style>
+</head>
+<body>
+
+  <div class="spacer">Scroll Down to Start Merge</div>
+
+  <section class="home_service">
+    <div class="home_service_inner">
+      
+      <h2 class="home_service_title" id="main-title">
+        <span class="service-layer" data-ty="60">SERVICE</span>
+        <span class="service-layer" data-ty="40">SERVICE</span>
+        <span class="service-layer" data-ty="20">SERVICE</span>
+        <span class="service-layer" data-ty="0">SERVICE</span>
+        <span class="service-layer" data-ty="-20">SERVICE</span>
+        <span class="service-layer" data-ty="-40">SERVICE</span>
+        <span class="service-layer" data-ty="-60">SERVICE</span>
+      </h2>
+
+      <ul class="home_service_list">
+        <li class="home_service_item">
+          <span class="home_service_num">01</span>
+          <div class="home_service_block">
+            <div class="home_service_name" data-text="Virtual Gallery"></div>
+            <p class="home_service_detail">Webブラウザで閲覧可能なバーチャルギャラリーの企画・デザイン・開発</p>
+          </div>
+        </li>
+        <li class="home_service_item">
+          <span class="home_service_num">02</span>
+          <div class="home_service_block">
+            <div class="home_service_name" data-text="NFT Solutions"></div>
+            <p class="home_service_detail">NFTの発行、プロジェクト運営、NFTを使ったWEBサービスの企画・デザイン・開発</p>
+          </div>
+        </li>
+        <li class="home_service_item">
+          <span class="home_service_num">03</span>
+          <div class="home_service_block">
+            <div class="home_service_name" data-text="AR Experience"></div>
+            <p class="home_service_detail">ブラウザベースでのWeb AR / XRの企画・デザイン・開発</p>
+          </div>
+        </li>
+        <li class="home_service_item">
+          <span class="home_service_num">04</span>
+          <div class="home_service_block">
+            <div class="home_service_name" data-text="GPS Check in"></div>
+            <p class="home_service_detail">GPSを活用したスマートフォン連動のチェックイン機能の企画・デザイン・開発</p>
+          </div>
+        </li>
+        <li class="home_service_item">
+          <span class="home_service_num">05</span>
+          <div class="home_service_block">
+            <div class="home_service_name" data-text="Access Control System"></div>
+            <p class="home_service_detail">イベント等の入場管理システム機能の企画・デザイン・開発</p>
+          </div>
+        </li>
+      </ul>
+
+      <button class="home_service_btn">Our Service</button>
+    </div>
+  </section>
+
+  <div class="spacer">Footer</div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    document.addEventListener("DOMContentLoaded", () => {
+      
+      // Automatic text splitting for sequential reveal logic
+      document.querySelectorAll('.home_service_name').forEach(nameDiv => {
+        const text = nameDiv.getAttribute('data-text');
+        nameDiv.innerHTML = text.split('').map((char, i) => 
+          `<span class="home_service_name_char" style="transition-delay: ${i * 20}ms">${char === ' ' ? '&nbsp;' : char}</span>`
+        ).join('');
+      });
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: ".home_service",
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 1,
+          pin: true
+        }
+      });
+
+      // 1. Bottom-up Merge
+      const layers = document.querySelectorAll('.service-layer');
+      layers.forEach((layer) => {
+        const val = parseFloat(layer.getAttribute('data-ty'));
+        const startY = 800 + (Math.abs(val) * 15);
+        tl.from(layer, { y: startY, opacity: 0, duration: 2, ease: "power3.out" }, 0);
+      });
+
+      // 2. Title header snap
+      tl.to(".home_service_title", {
+        scale: 0.55,
+        y: "-12vh",
+        duration: 1,
+        onStart: () => document.querySelector('.service-layer[data-ty="0"]').classList.add('merged'),
+        onReverseComplete: () => document.querySelector('.service-layer[data-ty="0"]').classList.remove('merged')
+      }, "-=0.5");
+
+      // 3. Sequential Reveal for the 5 items
+      tl.to(".home_service_list", { opacity: 1, y: -80, duration: 1 }, "-=0.2");
+      tl.from(".home_service_item", {
+        opacity: 0,
+        y: 30,
+        stagger: 0.15,
+        duration: 0.8
+      }, "-=0.6");
+    });
+  </script>
+</body>
+</html>

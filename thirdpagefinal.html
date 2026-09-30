@@ -1,0 +1,1634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exclusive - Scroll & Hover Reveal</title>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <style>
+    /* Base styling and typography */
+    :root {
+      --nav-pad-y: 1.5;
+      --nav-pad-x: 5;
+      --nav-logo-size: 1.8;
+      --nav-links-size: 0.8;
+      --nav-links-gap: 3;
+
+      --hero-min-h: 88;
+      --hero-offset-top: 5;
+      --hero-text-size: 16;
+      --hero-dot-size: 5;
+      --hero-dot-gap: 4;
+      --hero-dot-lift: -0.5;
+
+      --projects-pad-x: 5;
+      --project-row-pad-y: 6;
+      --project-info-width: 25;
+      --project-image-width: 70;
+      --project-image-ratio: 16 / 10;
+      --project-image-min-h: 340;
+      --project-title-size: 3.5;
+      --project-details-width: 80;
+      --project-details-size: 1.1;
+
+      --garage-pad-y: 10;
+      --garage-heading-size: 3.5;
+      --garage-title-size: 1.5;
+      --garage-details-size: 1.1;
+      --garage-gap: 2;
+      --garage-card-ratio: 4 / 3;
+
+      --footer-pad-y: 1.5;
+      --footer-pad-x: 2;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      background-color: #fff;
+      color: #000;
+      overflow-x: hidden;
+    }
+
+    html.aspect-resizing .hero-colossal,
+    html.aspect-resizing .projects-section,
+    html.aspect-resizing .garage-section {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .hero-colossal,
+    .projects-section,
+    .garage-section {
+      transition: opacity 0.16s ease;
+    }
+
+    /* Navigation Bar */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: calc(var(--nav-pad-y) * 1vw) calc(var(--nav-pad-x) * 1vw);
+      position: fixed;
+      top: 0;
+      width: 100%;
+      box-sizing: border-box;
+      z-index: 100;
+      background-color: #fff;
+    }
+
+    .nav-logo {
+      font-size: calc(var(--nav-logo-size) * 1vw);
+      font-weight: 700;
+      letter-spacing: -0.05em;
+      margin: 0;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: calc(var(--nav-links-gap) * 1vw);
+      font-size: calc(var(--nav-links-size) * 1vw);
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* Colossal Hero Section */
+    .hero-colossal {
+      min-height: clamp(420px, calc(var(--hero-min-h) * 1svh), 980px);
+      height: auto;
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow: hidden; /* Prevent horizontal scroll from the marquee */
+      margin-top: clamp(48px, calc(var(--hero-offset-top) * 1vh), 76px);
+    }
+
+    .marquee-track {
+      display: flex;
+      white-space: nowrap;
+      will-change: transform;
+      align-items: center;
+      width: max-content;
+      animation: marqueeScroll 15s linear infinite;
+      transform: translateZ(0);
+    }
+
+    .marquee-content {
+      display: flex;
+      align-items: center;
+    }
+
+    @keyframes marqueeScroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .colossal-text {
+      font-size: calc(var(--hero-text-size) * 1vw); /* Sized perfectly so "EXCLUSIVE" + dot fills the width */
+      margin: 0;
+      font-weight: 500;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+    }
+
+    .colossal-dot {
+      display: inline-block;
+      width: calc(var(--hero-dot-size) * 1vw);
+      height: calc(var(--hero-dot-size) * 1vw);
+      background-color: #000;
+      border-radius: 50%;
+      margin: 0 calc(var(--hero-dot-gap) * 1vw);
+      transform: translateY(calc(var(--hero-dot-lift) * 1vw)); /* Optical vertical alignment */
+    }
+
+    /* Projects Container */
+    .projects-section {
+      padding: 0 calc(var(--projects-pad-x) * 1vw);
+      padding-bottom: 10vh;
+    }
+
+    .project-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center; /* Centered vertically relative to the image */
+      padding: calc(var(--project-row-pad-y) * 1vw) 0;
+      position: relative;
+      cursor: pointer;
+    }
+
+    /* Left side: Info & Hover Reveal */
+    .project-info {
+      width: calc(var(--project-info-width) * 1%); /* Shrunk width to pull the text closer to the image */
+      position: relative; 
+      display: flex;
+      flex-direction: column;
+    }
+
+    .project-title {
+      font-size: calc(var(--project-title-size) * 1vw);
+      margin: 0;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+    }
+
+    /* The Invisible Hover Section */
+    .project-details {
+      position: absolute; /* Keeps it from pushing the title when it appears */
+      top: 100%;
+      left: 0;
+      width: calc(var(--project-details-width) * 1%);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(40px); /* Starts lower for the slide up effect */
+      transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+      padding-top: 20px;
+    }
+
+    .project-details p {
+      font-size: calc(var(--project-details-size) * 1rem);
+      line-height: 1.6;
+      color: #555;
+      margin-bottom: 30px;
+    }
+
+    .arrow-btn {
+      background: #000;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .arrow-btn:hover {
+      transform: translateX(10px);
+    }
+
+    /* Hover States for Desktop */
+    @media (min-width: 768px) {
+      .project-row:hover .project-details {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0); /* Slides up into place */
+      }
+    }
+
+    /* Right side: Image */
+    .project-image {
+      width: calc(var(--project-image-width) * 1%); /* Expanded width for a bolder image presence */
+      aspect-ratio: var(--project-image-ratio);
+      height: auto;
+      min-height: calc(var(--project-image-min-h) * 1px);
+      overflow: hidden;
+    }
+
+    .project-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform-origin: center;
+      transition: transform 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+      will-change: transform;
+    }
+
+    @media (max-width: 1200px) and (min-width: 769px) {
+      .nav-logo { font-size: clamp(1.25rem, calc(var(--nav-logo-size) * 1vw), 2rem); }
+      .nav-links { font-size: clamp(0.65rem, calc(var(--nav-links-size) * 1vw), 0.9rem); }
+      .project-title { font-size: clamp(1.9rem, calc(var(--project-title-size) * 1vw), 3.2rem); }
+      .garage-heading { font-size: clamp(2rem, calc(var(--garage-heading-size) * 1vw), 3.2rem); }
+      .garage-title { font-size: clamp(1rem, calc(var(--garage-title-size) * 1vw), 1.45rem); }
+    }
+
+    .project-row:hover .project-image img {
+      transform: scale(1.05); /* Slight zoom on hover */
+    }
+
+    /* --- Garage Section Styles --- */
+    .garage-section {
+      padding: calc(var(--garage-pad-y) * 1vh) calc(var(--projects-pad-x) * 1vw);
+      background-color: #fff;
+    }
+
+    .garage-heading {
+      font-size: calc(var(--garage-heading-size) * 1vw);
+      font-weight: 400;
+      margin: 0 0 4vw 0;
+      letter-spacing: -0.02em;
+    }
+
+    .garage-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: calc(var(--garage-gap) * 1vw);
+    }
+
+    .garage-card {
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-image-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: var(--garage-card-ratio);
+      overflow: hidden;
+      margin-bottom: 1.5vw;
+    }
+
+    .card-image-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+    }
+
+    .garage-title {
+      font-size: calc(var(--garage-title-size) * 1vw);
+      font-weight: 400;
+      margin: 0;
+      letter-spacing: -0.01em;
+    }
+
+    /* Invisible details underneath title */
+    .garage-details {
+      opacity: 0;
+      visibility: hidden;
+      max-height: 0;
+      transform: translateY(-10px);
+      transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+      margin-top: 0;
+      overflow: hidden;
+    }
+
+    .garage-details p {
+      font-size: calc(var(--garage-details-size) * 1vw);
+      line-height: 1.5;
+      color: #555;
+      margin: 0;
+    }
+
+    .garage-card:hover .card-image-container img {
+      transform: scale(1.05);
+    }
+
+    .garage-card:hover .garage-details {
+      opacity: 1;
+      visibility: visible;
+      max-height: 200px; /* Slides open */
+      transform: translateY(0);
+      margin-top: 1vw; /* Adds spacing when expanded */
+    }
+
+    /* Navigation Footer */
+    .site-footer-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.95);
+      padding: calc(var(--footer-pad-y) * 1rem) calc(var(--footer-pad-x) * 1rem);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 50;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .layout-control-bar {
+      position: fixed;
+      top: 78px;
+      right: 16px;
+      width: min(360px, 92vw);
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.14);
+      z-index: 120;
+      backdrop-filter: blur(8px);
+      border-radius: 12px;
+      overflow: hidden;
+      max-height: calc(100vh - 108px);
+    }
+
+    .layout-control-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.7rem 0.85rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      background: #fff;
+      cursor: move;
+      user-select: none;
+    }
+
+    .layout-control-head strong {
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .layout-control-toggle {
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      background: #fff;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.55rem;
+      cursor: pointer;
+    }
+
+    .layout-control-head button,
+    .layout-control-head select,
+    .layout-control-head input {
+      cursor: auto;
+    }
+
+    .layout-control-body {
+      padding: 0.8rem;
+      overflow-y: auto;
+      max-height: calc(100vh - 165px);
+      display: grid;
+      gap: 0.8rem;
+    }
+
+    .layout-control-bar.is-collapsed .layout-control-body {
+      display: none;
+    }
+
+    .control-row {
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .control-row label {
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(0, 0, 0, 0.7);
+      font-weight: 700;
+    }
+
+    .control-row select,
+    .control-row input[type="text"],
+    .control-row input[type="number"] {
+      border: 1px solid rgba(0, 0, 0, 0.18);
+      border-radius: 8px;
+      padding: 0.45rem 0.55rem;
+      font-size: 0.78rem;
+      width: 100%;
+      background: #fff;
+    }
+
+    .control-row input[type="range"] {
+      width: 100%;
+      margin: 0;
+    }
+
+    .control-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.45rem;
+    }
+
+    .control-value {
+      font-size: 0.66rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(0, 0, 0, 0.55);
+      text-align: right;
+      margin-top: 0.15rem;
+    }
+
+    .control-divider {
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+      margin: 0.3rem 0;
+    }
+
+    .control-actions {
+      display: flex;
+      gap: 0.45rem;
+    }
+
+    .control-actions button {
+      border: 1px solid rgba(0, 0, 0, 0.22);
+      background: #fff;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.5rem 0.65rem;
+      border-radius: 8px;
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .editable-node {
+      --edit-x: 0px;
+      --edit-y: 0px;
+      --edit-scale: 1;
+      --edit-rotate: 0deg;
+      transform: translate(var(--edit-x), var(--edit-y)) scale(var(--edit-scale)) rotate(var(--edit-rotate));
+      transform-origin: top left;
+      transition: transform 0.2s ease;
+    }
+
+    .editable-node.is-selected-for-edit {
+      outline: 2px dashed rgba(249, 83, 53, 0.7);
+      outline-offset: 4px;
+    }
+
+    .site-footer-nav a {
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-decoration: none;
+      color: rgba(255, 255, 255, 0.7);
+      transition: color 0.3s ease;
+      text-transform: uppercase;
+    }
+
+    .site-footer-nav a:hover {
+      color: rgba(255, 255, 255, 1);
+    }
+
+    /* Mobile adjustments */
+    @media (max-width: 768px) {
+      .navbar { padding: 4vw 5vw; }
+      .nav-links { display: none; }
+      .nav-logo { font-size: clamp(1.35rem, calc(var(--nav-logo-size) * 1vw), 2.15rem); }
+      
+      .hero-colossal { min-height: clamp(320px, calc(var(--hero-min-h) * 1svh), 680px); }
+      .colossal-text { font-size: calc(var(--hero-text-size) * 1vw); }
+      .colossal-dot { width: calc(var(--hero-dot-size) * 1vw); height: calc(var(--hero-dot-size) * 1vw); }
+
+      .project-row { flex-direction: column; align-items: flex-start; padding: 10vw 0; }
+      .project-info { width: 100%; margin-bottom: 2rem; }
+      .project-title { font-size: calc(var(--project-title-size) * 1vw); }
+      
+      .project-image { width: 100%; aspect-ratio: var(--project-image-ratio); min-height: 0; }
+      .project-details {
+        position: relative;
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+        padding-top: 20px;
+        width: 100%;
+      }
+
+      /* Garage Mobile Adjustments */
+      .garage-heading { font-size: calc(var(--garage-heading-size) * 1vw); margin-bottom: 8vw; }
+      .garage-grid { grid-template-columns: 1fr; gap: calc(var(--garage-gap) * 1vw); }
+      .card-image-container { margin-bottom: 4vw; }
+      .garage-title { font-size: calc(var(--garage-title-size) * 1vw); }
+      .garage-details p { font-size: calc(var(--garage-details-size) * 1vw); }
+      .garage-card:hover .garage-details { margin-top: 3vw; }
+
+      .layout-control-bar {
+        width: min(390px, 95vw);
+        top: 72px;
+        right: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar editable-node" data-edit-key="navbar">
+    <h2 class="nav-logo editable-node" id="ctlNavLogo" data-edit-key="navLogo">GENEROUS</h2>
+    <div class="nav-links editable-node" data-edit-key="navLinks">
+      <span data-nav-link="1">Work</span>
+      <span data-nav-link="2">Vision</span>
+      <span data-nav-link="3">The Agency</span>
+      <span data-nav-link="4">Contact</span>
+    </div>
+  </nav>
+
+  <aside class="layout-control-bar" id="layoutControlBar">
+    <div class="layout-control-head">
+      <strong>Adaptive Layout Panel</strong>
+      <button class="layout-control-toggle" id="layoutPanelToggle" type="button">Collapse</button>
+    </div>
+    <div class="layout-control-body">
+      <div class="control-grid-2">
+        <div class="control-row">
+          <label for="controlMode">Edit Mode</label>
+          <select id="controlMode">
+            <option value="auto">Auto Device</option>
+            <option value="desktop">Desktop Template</option>
+            <option value="mobile">Mobile Template</option>
+          </select>
+        </div>
+        <div class="control-row">
+          <label for="controlProfile">Edit Aspect</label>
+          <select id="controlProfile">
+            <option value="auto">Auto Aspect</option>
+            <option value="default">Default</option>
+            <option value="wide">Wide</option>
+            <option value="tall">Tall</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="control-divider"></div>
+
+      <div class="control-row">
+        <label for="ctlNavLogoText">Logo Text</label>
+        <input id="ctlNavLogoText" type="text" value="GENEROUS">
+      </div>
+      <div class="control-grid-2">
+        <div class="control-row">
+          <label for="ctlNavLink1">Nav 1</label>
+          <input id="ctlNavLink1" type="text" value="Work">
+        </div>
+        <div class="control-row">
+          <label for="ctlNavLink2">Nav 2</label>
+          <input id="ctlNavLink2" type="text" value="Vision">
+        </div>
+        <div class="control-row">
+          <label for="ctlNavLink3">Nav 3</label>
+          <input id="ctlNavLink3" type="text" value="The Agency">
+        </div>
+        <div class="control-row">
+          <label for="ctlNavLink4">Nav 4</label>
+          <input id="ctlNavLink4" type="text" value="Contact">
+        </div>
+      </div>
+
+      <div class="control-row">
+        <label for="ctlHeroWord">Hero Word</label>
+        <input id="ctlHeroWord" type="text" value="EXCLUSIVE">
+      </div>
+
+      <div class="control-row">
+        <label for="ctlGarageHeading">Garage Heading</label>
+        <input id="ctlGarageHeading" type="text" value="Garage">
+      </div>
+
+      <div class="control-divider"></div>
+
+      <div class="control-row">
+        <label for="ctlProject1Title">Project 1 Title</label>
+        <input id="ctlProject1Title" type="text" value="Mitwit Office">
+      </div>
+      <div class="control-row">
+        <label for="ctlProject2Title">Project 2 Title</label>
+        <input id="ctlProject2Title" type="text" value="Studio Alpha">
+      </div>
+
+      <div class="control-divider"></div>
+
+      <div class="control-row">
+        <label for="rangeHeroText">Hero Size (vw)</label>
+        <input id="rangeHeroText" type="range" min="10" max="32" step="0.1">
+        <div class="control-value" id="valueHeroText"></div>
+      </div>
+      <div class="control-row">
+        <label for="rangeProjectInfo">Project Info Width (%)</label>
+        <input id="rangeProjectInfo" type="range" min="20" max="60" step="1">
+        <div class="control-value" id="valueProjectInfo"></div>
+      </div>
+      <div class="control-row">
+        <label for="rangeProjectImage">Project Image Width (%)</label>
+        <input id="rangeProjectImage" type="range" min="40" max="80" step="1">
+        <div class="control-value" id="valueProjectImage"></div>
+      </div>
+      <div class="control-row">
+        <label for="rangeProjectTitle">Project Title Size (vw)</label>
+        <input id="rangeProjectTitle" type="range" min="2" max="12" step="0.1">
+        <div class="control-value" id="valueProjectTitle"></div>
+      </div>
+      <div class="control-row">
+        <label for="rangeProjectDetail">Project Detail Text (rem)</label>
+        <input id="rangeProjectDetail" type="range" min="0.8" max="1.6" step="0.02">
+        <div class="control-value" id="valueProjectDetail"></div>
+      </div>
+      <div class="control-row">
+        <label for="rangeGarageHeading">Garage Heading Size (vw)</label>
+        <input id="rangeGarageHeading" type="range" min="2" max="14" step="0.1">
+        <div class="control-value" id="valueGarageHeading"></div>
+      </div>
+      <div class="control-row">
+        <label for="rangeGarageTitle">Garage Title Size (vw)</label>
+        <input id="rangeGarageTitle" type="range" min="1" max="8" step="0.1">
+        <div class="control-value" id="valueGarageTitle"></div>
+      </div>
+      <div class="control-row">
+        <label for="rangeGarageGap">Garage Gap (vw)</label>
+        <input id="rangeGarageGap" type="range" min="1" max="10" step="0.1">
+        <div class="control-value" id="valueGarageGap"></div>
+      </div>
+      <div class="control-grid-2">
+        <div class="control-row">
+          <label for="ratioProjectW">Project Ratio W</label>
+          <input id="ratioProjectW" type="number" min="1" max="24" step="0.1">
+        </div>
+        <div class="control-row">
+          <label for="ratioProjectH">Project Ratio H</label>
+          <input id="ratioProjectH" type="number" min="1" max="24" step="0.1">
+        </div>
+      </div>
+      <div class="control-grid-2">
+        <div class="control-row">
+          <label for="ratioGarageW">Garage Ratio W</label>
+          <input id="ratioGarageW" type="number" min="1" max="24" step="0.1">
+        </div>
+        <div class="control-row">
+          <label for="ratioGarageH">Garage Ratio H</label>
+          <input id="ratioGarageH" type="number" min="1" max="24" step="0.1">
+        </div>
+      </div>
+
+      <div class="control-divider"></div>
+
+      <div class="control-row">
+        <label for="elementTargetSelect">Target Element</label>
+        <select id="elementTargetSelect">
+          <option value="navbar">Navbar</option>
+          <option value="navLogo">Navbar Logo</option>
+          <option value="navLinks">Navbar Links Row</option>
+          <option value="heroSection">Hero Section</option>
+          <option value="heroText">Hero Word</option>
+          <option value="projectsSection">Projects Section</option>
+          <option value="projectRow1">Project Row 1</option>
+          <option value="projectInfo1">Project 1 Info Block</option>
+          <option value="projectTitle1">Project 1 Title</option>
+          <option value="projectDetails1">Project 1 Details</option>
+          <option value="projectImage1">Project 1 Image Block</option>
+          <option value="projectRow2">Project Row 2</option>
+          <option value="projectInfo2">Project 2 Info Block</option>
+          <option value="projectTitle2">Project 2 Title</option>
+          <option value="projectDetails2">Project 2 Details</option>
+          <option value="projectImage2">Project 2 Image Block</option>
+          <option value="garageSection">Garage Section</option>
+          <option value="garageHeading">Garage Heading</option>
+          <option value="garageCard1">Garage Card 1</option>
+          <option value="garageImage1">Garage Card 1 Image</option>
+          <option value="garageTitle1">Garage Card 1 Title</option>
+          <option value="garageDetails1">Garage Card 1 Details</option>
+          <option value="garageCard2">Garage Card 2</option>
+          <option value="garageImage2">Garage Card 2 Image</option>
+          <option value="garageTitle2">Garage Card 2 Title</option>
+          <option value="garageDetails2">Garage Card 2 Details</option>
+          <option value="garageCard3">Garage Card 3</option>
+          <option value="garageImage3">Garage Card 3 Image</option>
+          <option value="garageTitle3">Garage Card 3 Title</option>
+          <option value="garageDetails3">Garage Card 3 Details</option>
+          <option value="footerNav">Bottom Footer Nav</option>
+        </select>
+      </div>
+
+      <div class="control-row">
+        <label for="elementTextInput">Element Text</label>
+        <input id="elementTextInput" type="text" placeholder="Edit text for selected target">
+      </div>
+
+      <div class="control-grid-2">
+        <div class="control-row">
+          <label for="elementOffsetX">Offset X (px)</label>
+          <input id="elementOffsetX" type="range" min="-600" max="600" step="1">
+          <div class="control-value" id="valueElementOffsetX"></div>
+        </div>
+        <div class="control-row">
+          <label for="elementOffsetY">Offset Y (px)</label>
+          <input id="elementOffsetY" type="range" min="-600" max="600" step="1">
+          <div class="control-value" id="valueElementOffsetY"></div>
+        </div>
+      </div>
+
+      <div class="control-grid-2">
+        <div class="control-row">
+          <label for="elementScale">Scale</label>
+          <input id="elementScale" type="range" min="0.4" max="2.5" step="0.01">
+          <div class="control-value" id="valueElementScale"></div>
+        </div>
+        <div class="control-row">
+          <label for="elementOpacity">Opacity</label>
+          <input id="elementOpacity" type="range" min="0.1" max="1" step="0.01">
+          <div class="control-value" id="valueElementOpacity"></div>
+        </div>
+      </div>
+
+      <div class="control-grid-2">
+        <div class="control-row">
+          <label for="elementWidthValue">Width</label>
+          <input id="elementWidthValue" type="number" step="0.1" placeholder="Auto">
+        </div>
+        <div class="control-row">
+          <label for="elementWidthUnit">Width Unit</label>
+          <select id="elementWidthUnit">
+            <option value="%">%</option>
+            <option value="px">px</option>
+            <option value="vw">vw</option>
+            <option value="rem">rem</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="control-grid-2">
+        <div class="control-row">
+          <label for="elementHeightValue">Height</label>
+          <input id="elementHeightValue" type="number" step="0.1" placeholder="Auto">
+        </div>
+        <div class="control-row">
+          <label for="elementHeightUnit">Height Unit</label>
+          <select id="elementHeightUnit">
+            <option value="px">px</option>
+            <option value="%">%</option>
+            <option value="vh">vh</option>
+            <option value="rem">rem</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="control-grid-2">
+        <div class="control-row">
+          <label for="elementFontSizeValue">Font Size</label>
+          <input id="elementFontSizeValue" type="number" step="0.1" placeholder="Auto">
+        </div>
+        <div class="control-row">
+          <label for="elementFontSizeUnit">Font Unit</label>
+          <select id="elementFontSizeUnit">
+            <option value="vw">vw</option>
+            <option value="rem">rem</option>
+            <option value="px">px</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="control-actions">
+        <button id="elementClearSizing" type="button">Clear Size</button>
+        <button id="elementResetAll" type="button">Reset Target</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Colossal Title Section -->
+  <section class="hero-colossal editable-node" data-edit-key="heroSection">
+    <div class="marquee-track">
+      <!-- Group 1 -->
+      <div class="marquee-content">
+        <h1 class="colossal-text editable-node" data-edit-key="heroText"><span class="colossal-dot"></span><span class="hero-word">EXCLUSIVE</span></h1>
+        <h1 class="colossal-text"><span class="colossal-dot"></span><span class="hero-word">EXCLUSIVE</span></h1>
+        <h1 class="colossal-text"><span class="colossal-dot"></span><span class="hero-word">EXCLUSIVE</span></h1>
+        <h1 class="colossal-text"><span class="colossal-dot"></span><span class="hero-word">EXCLUSIVE</span></h1>
+      </div>
+      <!-- Group 2 (Duplicated for an invisible, seamless loop) -->
+      <div class="marquee-content" aria-hidden="true">
+        <h1 class="colossal-text"><span class="colossal-dot"></span><span class="hero-word">EXCLUSIVE</span></h1>
+        <h1 class="colossal-text"><span class="colossal-dot"></span><span class="hero-word">EXCLUSIVE</span></h1>
+        <h1 class="colossal-text"><span class="colossal-dot"></span><span class="hero-word">EXCLUSIVE</span></h1>
+        <h1 class="colossal-text"><span class="colossal-dot"></span><span class="hero-word">EXCLUSIVE</span></h1>
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects List -->
+  <section class="projects-section editable-node" data-edit-key="projectsSection">
+    
+    <!-- Project 1 -->
+    <div class="project-row project-row-1 editable-node" data-edit-key="projectRow1">
+      <div class="project-info project-info-1 editable-node" data-edit-key="projectInfo1">
+        <h2 class="project-title project-title-1 editable-node" data-edit-key="projectTitle1">Mitwit Office</h2>
+        
+        <!-- Hidden until hovered -->
+        <div class="project-details project-details-1 editable-node" data-edit-key="projectDetails1">
+          <p>Launched by La Poste Immobilier and resulting from the merger of Startway and Multiburo, MITWIT has established itself as a major player in the shared workspace market, with a network of nearly 40 sites in France, Belgium and Switzerland.</p>
+          <button class="arrow-btn">→</button>
+        </div>
+      </div>
+      
+      <div class="project-image project-image-1 editable-node" data-edit-key="projectImage1">
+        <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1200" alt="Mitwit Office Kiosk">
+      </div>
+    </div>
+
+    <!-- Project 2 -->
+    <div class="project-row project-row-2 editable-node" data-edit-key="projectRow2">
+      <div class="project-info project-info-2 editable-node" data-edit-key="projectInfo2">
+        <h2 class="project-title project-title-2 editable-node" data-edit-key="projectTitle2">Studio Alpha</h2>
+        
+        <div class="project-details project-details-2 editable-node" data-edit-key="projectDetails2">
+          <p>A completely revitalized creative space designed for seamless collaboration. Features brutalist architectural elements mixed with warm, acoustic-friendly materials to foster focused productivity.</p>
+          <button class="arrow-btn">→</button>
+        </div>
+      </div>
+      
+      <div class="project-image project-image-2 editable-node" data-edit-key="projectImage2">
+        <img src="https://images.unsplash.com/photo-1600607687959-ce8a6c25118c?auto=format&fit=crop&q=80&w=1200" alt="Studio Alpha">
+      </div>
+    </div>
+
+  </section>
+
+  <!-- Garage Section -->
+  <section class="garage-section editable-node" data-edit-key="garageSection">
+    <h2 class="garage-heading editable-node" id="garageHeadingText" data-edit-key="garageHeading">Garage</h2>
+    
+    <div class="garage-grid">
+      <!-- Card 1 -->
+      <div class="garage-card garage-card-1 editable-node" data-edit-key="garageCard1">
+        <div class="card-image-container garage-image-1 editable-node" data-edit-key="garageImage1">
+          <img src="https://images.unsplash.com/photo-1558442074-3c19857bc1dc?auto=format&fit=crop&q=80&w=800" alt="Comet Meetings">
+        </div>
+        <h3 class="garage-title garage-title-1 editable-node" data-edit-key="garageTitle1">Comet Meetings</h3>
+        <div class="garage-details garage-details-1 editable-node" data-edit-key="garageDetails1">
+          <p>Innovative spaces for corporate meetings and creative team building.</p>
+        </div>
+      </div>
+      
+      <!-- Card 2 -->
+      <div class="garage-card garage-card-2 editable-node" data-edit-key="garageCard2">
+        <div class="card-image-container garage-image-2 editable-node" data-edit-key="garageImage2">
+          <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&q=80&w=800" alt="CEB">
+        </div>
+        <h3 class="garage-title garage-title-2 editable-node" data-edit-key="garageTitle2">CEB</h3>
+        <div class="garage-details garage-details-2 editable-node" data-edit-key="garageDetails2">
+          <p>L'art de bien ranger. Premium custom organization solutions.</p>
+        </div>
+      </div>
+      
+      <!-- Card 3 -->
+      <div class="garage-card garage-card-3 editable-node" data-edit-key="garageCard3">
+        <div class="card-image-container garage-image-3 editable-node" data-edit-key="garageImage3">
+          <img src="https://images.unsplash.com/photo-1545607062-848e4b7b2586?auto=format&fit=crop&q=80&w=800" alt="Centrakor">
+        </div>
+        <h3 class="garage-title garage-title-3 editable-node" data-edit-key="garageTitle3">Centrakor</h3>
+        <div class="garage-details garage-details-3 editable-node" data-edit-key="garageDetails3">
+          <p>Commercial retail spaces designed for optimized customer flow.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Site Navigation Footer -->
+  <footer class="site-footer-nav editable-node" data-edit-key="footerNav">
+    <a href="index.html">← Back to Index</a>
+    <a href="footer.html">Next Page →</a>
+  </footer>
+  
+  <script>
+    // Wait for the window and all external resources to load
+    window.onload = function() {
+      const rootEl = document.documentElement;
+      let resizeTimer;
+
+      const layoutConfig = {
+        desktop: {
+          default: {
+            navPadY: 1.5, navPadX: 5, navLogoSize: 1.8, navLinksSize: 0.8, navLinksGap: 3,
+            heroMinH: 88, heroOffsetTop: 5, heroTextSize: 16, heroDotSize: 5, heroDotGap: 4, heroDotLift: -0.5,
+            projectsPadX: 5, projectRowPadY: 6, projectInfoWidth: 25, projectImageWidth: 70,
+            projectImageRatioW: 16, projectImageRatioH: 10, projectImageMinH: 340,
+            projectTitleSize: 3.5, projectDetailsWidth: 80, projectDetailsSize: 1.1,
+            garagePadY: 10, garageHeadingSize: 3.5, garageTitleSize: 1.5, garageDetailsSize: 1.1,
+            garageGap: 2, garageCardRatioW: 4, garageCardRatioH: 3, footerPadY: 1.5, footerPadX: 2
+          },
+          wide: {
+            navPadY: 1.2, navPadX: 4.2, navLogoSize: 1.5, navLinksSize: 0.72, navLinksGap: 2.2,
+            heroMinH: 72, heroOffsetTop: 4.2, heroTextSize: 13.8, heroDotSize: 4.1, heroDotGap: 3,
+            heroDotLift: -0.42, projectsPadX: 4.2, projectRowPadY: 4.6, projectInfoWidth: 23,
+            projectImageWidth: 72, projectImageRatioW: 18, projectImageRatioH: 10, projectImageMinH: 280,
+            projectTitleSize: 2.9, projectDetailsWidth: 84, projectDetailsSize: 1.0,
+            garagePadY: 8, garageHeadingSize: 3.0, garageTitleSize: 1.25, garageDetailsSize: 0.95,
+            garageGap: 1.6, garageCardRatioW: 5, garageCardRatioH: 3, footerPadY: 1.1, footerPadX: 1.8
+          },
+          tall: {
+            navPadY: 1.8, navPadX: 5.8, navLogoSize: 2.0, navLinksSize: 0.88, navLinksGap: 3.4,
+            heroMinH: 90, heroOffsetTop: 5.6, heroTextSize: 17, heroDotSize: 5.2, heroDotGap: 4.2,
+            heroDotLift: -0.52, projectsPadX: 5.8, projectRowPadY: 6.6, projectInfoWidth: 28,
+            projectImageWidth: 67, projectImageRatioW: 15, projectImageRatioH: 10, projectImageMinH: 360,
+            projectTitleSize: 4.0, projectDetailsWidth: 85, projectDetailsSize: 1.14,
+            garagePadY: 11.2, garageHeadingSize: 3.9, garageTitleSize: 1.7, garageDetailsSize: 1.16,
+            garageGap: 2.2, garageCardRatioW: 4, garageCardRatioH: 3, footerPadY: 1.6, footerPadX: 2.2
+          }
+        },
+        mobile: {
+          default: {
+            navPadY: 4.0, navPadX: 5.0, navLogoSize: 6.0, navLinksSize: 3.0, navLinksGap: 3.0,
+            heroMinH: 42, heroOffsetTop: 4.5, heroTextSize: 24, heroDotSize: 8, heroDotGap: 4.5,
+            heroDotLift: -0.6, projectsPadX: 5.0, projectRowPadY: 10, projectInfoWidth: 100,
+            projectImageWidth: 100, projectImageRatioW: 4, projectImageRatioH: 3, projectImageMinH: 0,
+            projectTitleSize: 10, projectDetailsWidth: 100, projectDetailsSize: 1.0,
+            garagePadY: 8.8, garageHeadingSize: 10, garageTitleSize: 6, garageDetailsSize: 3.5,
+            garageGap: 8, garageCardRatioW: 4, garageCardRatioH: 3, footerPadY: 1.3, footerPadX: 1.2
+          },
+          wide: {
+            navPadY: 3.0, navPadX: 4.0, navLogoSize: 4.6, navLinksSize: 2.2, navLinksGap: 2.5,
+            heroMinH: 36, heroOffsetTop: 4, heroTextSize: 19, heroDotSize: 6, heroDotGap: 3.5,
+            heroDotLift: -0.45, projectsPadX: 4.0, projectRowPadY: 6.8, projectInfoWidth: 100,
+            projectImageWidth: 100, projectImageRatioW: 16, projectImageRatioH: 9, projectImageMinH: 0,
+            projectTitleSize: 7.2, projectDetailsWidth: 100, projectDetailsSize: 0.95,
+            garagePadY: 7.8, garageHeadingSize: 7.2, garageTitleSize: 4.2, garageDetailsSize: 2.6,
+            garageGap: 5.2, garageCardRatioW: 16, garageCardRatioH: 10, footerPadY: 1.0, footerPadX: 1.0
+          },
+          tall: {
+            navPadY: 4.5, navPadX: 5.5, navLogoSize: 6.5, navLinksSize: 3.2, navLinksGap: 3.2,
+            heroMinH: 48, heroOffsetTop: 5.2, heroTextSize: 26, heroDotSize: 8.8, heroDotGap: 4.9,
+            heroDotLift: -0.7, projectsPadX: 5.5, projectRowPadY: 11, projectInfoWidth: 100,
+            projectImageWidth: 100, projectImageRatioW: 4, projectImageRatioH: 3, projectImageMinH: 0,
+            projectTitleSize: 10.8, projectDetailsWidth: 100, projectDetailsSize: 1.08,
+            garagePadY: 10, garageHeadingSize: 11, garageTitleSize: 6.6, garageDetailsSize: 3.8,
+            garageGap: 8.8, garageCardRatioW: 4, garageCardRatioH: 3, footerPadY: 1.45, footerPadX: 1.2
+          }
+        }
+      };
+
+      const controlState = {
+        mode: "auto",
+        profile: "auto"
+      };
+
+      const textTargetConfig = {
+        navLogo: { selector: "#ctlNavLogo", all: false },
+        heroText: { selector: ".hero-word", all: true },
+        projectTitle1: { selector: ".project-title-1", all: false },
+        projectDetails1: { selector: ".project-details-1 p", all: false },
+        projectTitle2: { selector: ".project-title-2", all: false },
+        projectDetails2: { selector: ".project-details-2 p", all: false },
+        garageHeading: { selector: "#garageHeadingText", all: false },
+        garageTitle1: { selector: ".garage-title-1", all: false },
+        garageDetails1: { selector: ".garage-details-1 p", all: false },
+        garageTitle2: { selector: ".garage-title-2", all: false },
+        garageDetails2: { selector: ".garage-details-2 p", all: false },
+        garageTitle3: { selector: ".garage-title-3", all: false },
+        garageDetails3: { selector: ".garage-details-3 p", all: false }
+      };
+
+      function createTemplateBucket() {
+        return { default: {}, wide: {}, tall: {} };
+      }
+
+      const elementOverrides = {
+        desktop: createTemplateBucket(),
+        mobile: createTemplateBucket()
+      };
+
+      const rangeBindings = [
+        { id: "rangeHeroText", valueId: "valueHeroText", key: "heroTextSize", unit: "vw" },
+        { id: "rangeProjectInfo", valueId: "valueProjectInfo", key: "projectInfoWidth", unit: "%" },
+        { id: "rangeProjectImage", valueId: "valueProjectImage", key: "projectImageWidth", unit: "%" },
+        { id: "rangeProjectTitle", valueId: "valueProjectTitle", key: "projectTitleSize", unit: "vw" },
+        { id: "rangeProjectDetail", valueId: "valueProjectDetail", key: "projectDetailsSize", unit: "rem" },
+        { id: "rangeGarageHeading", valueId: "valueGarageHeading", key: "garageHeadingSize", unit: "vw" },
+        { id: "rangeGarageTitle", valueId: "valueGarageTitle", key: "garageTitleSize", unit: "vw" },
+        { id: "rangeGarageGap", valueId: "valueGarageGap", key: "garageGap", unit: "vw" }
+      ];
+
+      function getAutoMode() {
+        return window.matchMedia("(max-width: 768px)").matches ? "mobile" : "desktop";
+      }
+
+      function getAutoProfile(mode) {
+        const ratio = window.innerWidth / Math.max(window.innerHeight, 1);
+        if (mode === "desktop") {
+          if (ratio >= 1.8) return "wide";
+          if (ratio <= 1.35) return "tall";
+          return "default";
+        }
+        if (ratio >= 0.7) return "wide";
+        if (ratio <= 0.5) return "tall";
+        return "default";
+      }
+
+      function getTargetMode() {
+        return controlState.mode === "auto" ? getAutoMode() : controlState.mode;
+      }
+
+      function getTargetProfile(mode) {
+        return controlState.profile === "auto" ? getAutoProfile(mode) : controlState.profile;
+      }
+
+      function setCssVar(name, value) {
+        rootEl.style.setProperty(name, value);
+      }
+
+      function applyLayout() {
+        const mode = getTargetMode();
+        const profile = getTargetProfile(mode);
+        const cfg = layoutConfig[mode][profile];
+
+        setCssVar("--nav-pad-y", cfg.navPadY);
+        setCssVar("--nav-pad-x", cfg.navPadX);
+        setCssVar("--nav-logo-size", cfg.navLogoSize);
+        setCssVar("--nav-links-size", cfg.navLinksSize);
+        setCssVar("--nav-links-gap", cfg.navLinksGap);
+
+        setCssVar("--hero-min-h", cfg.heroMinH);
+        setCssVar("--hero-offset-top", cfg.heroOffsetTop);
+        setCssVar("--hero-text-size", cfg.heroTextSize);
+        setCssVar("--hero-dot-size", cfg.heroDotSize);
+        setCssVar("--hero-dot-gap", cfg.heroDotGap);
+        setCssVar("--hero-dot-lift", cfg.heroDotLift);
+
+        setCssVar("--projects-pad-x", cfg.projectsPadX);
+        setCssVar("--project-row-pad-y", cfg.projectRowPadY);
+        setCssVar("--project-info-width", cfg.projectInfoWidth);
+        setCssVar("--project-image-width", cfg.projectImageWidth);
+        setCssVar("--project-image-ratio", cfg.projectImageRatioW + " / " + cfg.projectImageRatioH);
+        setCssVar("--project-image-min-h", cfg.projectImageMinH);
+        setCssVar("--project-title-size", cfg.projectTitleSize);
+        setCssVar("--project-details-width", cfg.projectDetailsWidth);
+        setCssVar("--project-details-size", cfg.projectDetailsSize);
+
+        setCssVar("--garage-pad-y", cfg.garagePadY);
+        setCssVar("--garage-heading-size", cfg.garageHeadingSize);
+        setCssVar("--garage-title-size", cfg.garageTitleSize);
+        setCssVar("--garage-details-size", cfg.garageDetailsSize);
+        setCssVar("--garage-gap", cfg.garageGap);
+        setCssVar("--garage-card-ratio", cfg.garageCardRatioW + " / " + cfg.garageCardRatioH);
+
+        setCssVar("--footer-pad-y", cfg.footerPadY);
+        setCssVar("--footer-pad-x", cfg.footerPadX);
+
+        applyElementOverrides(mode, profile);
+
+        rootEl.dataset.layoutMode = mode;
+        rootEl.dataset.layoutProfile = profile;
+      }
+
+      function getEditableTemplate() {
+        const mode = getTargetMode();
+        const profile = getTargetProfile(mode);
+        return { mode: mode, profile: profile, cfg: layoutConfig[mode][profile] };
+      }
+
+      function formatValue(value, unit) {
+        return Number(value).toFixed(2).replace(/\.00$/, "") + unit;
+      }
+
+      function refreshRangeLabels() {
+        rangeBindings.forEach(function(binding) {
+          const el = document.getElementById(binding.id);
+          const valueEl = document.getElementById(binding.valueId);
+          if (!el || !valueEl) return;
+          valueEl.textContent = formatValue(el.value, binding.unit);
+        });
+      }
+
+      function hydrateControlsFromTemplate() {
+        const template = getEditableTemplate().cfg;
+        rangeBindings.forEach(function(binding) {
+          const el = document.getElementById(binding.id);
+          if (!el) return;
+          el.value = template[binding.key];
+        });
+
+        const ratioProjectW = document.getElementById("ratioProjectW");
+        const ratioProjectH = document.getElementById("ratioProjectH");
+        const ratioGarageW = document.getElementById("ratioGarageW");
+        const ratioGarageH = document.getElementById("ratioGarageH");
+
+        if (ratioProjectW) ratioProjectW.value = template.projectImageRatioW;
+        if (ratioProjectH) ratioProjectH.value = template.projectImageRatioH;
+        if (ratioGarageW) ratioGarageW.value = template.garageCardRatioW;
+        if (ratioGarageH) ratioGarageH.value = template.garageCardRatioH;
+
+        refreshRangeLabels();
+      }
+
+      function setText(selector, value, all) {
+        const nodes = all ? document.querySelectorAll(selector) : [document.querySelector(selector)];
+        nodes.forEach(function(node) {
+          if (node) node.textContent = value;
+        });
+      }
+
+      function getTargetNode(editKey) {
+        return document.querySelector('[data-edit-key="' + editKey + '"]');
+      }
+
+      function getTextTargetValue(editKey) {
+        const textCfg = textTargetConfig[editKey];
+        if (!textCfg) return "";
+        const node = document.querySelector(textCfg.selector);
+        return node ? node.textContent : "";
+      }
+
+      function getEditableOverrideBucket() {
+        const template = getEditableTemplate();
+        return elementOverrides[template.mode][template.profile];
+      }
+
+      function getDefaultElementOverride() {
+        return {
+          x: 0,
+          y: 0,
+          scale: 1,
+          opacity: 1,
+          widthValue: "",
+          widthUnit: "%",
+          heightValue: "",
+          heightUnit: "px",
+          fontSizeValue: "",
+          fontSizeUnit: "vw",
+          text: ""
+        };
+      }
+
+      function getElementOverride(editKey) {
+        const bucket = getEditableOverrideBucket();
+        if (!bucket[editKey]) {
+          bucket[editKey] = getDefaultElementOverride();
+        }
+        return bucket[editKey];
+      }
+
+      function applyElementOverrides(mode, profile) {
+        const allEditableNodes = document.querySelectorAll(".editable-node");
+        allEditableNodes.forEach(function(node) {
+          node.classList.remove("is-selected-for-edit");
+          node.style.removeProperty("--edit-x");
+          node.style.removeProperty("--edit-y");
+          node.style.removeProperty("--edit-scale");
+          node.style.removeProperty("opacity");
+          node.style.removeProperty("width");
+          node.style.removeProperty("height");
+          node.style.removeProperty("font-size");
+        });
+
+        const bucket = elementOverrides[mode][profile];
+        Object.keys(bucket).forEach(function(key) {
+          const override = bucket[key];
+          const node = getTargetNode(key);
+          if (!node || !override) return;
+
+          node.style.setProperty("--edit-x", (override.x || 0) + "px");
+          node.style.setProperty("--edit-y", (override.y || 0) + "px");
+          node.style.setProperty("--edit-scale", override.scale || 1);
+          node.style.opacity = override.opacity || 1;
+
+          if (override.widthValue !== "") {
+            node.style.width = String(override.widthValue) + (override.widthUnit || "%");
+          }
+
+          if (override.heightValue !== "") {
+            node.style.height = String(override.heightValue) + (override.heightUnit || "px");
+          }
+
+          if (override.fontSizeValue !== "") {
+            node.style.fontSize = String(override.fontSizeValue) + (override.fontSizeUnit || "vw");
+          }
+
+          const textCfg = textTargetConfig[key];
+          if (textCfg && override.text) {
+            setText(textCfg.selector, override.text, textCfg.all);
+          }
+        });
+      }
+
+      function refreshElementEditorLabels() {
+        const xRange = document.getElementById("elementOffsetX");
+        const yRange = document.getElementById("elementOffsetY");
+        const scaleRange = document.getElementById("elementScale");
+        const opacityRange = document.getElementById("elementOpacity");
+        const xValue = document.getElementById("valueElementOffsetX");
+        const yValue = document.getElementById("valueElementOffsetY");
+        const scaleValue = document.getElementById("valueElementScale");
+        const opacityValue = document.getElementById("valueElementOpacity");
+
+        if (xRange && xValue) xValue.textContent = formatValue(xRange.value, "px");
+        if (yRange && yValue) yValue.textContent = formatValue(yRange.value, "px");
+        if (scaleRange && scaleValue) scaleValue.textContent = formatValue(scaleRange.value, "x");
+        if (opacityRange && opacityValue) opacityValue.textContent = formatValue(opacityRange.value, "");
+      }
+
+      function highlightSelectedElement(editKey) {
+        const allEditableNodes = document.querySelectorAll(".editable-node");
+        allEditableNodes.forEach(function(node) {
+          node.classList.remove("is-selected-for-edit");
+        });
+        const node = getTargetNode(editKey);
+        if (node) node.classList.add("is-selected-for-edit");
+      }
+
+      function syncElementEditorFromSelection() {
+        const editKey = document.getElementById("elementTargetSelect").value;
+        const override = getElementOverride(editKey);
+        const textCfg = textTargetConfig[editKey];
+
+        const textInput = document.getElementById("elementTextInput");
+        const xInput = document.getElementById("elementOffsetX");
+        const yInput = document.getElementById("elementOffsetY");
+        const scaleInput = document.getElementById("elementScale");
+        const opacityInput = document.getElementById("elementOpacity");
+        const widthValue = document.getElementById("elementWidthValue");
+        const widthUnit = document.getElementById("elementWidthUnit");
+        const heightValue = document.getElementById("elementHeightValue");
+        const heightUnit = document.getElementById("elementHeightUnit");
+        const fontSizeValue = document.getElementById("elementFontSizeValue");
+        const fontSizeUnit = document.getElementById("elementFontSizeUnit");
+
+        if (textInput) {
+          textInput.disabled = !textCfg;
+          textInput.value = textCfg ? (override.text || getTextTargetValue(editKey)) : "";
+        }
+
+        if (xInput) xInput.value = override.x || 0;
+        if (yInput) yInput.value = override.y || 0;
+        if (scaleInput) scaleInput.value = override.scale || 1;
+        if (opacityInput) opacityInput.value = override.opacity || 1;
+        if (widthValue) widthValue.value = override.widthValue;
+        if (widthUnit) widthUnit.value = override.widthUnit || "%";
+        if (heightValue) heightValue.value = override.heightValue;
+        if (heightUnit) heightUnit.value = override.heightUnit || "px";
+        if (fontSizeValue) fontSizeValue.value = override.fontSizeValue;
+        if (fontSizeUnit) fontSizeUnit.value = override.fontSizeUnit || "vw";
+
+        refreshElementEditorLabels();
+        highlightSelectedElement(editKey);
+      }
+
+      function makePanelDraggable(panel, handle) {
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
+        let originX = 0;
+        let originY = 0;
+
+        function clamp(value, min, max) {
+          return Math.max(min, Math.min(max, value));
+        }
+
+        function startDrag(clientX, clientY) {
+          const rect = panel.getBoundingClientRect();
+          panel.style.left = rect.left + "px";
+          panel.style.top = rect.top + "px";
+          panel.style.right = "auto";
+
+          startX = clientX;
+          startY = clientY;
+          originX = rect.left;
+          originY = rect.top;
+          isDragging = true;
+        }
+
+        function moveDrag(clientX, clientY) {
+          if (!isDragging) return;
+          const deltaX = clientX - startX;
+          const deltaY = clientY - startY;
+
+          const maxX = window.innerWidth - panel.offsetWidth;
+          const maxY = window.innerHeight - panel.offsetHeight;
+
+          panel.style.left = clamp(originX + deltaX, 0, Math.max(0, maxX)) + "px";
+          panel.style.top = clamp(originY + deltaY, 0, Math.max(0, maxY)) + "px";
+        }
+
+        function endDrag() {
+          isDragging = false;
+        }
+
+        handle.addEventListener("mousedown", function(event) {
+          if (event.target.closest("button, input, select, textarea")) return;
+          startDrag(event.clientX, event.clientY);
+          event.preventDefault();
+        });
+
+        document.addEventListener("mousemove", function(event) {
+          moveDrag(event.clientX, event.clientY);
+        });
+
+        document.addEventListener("mouseup", endDrag);
+
+        handle.addEventListener("touchstart", function(event) {
+          if (event.target.closest("button, input, select, textarea")) return;
+          if (!event.touches[0]) return;
+          startDrag(event.touches[0].clientX, event.touches[0].clientY);
+        }, { passive: true });
+
+        document.addEventListener("touchmove", function(event) {
+          if (!event.touches[0]) return;
+          moveDrag(event.touches[0].clientX, event.touches[0].clientY);
+        }, { passive: true });
+
+        document.addEventListener("touchend", endDrag, { passive: true });
+      }
+
+      function queueAspectRefresh() {
+        rootEl.classList.add("aspect-resizing");
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+          applyLayout();
+          syncElementEditorFromSelection();
+          if (typeof ScrollTrigger !== "undefined") {
+            ScrollTrigger.refresh(true);
+          }
+          rootEl.classList.remove("aspect-resizing");
+        }, 250);
+      }
+
+      function bindControlPanel() {
+        const panel = document.getElementById("layoutControlBar");
+        const panelHead = panel ? panel.querySelector(".layout-control-head") : null;
+        const toggleBtn = document.getElementById("layoutPanelToggle");
+        const modeSelect = document.getElementById("controlMode");
+        const profileSelect = document.getElementById("controlProfile");
+
+        if (!panel || !toggleBtn || !modeSelect || !profileSelect) return;
+
+        if (panelHead) {
+          makePanelDraggable(panel, panelHead);
+        }
+
+        toggleBtn.addEventListener("click", function() {
+          panel.classList.toggle("is-collapsed");
+          toggleBtn.textContent = panel.classList.contains("is-collapsed") ? "Expand" : "Collapse";
+        });
+
+        modeSelect.addEventListener("change", function() {
+          controlState.mode = modeSelect.value;
+          hydrateControlsFromTemplate();
+          syncElementEditorFromSelection();
+        });
+
+        profileSelect.addEventListener("change", function() {
+          controlState.profile = profileSelect.value;
+          hydrateControlsFromTemplate();
+          syncElementEditorFromSelection();
+        });
+
+        rangeBindings.forEach(function(binding) {
+          const el = document.getElementById(binding.id);
+          if (!el) return;
+          el.addEventListener("input", function() {
+            const editable = getEditableTemplate();
+            editable.cfg[binding.key] = parseFloat(el.value);
+            refreshRangeLabels();
+            applyLayout();
+            syncElementEditorFromSelection();
+            if (typeof ScrollTrigger !== "undefined") {
+              ScrollTrigger.refresh(true);
+            }
+          });
+        });
+
+        ["ratioProjectW", "ratioProjectH", "ratioGarageW", "ratioGarageH"].forEach(function(id) {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.addEventListener("input", function() {
+            const editable = getEditableTemplate();
+            editable.cfg.projectImageRatioW = parseFloat(document.getElementById("ratioProjectW").value);
+            editable.cfg.projectImageRatioH = parseFloat(document.getElementById("ratioProjectH").value);
+            editable.cfg.garageCardRatioW = parseFloat(document.getElementById("ratioGarageW").value);
+            editable.cfg.garageCardRatioH = parseFloat(document.getElementById("ratioGarageH").value);
+            applyLayout();
+            syncElementEditorFromSelection();
+            if (typeof ScrollTrigger !== "undefined") {
+              ScrollTrigger.refresh(true);
+            }
+          });
+        });
+
+        const textBindings = [
+          { id: "ctlNavLogoText", selector: "#ctlNavLogo", all: false },
+          { id: "ctlNavLink1", selector: '[data-nav-link="1"]', all: false },
+          { id: "ctlNavLink2", selector: '[data-nav-link="2"]', all: false },
+          { id: "ctlNavLink3", selector: '[data-nav-link="3"]', all: false },
+          { id: "ctlNavLink4", selector: '[data-nav-link="4"]', all: false },
+          { id: "ctlHeroWord", selector: ".hero-word", all: true },
+          { id: "ctlGarageHeading", selector: "#garageHeadingText", all: false },
+          { id: "ctlProject1Title", selector: ".project-title-1", all: false },
+          { id: "ctlProject2Title", selector: ".project-title-2", all: false }
+        ];
+
+        textBindings.forEach(function(binding) {
+          const el = document.getElementById(binding.id);
+          if (!el) return;
+          el.addEventListener("input", function() {
+            setText(binding.selector, el.value, binding.all);
+          });
+        });
+
+        const elementTargetSelect = document.getElementById("elementTargetSelect");
+        const elementTextInput = document.getElementById("elementTextInput");
+        const elementOffsetX = document.getElementById("elementOffsetX");
+        const elementOffsetY = document.getElementById("elementOffsetY");
+        const elementScale = document.getElementById("elementScale");
+        const elementOpacity = document.getElementById("elementOpacity");
+        const elementWidthValue = document.getElementById("elementWidthValue");
+        const elementWidthUnit = document.getElementById("elementWidthUnit");
+        const elementHeightValue = document.getElementById("elementHeightValue");
+        const elementHeightUnit = document.getElementById("elementHeightUnit");
+        const elementFontSizeValue = document.getElementById("elementFontSizeValue");
+        const elementFontSizeUnit = document.getElementById("elementFontSizeUnit");
+        const elementClearSizing = document.getElementById("elementClearSizing");
+        const elementResetAll = document.getElementById("elementResetAll");
+
+        function applyEditorChange(updateFn) {
+          const targetKey = elementTargetSelect.value;
+          const override = getElementOverride(targetKey);
+          updateFn(override, targetKey);
+          applyLayout();
+          syncElementEditorFromSelection();
+          if (typeof ScrollTrigger !== "undefined") {
+            ScrollTrigger.refresh(true);
+          }
+        }
+
+        elementTargetSelect.addEventListener("change", syncElementEditorFromSelection);
+
+        elementTextInput.addEventListener("input", function() {
+          applyEditorChange(function(override, targetKey) {
+            const textCfg = textTargetConfig[targetKey];
+            if (!textCfg) return;
+            override.text = elementTextInput.value;
+            setText(textCfg.selector, override.text, textCfg.all);
+          });
+        });
+
+        elementOffsetX.addEventListener("input", function() {
+          applyEditorChange(function(override) {
+            override.x = parseFloat(elementOffsetX.value);
+          });
+        });
+
+        elementOffsetY.addEventListener("input", function() {
+          applyEditorChange(function(override) {
+            override.y = parseFloat(elementOffsetY.value);
+          });
+        });
+
+        elementScale.addEventListener("input", function() {
+          applyEditorChange(function(override) {
+            override.scale = parseFloat(elementScale.value);
+          });
+        });
+
+        elementOpacity.addEventListener("input", function() {
+          applyEditorChange(function(override) {
+            override.opacity = parseFloat(elementOpacity.value);
+          });
+        });
+
+        elementWidthValue.addEventListener("input", function() {
+          applyEditorChange(function(override) {
+            override.widthValue = elementWidthValue.value;
+          });
+        });
+
+        elementWidthUnit.addEventListener("change", function() {
+          applyEditorChange(function(override) {
+            override.widthUnit = elementWidthUnit.value;
+          });
+        });
+
+        elementHeightValue.addEventListener("input", function() {
+          applyEditorChange(function(override) {
+            override.heightValue = elementHeightValue.value;
+          });
+        });
+
+        elementHeightUnit.addEventListener("change", function() {
+          applyEditorChange(function(override) {
+            override.heightUnit = elementHeightUnit.value;
+          });
+        });
+
+        elementFontSizeValue.addEventListener("input", function() {
+          applyEditorChange(function(override) {
+            override.fontSizeValue = elementFontSizeValue.value;
+          });
+        });
+
+        elementFontSizeUnit.addEventListener("change", function() {
+          applyEditorChange(function(override) {
+            override.fontSizeUnit = elementFontSizeUnit.value;
+          });
+        });
+
+        elementClearSizing.addEventListener("click", function() {
+          applyEditorChange(function(override) {
+            override.widthValue = "";
+            override.heightValue = "";
+            override.fontSizeValue = "";
+          });
+        });
+
+        elementResetAll.addEventListener("click", function() {
+          const targetKey = elementTargetSelect.value;
+          const bucket = getEditableOverrideBucket();
+          delete bucket[targetKey];
+          applyLayout();
+          syncElementEditorFromSelection();
+          if (typeof ScrollTrigger !== "undefined") {
+            ScrollTrigger.refresh(true);
+          }
+        });
+
+        hydrateControlsFromTemplate();
+        syncElementEditorFromSelection();
+      }
+
+      bindControlPanel();
+      applyLayout();
+
+      // Double check that GSAP is available before running
+      if (typeof gsap !== 'undefined') {
+        gsap.registerPlugin(ScrollTrigger);
+
+        ScrollTrigger.config({
+          ignoreMobileResize: true,
+          autoRefreshEvents: "visibilitychange,DOMContentLoaded,load"
+        });
+
+        window.addEventListener("resize", queueAspectRefresh, { passive: true });
+
+        // 1. Image Reveal Animation on Scroll
+        const projectRows = gsap.utils.toArray('.project-row');
+
+        projectRows.forEach((row) => {
+          const img = row.querySelector('img');
+
+          gsap.fromTo(img,
+            {
+              y: 80,
+              scale: 1.15
+            },
+            {
+              scrollTrigger: {
+                trigger: row,
+                start: "top 90%",
+                end: "top 30%",
+                scrub: 1,
+                invalidateOnRefresh: true
+              },
+              y: 0,
+              scale: 1,
+              ease: "power2.out"
+            }
+          );
+        });
+
+        // 2. Garage Grid Fade-In Animation
+        gsap.from(".garage-card", {
+          scrollTrigger: {
+            trigger: ".garage-section",
+            start: "top 80%",
+          },
+          y: 60,
+          opacity: 0,
+          duration: 0.8,
+          stagger: 0.15,
+          ease: "power3.out"
+        });
+
+      } else {
+        window.addEventListener("resize", queueAspectRefresh, { passive: true });
+        console.error("GSAP failed to load. Please check your internet connection or CDN links.");
+      }
+    };
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>We Help Artists Grow</title>
+    <style>
+        :root {
+            /* Precise brand colors from image_ab54d8.png */
+            --color-black: #111111;
+            --color-black-light: #2A2925;
+            --color-white: #FFFFFF;
+            --color-brand-1: #FF55F8;  /* Pink */
+            --color-brand-11: #bdf740; /* Lime green background */
+            
+            /* Typography from image_ab54d8.png */
+            --font-family-gellix: 'Gellix', sans-serif;
+            --font-family-sans: var(--font-family-gellix);
+            
+            /* Scaling base from image_ab5460.png */
+            --fz: 1.6667rem; 
+        }
+
+        @font-face {
+            font-family: 'Gellix';
+            src: url('./gellix/Gellix-Regular.woff2') format('woff2');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--color-brand-11);
+            color: var(--color-black);
+            font-family: var(--font-family-sans);
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* --- UI Elements --- */
+        .menu-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: var(--color-white);
+            border: 1px solid var(--color-black);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        .menu-btn span {
+            display: block;
+            width: 30px;
+            height: 2px;
+            background: var(--color-black);
+        }
+
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            background: var(--color-white);
+            border-top: 1px solid var(--color-black);
+            border-right: 1px solid var(--color-black);
+            display: flex;
+            align-items: stretch;
+            z-index: 1000;
+            height: 60px;
+        }
+        .bb-item {
+            border-right: 1px solid var(--color-black);
+            padding: 0 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .bb-item:last-child { border-right: none; }
+        .bb-logo {
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: -0.02em;
+        }
+        .bb-circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid var(--color-black);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            line-height: 1.1;
+        }
+        .bb-circle hr {
+            width: 100%;
+            border: none;
+            border-top: 1px solid var(--color-black);
+            margin: 1px 0;
+        }
+        .btn-login {
+            border: 1px solid var(--color-black);
+            border-radius: 30px;
+            padding: 6px 20px;
+            text-decoration: none;
+            color: var(--color-black);
+            font-size: 0.9rem;
+        }
+        .btn-create {
+            background: var(--color-brand-1);
+            border: none;
+            padding: 8px 18px;
+            color: var(--color-black);
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-decoration: none;
+            position: relative;
+            z-index: 2;
+        }
+        .btn-create::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border: 2px dotted var(--color-black);
+            transform: translate(5px, 5px);
+            z-index: -1;
+        }
+
+        /* --- Sticky Track --- */
+        .s-education-home {
+            position: relative;
+            height: 450vh;
+            overflow: visible; 
+            z-index: 10;
+        }
+
+        .sticky-wrapper {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: visible;
+        }
+
+        .parallax-text-group {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            will-change: transform;
+        }
+
+        .center-line {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 1px;
+            height: 1px;
+        }
+        .center-line::before, .center-line::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            width: 1px;
+            height: 200vh;
+            background: var(--color-black);
+        }
+        .center-line::before { bottom: 180px; }
+        .center-line::after { top: 200px; }
+
+        .s__content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            max-width: 650px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .s_suptitle {
+            display: inline-block;
+            border: 1px solid var(--color-black);
+            border-radius: 50px;
+            padding: 6px 24px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 25px;
+            background: var(--color-white);
+        }
+
+        .s_title {
+            font-size: clamp(3.5rem, 8vw, 7.5rem);
+            line-height: 0.85;
+            font-weight: 600;
+            letter-spacing: -0.05em;
+            margin-bottom: 30px;
+        }
+
+        .s__text {
+            font-size: 1.2rem;
+            line-height: 1.35;
+            max-width: 520px;
+        }
+
+        /* --- EXACT CARD SIZES from image_ab5460.png & image_ab5497.png --- */
+        .sb-course {
+            position: absolute;
+            --width: 7.1332em;
+            --height: 4.6em;
+            width: var(--width);
+            height: var(--height);
+            background: var(--color-brand-11);
+            border: 1px solid var(--color-black);
+            padding: .5em .35em;
+            font-size: var(--fz);
+            font-weight: 600;
+            letter-spacing: -0.04em;
+            line-height: .9;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            list-style: none;
+            white-space: normal;
+            text-align: center;
+            will-change: transform;
+        }
+
+        .sb-course--title {
+            --width: 4.2798em;
+            --height: 2.76em;
+            z-index: 3;
+            background: var(--color-black);
+            color: var(--color-brand-11);
+            font-size: calc(var(--fz) * 1.6667);
+            line-height: .8;
+            padding-bottom: .3em;
+            border: none;
+        }
+
+        /* Responsive fz scaling from reference image */
+        @media only screen and (max-width: 1536px) {
+            :root { --fz: 1.3333rem; }
+        }
+        @media only screen and (max-width: 1280px) {
+            :root { --fz: 1.111rem; }
+        }
+        @media (max-width: 768px) {
+            .bottom-bar { display: none; }
+        }
+
+        .s__courses {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .s_courses_list { position: relative; width: 100%; height: 100%; }
+
+        .section-spacer {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            position: relative;
+            z-index: 5;
+        }
+    </style>
+</head>
+<body>
+
+    <button class="menu-btn" aria-label="Menu">
+        <span></span>
+        <span></span>
+    </button>
+
+    <div class="bottom-bar">
+        <div class="bb-item" style="padding: 0 15px;">
+            <div class="bb-circle"><span>24</span><hr><span>7</span></div>
+        </div>
+        <div class="bb-item bb-logo">24/7Artists</div>
+        <div class="bb-item"><a href="#" class="btn-login">Login</a></div>
+        <div class="bb-item">
+            <div class="btn-create-wrapper"><a href="#" class="btn-create">Create Account</a></div>
+        </div>
+    </div>
+
+    <div class="section-spacer" style="background: var(--color-white); color: var(--color-black);">
+        <h2>Scroll Down</h2>
+    </div>
+
+    <div class="s-education-home" id="education">
+        <div class="sticky-wrapper">
+            
+            <div class="parallax-text-group js-spring-group">
+                <div class="center-line"></div>
+                <div class="s__content">
+                    <div class="s_suptitle">Education</div>
+                    <h1 class="s_title">We help<br>artists grow</h1>
+                    <p class="s__text">
+                        Access expert-led <a href="#" style="color: inherit; text-decoration: underline; text-decoration-style: dotted;">online courses</a>, live webinars, and mentorship programs designed to sharpen your skills.
+                    </p>
+                </div>
+            </div>
+
+            <div class="s__courses">
+                <ul class="s_courses_list" id="coursesList"></ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-spacer" style="background: var(--color-black); color: var(--color-brand-11);">
+        <h2>Keep Exploring</h2>
+    </div>
+
+    <script>
+        const cardsData = [
+            { text: "Intro to Artist Management", top: "10%", left: "8%", rot: "-25deg", speedY: 0.45 },
+            { text: "5 Tips Artists Going On Tour", top: "4%", left: "20%", rot: "-12deg", speedY: 0.15 },
+            { text: "The art of Vision Boarding", top: "18%", left: "26%", rot: "-6deg", speedY: 0.55 },
+            { text: "Marketing for Artists", top: "22%", left: "72%", rot: "5deg", speedY: 0.25 },
+            { text: "Starting an indie record label", top: "35%", left: "80%", rot: "125deg", speedY: 0.65 },
+            { text: "One Year Music Plan", top: "48%", left: "6%", rot: "-20deg", speedY: 0.35 },
+            { text: "Music Promotion", top: "48%", left: "18%", rot: "-12deg", speedY: 0.5 },
+            { text: "How to Manage Yourself", top: "68%", left: "16%", rot: "35deg", speedY: 0.2 },
+            { text: "Copyright and IP", top: "78%", left: "2%", rot: "-30deg", speedY: 0.6 },
+            { text: "Music Business Intro", top: "58%", left: "68%", rot: "-12deg", speedY: 0.1 },
+            { text: "Tour Management", top: "50%", left: "86%", rot: "-18deg", speedY: 0.4 },
+            { text: "Music Publishing", top: "82%", left: "60%", rot: "-55deg", speedY: 0.3 },
+            { text: "Artist Career Path", top: "90%", left: "66%", rot: "-45deg", speedY: 0.5 },
+            { text: "Building a team", top: "88%", left: "76%", rot: "25deg", speedY: 0.25 },
+            { text: "Brand Identity", top: "28%", left: "30%", rot: "4deg", zIndex: 1, speedY: 0.35 }, 
+            { text: "20+<br>Courses", top: "12%", left: "58%", rot: "25deg", isTitle: true, speedY: 0.15 }
+        ];
+
+        const listContainer = document.getElementById('coursesList');
+        const parallaxElements = []; 
+
+        cardsData.forEach(card => {
+            const li = document.createElement('li');
+            li.className = card.isTitle ? 'sb-course sb-course--title' : 'sb-course';
+            li.style.top = card.top;
+            li.style.left = card.left;
+            if (card.zIndex) li.style.zIndex = card.zIndex;
+            li.innerHTML = `<span>${card.text}</span>`;
+            listContainer.appendChild(li);
+
+            const rand = Math.random();
+            let floatSpeed = rand < 0.3 ? 0.015 + Math.random() * 0.02 : (rand < 0.8 ? 0.04 + Math.random() * 0.04 : 0.12 + Math.random() * 0.15);
+
+            parallaxElements.push({
+                element: li,
+                rot: parseFloat(card.rot) || 0,
+                currentRot: parseFloat(card.rot) || 0, 
+                baseRotSpeed: (Math.random() > 0.5 ? 1 : -1) * (0.75 - card.speedY) * 0.07, 
+                speedY: card.speedY,
+                topPercent: parseFloat(card.top),
+                floatSpeed: floatSpeed, 
+                ambientDistance: 0
+            });
+        });
+
+        let targetScrollY = window.scrollY;
+        let springY = window.scrollY; 
+        let springVelocity = 0;
+        const stiffness = 0.06, damping = 0.58, lagIntensity = 0.35;
+        let smoothedLag = 0;
+
+        const springGroup = document.querySelector('.js-spring-group');
+        const educationSection = document.getElementById('education');
+
+        window.addEventListener('scroll', () => { targetScrollY = window.scrollY; }, { passive: true });
+
+        let lastTime = null, lastScrollDirection = 1;
+
+        function animate(time) {
+            if (!lastTime) lastTime = time;
+            const deltaTime = time - lastTime;
+            lastTime = time;
+
+            const displacement = targetScrollY - springY;
+            const springForce = displacement * stiffness;
+            const prevSpringY = springY;
+            springVelocity = (springVelocity + springForce) * damping;
+            springY += springVelocity;
+
+            if (Math.abs(springY - prevSpringY) > 0.1) lastScrollDirection = Math.sign(springY - prevSpringY);
+
+            const rawLag = targetScrollY - springY;
+            smoothedLag += (rawLag - smoothedLag) * 0.15; 
+
+            if (springGroup) {
+                const offsetY = -(smoothedLag * lagIntensity);
+                springGroup.style.transform = `translate3d(0, ${offsetY}px, 0)`;
+            }
+
+            const H = window.innerHeight;
+            const minY = -500, maxY = H + 500, wrapRange = maxY - minY;
+            const relativeSpringY = springY - educationSection.offsetTop;
+
+            parallaxElements.forEach(item => {
+                item.ambientDistance += item.floatSpeed * deltaTime * lastScrollDirection;
+                const startY = (item.topPercent / 100) * H;
+                const distanceMoved = (relativeSpringY * item.speedY * 2.5) + item.ambientDistance;
+                const absY = startY - distanceMoved;
+                const wrappedAbsY = ((absY - minY) % wrapRange + wrapRange) % wrapRange + minY;
+                const translateY = wrappedAbsY - startY;
+
+                item.currentRot += (item.baseRotSpeed * lastScrollDirection) * deltaTime;
+                item.element.style.transform = `translate3d(0, ${translateY}px, 0) rotate(${item.currentRot}deg)`;
+            });
+
+            requestAnimationFrame(animate);
+        }
+        requestAnimationFrame(animate);
+    </script>
+</body>
+</html>
