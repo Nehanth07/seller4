@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opening Animation</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        /* Reset & Setup */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: sans-serif;
+        }
+
+        /* Mock Content to Reveal */
+        .js-site-wrapper {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #fff;
+        }
+
+        .js-mount {
+            opacity: 0; /* Hidden initially per logic */
+            text-align: center;
+        }
+
+        h1 { font-size: 2rem; color: #333; margin-bottom: 1rem; }
+        p { color: #666; }
+
+        /* Converted SCSS to CSS 
+           Primary Color: #F40C3F
+           Secondary Color: #FFFFFF (Assumed for contrast)
+        */
+        
+        .site-intro {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 50;
+            width: 100%;
+            height: 100%;
+            background: #F40C3F; /* color(primary) */
+        }
+
+        .site-intro .sb-logo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 3rem;
+            height: 3rem;
+            transform: translate3d(-50%, -50%, 0);
+        }
+
+        @media (max-width: 768px) { /* mq(phone) */
+            .site-intro .sb-logo {
+                width: 1.875rem;
+                height: 1.875rem;
+            }
+        }
+
+        .site-intro .sb-logo .sb__path {
+            position: absolute;
+            background: #FFFFFF; /* color(secondary) */
+        }
+
+        /* Vertical Paths */
+        .site-intro .sb-logo .sb__path--v {
+            top: 0;
+            width: 14.2857%;
+            height: 100%;
+            transform-origin: 50% 100%;
+        }
+
+        .site-intro .sb-logo .sb__path--v-1 { left: 0; }
+        .site-intro .sb-logo .sb__path--v-2 { left: 21.3214%; }
+        .site-intro .sb-logo .sb__path--v-3 { left: 43.2143%; }
+        .site-intro .sb-logo .sb__path--v-4 { left: 64.7857%; }
+        .site-intro .sb-logo .sb__path--v-5 { right: 0; }
+
+        /* Horizontal Paths */
+        .site-intro .sb-logo .sb__path--h {
+            width: 7.5%;
+            height: 6%;
+        }
+
+        .site-intro .sb-logo .sb__path--h-1 {
+            top: 0;
+            left: 14.2857%;
+            transform-origin: 100% 0;
+        }
+
+        .site-intro .sb-logo .sb__path--h-2 {
+            left: 57.5%;
+            bottom: 0;
+            transform-origin: 0 0;
+        }
+
+        .site-intro .sb-logo .sb__path--h-3 {
+            right: 14.2857%;
+            bottom: 0;
+            transform-origin: 0% 0;
+        }
+
+        /* Borders */
+        .site-intro__border {
+            --width: 1rem;
+            position: absolute;
+            background: #FFFFFF; /* color(secondary) */
+        }
+
+        @media (max-width: 768px) {
+            .site-intro__border {
+                --width: 0.5rem;
+            }
+        }
+
+        .site-intro__border--top {
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: var(--width);
+            transform-origin: 50% 0;
+        }
+
+        .site-intro__border--left,
+        .site-intro__border--right {
+            top: 0;
+            left: 0;
+            width: var(--width);
+            height: 100%;
+        }
+
+        .site-intro__border--left {
+            transform-origin: 0 50%;
+        }
+
+        .site-intro__border--right {
+            left: auto;
+            right: 0;
+            transform-origin: 100% 50%;
+        }
+
+        /* Helper for scroll blocking removal */
+        .is-scroll-blocked {
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Main Content Wrapper (js-site-wrapper) -->
+    <div class="js-site-wrapper">
+        <div class="js-mount">
+            <h1>Content Loaded</h1>
+            <p>The intro animation is complete.</p>
+        </div>
+    </div>
+
+    <!-- Intro Component (js-intro) -->
+    <div class="site-intro js-intro" style="opacity: 1; position: fixed; top: 0; left: 0; z-index: 50; width: 100%; height: 100%; background: #F40C3F;">
+        <div class="sb-logo js-logo">
+            <div class="sb__path sb__path--v sb__path--v-1 js-logo-line-v"></div>
+            <div class="sb__path sb__path--h sb__path--h-1 js-logo-line-h"></div>
+            <div class="sb__path sb__path--v sb__path--v-2 js-logo-line-v"></div>
+            <div class="sb__path sb__path--v sb__path--v-3 js-logo-line-v"></div>
+            <div class="sb__path sb__path--h sb__path--h-2 js-logo-line-h"></div>
+            <div class="sb__path sb__path--v sb__path--v-4 js-logo-line-v"></div>
+            <div class="sb__path sb__path--h sb__path--h-3 js-logo-line-h"></div>
+            <div class="sb__path sb__path--v sb__path--v-5 js-logo-line-v"></div>
+        </div>
+        
+        <div class="site-intro__border site-intro__border--top js-border-top"></div>
+        <div class="site-intro__border site-intro__border--left js-border-left"></div>
+        <div class="site-intro__border site-intro__border--right js-border-right"></div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            intro();
+        });
+
+        function intro() {
+            // Selectors
+            const wrapper = document.querySelector('.js-site-wrapper');
+            const intro = document.querySelector('.js-intro');
+            const mount = document.querySelector('.js-mount');
+            const logoLinesV = intro.querySelectorAll('.js-logo-line-v');
+            const logoLinesH = intro.querySelectorAll('.js-logo-line-h');
+            const borderTop = intro.querySelector('.js-border-top');
+            const borderLeft = intro.querySelector('.js-border-left');
+            const borderRight = intro.querySelector('.js-border-right');
+
+            // Timeline
+            const tl = gsap.timeline();
+
+            tl.set(wrapper, {
+                opacity: '',
+            });
+
+            tl.set(intro, {
+                background: 'transparent',
+            });
+
+            // Animate Vertical Lines Up
+            tl.fromTo(
+                logoLinesV,
+                { scaleY: 0 },
+                {
+                    scaleY: 1,
+                    duration: 1,
+                    ease: 'power4.inOut',
+                    stagger: 0.15,
+                },
+                0,
+            );
+
+            // Animate Horizontal Lines Out
+            tl.fromTo(
+                logoLinesH,
+                { scaleX: 0 },
+                {
+                    scaleX: 1,
+                    duration: 0.4,
+                    ease: 'power4.inOut',
+                    stagger: 0,
+                },
+                1,
+            );
+
+            tl.set(logoLinesV, {
+                transformOrigin: '50% 0',
+            });
+
+            // Animate Vertical Lines Down (Disappear)
+            tl.fromTo(
+                logoLinesV,
+                { scaleY: 1 },
+                {
+                    scaleY: 0,
+                    duration: 1,
+                    ease: 'power4.in',
+                    immediateRender: false,
+                    stagger: 0.1,
+                },
+                2,
+            );
+
+            // Animate Horizontal Lines Down (Disappear)
+            tl.fromTo(
+                logoLinesH,
+                { scaleY: 1 },
+                {
+                    scaleY: 0,
+                    duration: 0.5,
+                    ease: 'power4.in',
+                    immediateRender: false,
+                    stagger: 0.1,
+                },
+                2.1,
+            );
+
+            // Animate Borders
+            tl.from(
+                borderTop,
+                {
+                    scaleY: 0,
+                    duration: 3,
+                    ease: 'power3.inOut',
+                },
+                1,
+            );
+
+            tl.from(
+                [borderLeft, borderRight],
+                {
+                    scaleX: 0,
+                    duration: 3,
+                    ease: 'power3.inOut',
+                },
+                1,
+            );
+
+            // Dispatch Custom Event
+            tl.call(
+                () => {
+                    console.log('Event: intro dispatched');
+                    document.dispatchEvent(new CustomEvent('intro'));
+                },
+                null,
+                '-=1.85',
+            );
+
+            // Cleanup & Reveal Content
+            tl.call(
+                () => {
+                    mount.style.opacity = '1';
+                    if (intro) intro.remove();
+
+                    document.documentElement.classList.remove('is-scroll-blocked');
+
+                    // Mocking Ticker.nextTick & Emitter
+                    requestAnimationFrame(() => {
+                        console.log('Emitter: updateViewport');
+                    });
+                },
+                null,
+                5,
+            );
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drive Capital - Mimic</title>
+  <style>
+    :root {
+      --bg: #0d0d10;
+      --panel: #111217;
+      --text: #f3f4f6;
+      --muted: #a4a8b3;
+      --line: #2a2f3a;
+      --accent: #88b1ff;
+      --max: 1280px;
+      --g: clamp(16px, 2vw, 28px);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at 20% 0%, #171d28 0, var(--bg) 40%);
+      color: var(--text);
+      font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    a { color: inherit; }
+
+    .page {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 24px var(--g) 80px;
+    }
+
+    .label {
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0 0 12px;
+    }
+
+    .hero-title {
+      margin: 0;
+      font-size: clamp(44px, 9vw, 108px);
+      line-height: 0.92;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .hero-media {
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--g);
+    }
+
+    .frame {
+      position: relative;
+      overflow: hidden;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #161922;
+      min-height: 260px;
+    }
+
+    .frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .marquee {
+      margin: 18px 0 4px;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .marquee-track {
+      display: inline-block;
+      padding: 12px 0;
+      animation: slide 40s linear infinite;
+      text-transform: uppercase;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      color: #c9cfdb;
+    }
+
+    .marquee-track span { margin-right: 28px; }
+
+    @keyframes slide {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    .section {
+      margin-top: clamp(56px, 9vw, 120px);
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: var(--g);
+      align-items: start;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 52px);
+      text-transform: uppercase;
+      line-height: 0.95;
+    }
+
+    .section-head p {
+      margin: 0;
+      color: #ced2da;
+      line-height: 1.6;
+      font-size: clamp(15px, 1.4vw, 20px);
+    }
+
+    .story-grid {
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--g);
+    }
+
+    .city-list {
+      margin: 20px 0 0;
+      padding: 0;
+      list-style: none;
+      border-top: 1px solid var(--line);
+    }
+
+    .city-list li {
+      border-bottom: 1px solid var(--line);
+      padding: 12px 0;
+    }
+
+    .city-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: baseline;
+      text-transform: uppercase;
+    }
+
+    .city {
+      font-size: clamp(20px, 3.4vw, 38px);
+      line-height: 1;
+    }
+
+    .airport {
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      font-size: 13px;
+    }
+
+    .jobs {
+      margin-top: 8px;
+      color: #b8becc;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .split {
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--g);
+    }
+
+    .stats {
+      margin-top: 24px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .stats .marquee { margin: 0; }
+
+    .portfolio-box {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--g);
+      align-items: center;
+    }
+
+    .portfolio-box h3 {
+      margin: 0;
+      font-size: clamp(28px, 3.8vw, 54px);
+      text-transform: uppercase;
+    }
+
+    .portfolio-box p {
+      margin: 0;
+      color: #c7ccd8;
+      line-height: 1.6;
+    }
+
+    .cta {
+      margin-top: 16px;
+      display: inline-block;
+      text-transform: uppercase;
+      letter-spacing: 0.11em;
+      font-size: 12px;
+      padding: 12px 18px;
+      border: 1px solid #39445a;
+      border-radius: 999px;
+      text-decoration: none;
+      transition: background-color .2s ease, transform .2s ease;
+    }
+
+    .cta:hover {
+      background: #1b2333;
+      transform: translateY(-1px);
+    }
+
+    .foot-pair {
+      margin-top: 26px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--g);
+    }
+
+    @media (max-width: 920px) {
+      .hero-media,
+      .section-head,
+      .story-grid,
+      .split,
+      .portfolio-box,
+      .foot-pair {
+        grid-template-columns: 1fr;
+      }
+
+      .frame { min-height: 220px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section>
+      <p class="label">Drive Capital</p>
+      <h1 class="hero-title">Greatness Is In<br>Our Backyard</h1>
+
+      <div class="marquee" aria-label="hero marquee">
+        <div class="marquee-track">
+          <span>ATL - Capital that comes to you</span><span>AUS - True partners</span><span>BNA - Idea to IPO</span><span>CMH - True partners</span><span>DEN - Idea to IPO</span><span>PGH - Idea to IPO</span><span>YYZ - True partners</span>
+          <span>ATL - Capital that comes to you</span><span>AUS - True partners</span><span>BNA - Idea to IPO</span><span>CMH - True partners</span><span>DEN - Idea to IPO</span><span>PGH - Idea to IPO</span><span>YYZ - True partners</span>
+        </div>
+      </div>
+
+      <div class="hero-media">
+        <figure class="frame"><img src="https://images.ctfassets.net/mq81gy7w2znw/OzmbaMQxbXLOKSCxbZW8b/e2a38b6cb733d52f5b448bf5d9da8114/Drive_Home_01a.jpg" alt="Hero visual 1"></figure>
+        <figure class="frame"><img src="https://images.ctfassets.net/mq81gy7w2znw/1udJ21L5uojfgP7FrjiHhg/182b4e9b39aac56190a913c2db525c06/Drive_Home_01b.jpg" alt="Hero visual 2"></figure>
+        <figure class="frame"><img src="https://images.ctfassets.net/mq81gy7w2znw/25PHglmr0IVxPGVKjSJEIG/5e198097752b64eb38b80a5b57cd76b9/Drive_Home_01c.jpg" alt="Hero visual 3"></figure>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>Our Story</h2>
+        <p>Today, technology cuts horizontally through every business and industry. There are more billion-dollar opportunities east of the Rockies and west of the Hudson River than everywhere else in North America combined.</p>
+      </div>
+
+      <div class="story-grid">
+        <figure class="frame"><img src="https://images.ctfassets.net/mq81gy7w2znw/3xaXCtWNiLnHrxHFgNtfqg/fd4f59520c20def26b14902f0e677cda/Drive_Home_02a.jpg" alt="Story image top"></figure>
+        <figure class="frame"><img src="https://images.ctfassets.net/mq81gy7w2znw/1s2VXpSZ3kFbq4F9h9wRg0/5e300eea8761d8e892f2e0c4603ca31e/Drive_Home_02b.jpg" alt="Story image bottom"></figure>
+      </div>
+
+      <ul class="city-list">
+        <li><div class="city-row"><strong class="city">Atlanta</strong><span class="airport">ATL</span></div><p class="jobs">Greenlight, Scout</p></li>
+        <li><div class="city-row"><strong class="city">Austin</strong><span class="airport">AUS</span></div><p class="jobs">Molecula, Telnyx</p></li>
+        <li><div class="city-row"><strong class="city">Chicago</strong><span class="airport">ORD</span></div><p class="jobs">Channel IQ, Fast Radius, Cofactor AI, Hallow</p></li>
+        <li><div class="city-row"><strong class="city">Columbus</strong><span class="airport">CMH</span></div><p class="jobs">Forge Biologics, Path Robotics, Beam Benefits, Tandem</p></li>
+        <li><div class="city-row"><strong class="city">Pittsburgh</strong><span class="airport">PGH</span></div><p class="jobs">Fifth Season, Duolingo, Gecko Robotics</p></li>
+        <li><div class="city-row"><strong class="city">Toronto</strong><span class="airport">YYZ</span></div><p class="jobs">KOHO, Relay Platform, ApplyBoard, Cyclica</p></li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <div class="split">
+        <figure class="frame"><img src="https://images.ctfassets.net/mq81gy7w2znw/7uE7SV2OEBsGNhiXHKKqBn/88561c27955cc7c490042ebd8ca9191d/Drive_Home_03a.jpg" alt="Team image left"></figure>
+        <figure class="frame"><img src="https://images.ctfassets.net/mq81gy7w2znw/7uc7iojAIaMtiyYNLmRB3W/cb6f6ec34c4a404328e2606ece744d85/Drive_Home_03b.jpg" alt="Team image right"></figure>
+      </div>
+
+      <div class="section-head" style="margin-top:20px;">
+        <h2>Our Team</h2>
+        <p>We are a diverse and collaborative team from unlikely backgrounds. Great founders do not want cheerleaders. They want conviction, honesty, and partners who push toward market-defining outcomes.</p>
+      </div>
+
+      <div class="stats">
+        <div class="marquee"><div class="marquee-track"><span>87 companies</span><span>$2B AUM</span><span>87 companies</span><span>$2B AUM</span><span>87 companies</span><span>$2B AUM</span></div></div>
+        <div class="marquee"><div class="marquee-track"><span>24 cities</span><span>16 partners</span><span>24 cities</span><span>16 partners</span><span>24 cities</span><span>16 partners</span></div></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <p class="label">Building Greatness</p>
+      <div class="portfolio-box">
+        <h3>Our Portfolio</h3>
+        <div>
+          <p>Our companies are proving that you can build a world-class technology company anywhere. Build where your talent is. Build where your customers are. Build where you are strongest.</p>
+          <a class="cta" href="/portfolio">View Our Portfolio</a>
+        </div>
+      </div>
+
+      <div class="foot-pair">
+        <figure class="frame"><img src="https://images.ctfassets.net/mq81gy7w2znw/7F55Jsjr2OprSVJ17e09XL/b2134357d5ac60b97dc8670527a8cd96/Drive_Home_05a.jpg" alt="Portfolio image A"></figure>
+        <figure class="frame"><img src="https://images.ctfassets.net/mq81gy7w2znw/5gjA1ZLHZhdqDZeuqsdmx5/b62e9f8ea1eb890fabd6c7c8db29bbd2/Drive_Home_05b.jpg" alt="Portfolio image B"></figure>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

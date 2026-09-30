@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exclusive - Garage + Footer (Fluid Recalibration)</title>
+
+  <!-- GSAP kept for the same scroll reveal feel as footer.html -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+    /*
+      ============================================================
+      FLUID RECALIBRATION SYSTEM (same mechanics as Drive Capital)
+      ------------------------------------------------------------
+      - ONE fluid unit --u drives every size.
+      - --u blends width AND height, so it reacts to ASPECT RATIO.
+      - --vw / --vh are synced from visualViewport in JS for exactness.
+      - Layout uses GRID/FLOW instead of absolute magic-number panels,
+        so nothing needs per-element hand tuning.
+      ============================================================
+    */
+    :root {
+      --vw: 100vw;
+      --vh: 100vh;
+
+      /* aspect-ratio-aware fluid base unit */
+      --u: clamp(9px, calc(0.55vw + 0.55vh), 20px);
+
+      --gap: calc(var(--u) * 2);
+      --pad-block: calc(var(--u) * 6);
+      --pad-inline: calc(var(--u) * 4);
+
+      --bg: #ffffff;
+      --ink: #0b0b0b;
+      --muted: #5a5a5a;
+      --line: rgba(0, 0, 0, 0.12);
+      --accent: #F95335;
+      --sub-bg: #f2f2ef;
+
+      /* ===== LIVE EDITOR VARIABLES (adjust via the panel) ===== */
+      --section-gap: 0px;          /* gap between garage and footer */
+      --drive-height: 60vh;        /* footer stage height */
+
+      --headline-x: 4vw;   --headline-y: 6vh;   --headline-scale: 1;  --headline-font: 4.4;
+      --map-x: 55vw;       --map-y: 2vh;        --map-scale: 1;       --map-w: 40vw;  --map-h: 26vh;
+      --follow-x: 4vw;     --follow-y: 40vh;    --follow-scale: 1;
+      --links-x: 55vw;     --links-y: 38vh;     --links-scale: 1;     --links-font: 1.1;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* =========================================================
+       GARAGE SECTION (fluid grid)
+       ========================================================= */
+    .garage {
+      padding: var(--pad-block) var(--pad-inline);
+    }
+
+    .garage-heading {
+      margin: 0 0 var(--gap);
+      font-size: calc(var(--u) * 3.2);
+      font-weight: 500;
+      letter-spacing: -0.02em;
+    }
+
+    .garage-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--gap);
+    }
+
+    .garage-card { cursor: pointer; }
+
+    .card-image {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4 / 3;      /* stays proportional at any size */
+      overflow: hidden;
+      border-radius: calc(var(--u) * 0.4);
+      margin-bottom: var(--u);
+    }
+
+    .card-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+    }
+
+    .garage-card:hover .card-image img { transform: scale(1.05); }
+
+    .garage-title {
+      margin: 0;
+      font-size: calc(var(--u) * 1.35);
+      font-weight: 500;
+      letter-spacing: -0.01em;
+    }
+
+    .garage-details {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transform: translateY(-10px);
+      transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+    }
+
+    .garage-details p {
+      margin: calc(var(--u) * 0.8) 0 0;
+      font-size: calc(var(--u) * 1);
+      line-height: 1.5;
+      color: var(--muted);
+    }
+
+    .garage-card:hover .garage-details {
+      max-height: calc(var(--u) * 14);
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* =========================================================
+       DRIVE FOOTER (fluid flow, NO absolute magic numbers)
+       ========================================================= */
+    .drive {
+      position: relative;
+      background: var(--bg);
+      margin-top: var(--section-gap);
+      padding: 0 var(--pad-inline);
+      height: var(--drive-height);
+      min-height: 22rem;
+      border-top: 1px solid var(--line);
+      overflow: hidden;
+    }
+
+    .drive .panel-headline,
+    .drive .panel-map,
+    .drive .panel-follow,
+    .drive .panel-links {
+      position: absolute;
+      transform-origin: top left;
+      will-change: left, top, transform;
+    }
+
+    .drive-noise {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.03;
+      z-index: 5;
+      background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="n"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23n)"/%3E%3C/svg%3E');
+    }
+
+    .panel-headline {
+      left: var(--headline-x);
+      top: var(--headline-y);
+      transform: scale(var(--headline-scale));
+      max-width: 92vw;
+    }
+
+    .panel-headline h1 {
+      margin: 0;
+      font-family: "Arial Black", Impact, sans-serif;
+      /* aspect-ratio-aware headline size */
+      font-size: calc(var(--u) * var(--headline-font));
+      line-height: 0.88;
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+    }
+
+    .panel-headline .l2 { font-size: 0.8em; }
+    .panel-headline .l3 { font-size: 0.8em; }
+
+    .panel-map {
+      left: var(--map-x);
+      top: var(--map-y);
+      width: min(var(--map-w), 95vw);
+      height: var(--map-h);
+      transform: scale(var(--map-scale));
+      border: 1px dashed var(--line);
+      background: radial-gradient(circle at center, rgba(0,0,0,0.03), transparent 70%);
+    }
+
+    #mapCanvas { width: 100%; height: 100%; display: block; }
+
+    .panel-follow {
+      left: var(--follow-x);
+      top: var(--follow-y);
+      transform: scale(var(--follow-scale));
+      font-family: "Courier New", Courier, monospace;
+    }
+
+    .panel-follow label {
+      display: block;
+      margin-bottom: var(--u);
+      font-size: calc(var(--u) * 0.8);
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .follow-icons { display: flex; gap: calc(var(--u) * 0.75); }
+
+    .follow-btn {
+      width: calc(var(--u) * 2.2);
+      height: calc(var(--u) * 2.2);
+      border-radius: 50%;
+      border: 1px solid var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--ink);
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .follow-btn:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .follow-btn svg { width: 45%; height: 45%; fill: currentColor; }
+
+    .panel-links {
+      left: var(--links-x);
+      top: var(--links-y);
+      transform: scale(var(--links-scale));
+      display: flex;
+      flex-wrap: wrap;
+      gap: calc(var(--gap) * 1.4);
+      max-width: 92vw;
+    }
+
+    .link-col { display: grid; gap: calc(var(--u) * 0.8); }
+
+    .link-col a {
+      color: var(--ink);
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-size: calc(var(--u) * var(--links-font));
+      transition: color 0.2s ease;
+    }
+
+    .link-col a:hover { color: var(--accent); }
+
+    .sub-footer {
+      background: var(--sub-bg);
+      padding: var(--gap) var(--pad-inline);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: var(--u);
+      font-size: calc(var(--u) * 0.85);
+      color: var(--muted);
+    }
+
+    /* ===== LIVE LAYOUT EDITOR PANEL ===== */
+    .editor {
+      position: fixed;
+      left: 12px;
+      bottom: 12px;
+      z-index: 10000;
+      width: 264px;
+      max-height: 84vh;
+      overflow: auto;
+      background: rgba(17, 17, 20, 0.93);
+      color: #eaeaea;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 12px;
+      font: 12px/1.4 ui-monospace, Menlo, monospace;
+      backdrop-filter: blur(6px);
+    }
+    .editor h3 { margin: 0 0 8px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; }
+    .editor .toggle { cursor: pointer; float: right; color: #9ad0ff; font-weight: 400; }
+    .editor .row { margin-bottom: 9px; }
+    .editor .row label { display: flex; justify-content: space-between; margin-bottom: 3px; color: #c7c7c7; }
+    .editor .row input[type=range] { width: 100%; }
+    .editor .btns { display: flex; gap: 6px; margin: 8px 0; }
+    .editor button {
+      flex: 1; cursor: pointer; border: 1px solid #444; background: #23252d;
+      color: #eee; border-radius: 6px; padding: 6px; font: inherit;
+    }
+    .editor button:hover { background: #2d3038; }
+    .editor textarea {
+      width: 100%; height: 120px; background: #0c0d11; color: #9ad0ff;
+      border: 1px solid #333; border-radius: 6px; padding: 6px;
+      font: 11px/1.4 ui-monospace, monospace; resize: vertical;
+    }
+    .editor.collapsed .editor-body { display: none; }
+
+    /* Live readout so you can SEE the recalibration values */
+    .readout {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 9999;
+      background: rgba(10, 10, 10, 0.82);
+      color: #eee;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font: 11px/1.5 ui-monospace, Menlo, monospace;
+      pointer-events: none;
+      white-space: pre;
+    }
+
+    /* Only ONE structural breakpoint; the fluid unit handles the rest */
+    @media (max-width: 760px) {
+      .garage-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="readout" id="readout"></div>
+
+  <div class="editor" id="editor">
+    <h3>Layout Editor <span class="toggle" id="toggle">[hide]</span></h3>
+    <div class="editor-body">
+      <div id="controls"></div>
+      <div class="btns">
+        <button id="reset">Reset</button>
+        <button id="export">Export CSS</button>
+        <button id="copy">Copy</button>
+      </div>
+      <textarea id="exportBox" readonly placeholder="Click Export CSS to get your :root coordinates, then send them to me to bake in permanently."></textarea>
+    </div>
+  </div>
+
+  <!-- GARAGE -->
+  <section class="garage" id="garage">
+    <h2 class="garage-heading">Garage</h2>
+    <div class="garage-grid">
+      <article class="garage-card">
+        <div class="card-image">
+          <img src="https://images.unsplash.com/photo-1558442074-3c19857bc1dc?auto=format&fit=crop&q=80&w=800" alt="Comet Meetings" onerror="this.src='https://placehold.co/800x600/eeeeee/999999?text=Image+1'">
+        </div>
+        <h3 class="garage-title">Comet Meetings</h3>
+        <div class="garage-details"><p>A workspace concept reimagining how modern teams gather, focus, and create together.</p></div>
+      </article>
+      <article class="garage-card">
+        <div class="card-image">
+          <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&q=80&w=800" alt="CEB" onerror="this.src='https://placehold.co/800x600/eeeeee/999999?text=Image+2'">
+        </div>
+        <h3 class="garage-title">CEB</h3>
+        <div class="garage-details"><p>Bold identity work built around clarity, contrast, and confident typography.</p></div>
+      </article>
+      <article class="garage-card">
+        <div class="card-image">
+          <img src="https://images.unsplash.com/photo-1545607062-848e4b7b2586?auto=format&fit=crop&q=80&w=800" alt="Centrakor" onerror="this.src='https://placehold.co/800x600/eeeeee/999999?text=Image+3'">
+        </div>
+        <h3 class="garage-title">Centrakor</h3>
+        <div class="garage-details"><p>Retail storytelling with a warm, human, and playful visual language.</p></div>
+      </article>
+    </div>
+  </section>
+
+  <!-- DRIVE FOOTER -->
+  <section class="drive">
+    <div class="drive-noise"></div>
+
+    <div class="panel-headline">
+      <h1>
+        <span class="l1">The Greatest</span><br>
+        <span class="l2">Emerging Market</span><br>
+        <span class="l3">For VC Is America</span>
+      </h1>
+    </div>
+
+    <div class="panel-map">
+      <canvas id="mapCanvas"></canvas>
+    </div>
+
+    <div class="panel-follow">
+      <label>Follow Us</label>
+      <div class="follow-icons">
+        <a class="follow-btn" href="#" aria-label="Instagram"><svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2.1 1.8.3 2.2.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.1.4.3 1 .4 2.2.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.1 1.2-.3 1.8-.4 2.2-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.1-1 .3-2.2.4-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2-.1-1.8-.3-2.2-.4-.6-.2-1-.5-1.4-.9-.4-.4-.7-.8-.9-1.4-.1-.4-.3-1-.4-2.2C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.9c.1-1.2.3-1.8.4-2.2.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.1 1-.3 2.2-.4C8.4 2.2 8.8 2.2 12 2.2zm0 3.2A6.6 6.6 0 1012 18.6 6.6 6.6 0 0012 5.4zm0 10.9a4.3 4.3 0 110-8.6 4.3 4.3 0 010 8.6zm6.8-11.2a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/></svg></a>
+        <a class="follow-btn" href="#" aria-label="Twitter"><svg viewBox="0 0 24 24"><path d="M22 5.9c-.7.3-1.5.5-2.3.6.8-.5 1.5-1.3 1.8-2.3-.8.5-1.7.8-2.6 1a4.1 4.1 0 00-7 3.7A11.6 11.6 0 013 4.8a4.1 4.1 0 001.3 5.5c-.7 0-1.3-.2-1.8-.5v.1a4.1 4.1 0 003.3 4 4.1 4.1 0 01-1.8.1 4.1 4.1 0 003.8 2.8A8.2 8.2 0 012 18.6a11.6 11.6 0 006.3 1.8c7.5 0 11.6-6.2 11.6-11.6v-.5c.8-.6 1.5-1.3 2.1-2.1z"/></svg></a>
+        <a class="follow-btn" href="#" aria-label="YouTube"><svg viewBox="0 0 24 24"><path d="M21.6 7.2s-.2-1.4-.8-2c-.7-.8-1.6-.8-2-.9C16 4.1 12 4.1 12 4.1s-4 0-6.8.2c-.4 0-1.3.1-2 .9-.6.6-.8 2-.8 2S2.2 8.8 2.2 10.5v1.6c0 1.7.2 3.3.2 3.3s.2 1.4.8 2c.7.8 1.7.8 2.2.9 1.6.2 6.6.2 6.6.2s4 0 6.8-.2c.4 0 1.3-.1 2-.9.6-.6.8-2 .8-2s.2-1.6.2-3.3v-1.6c0-1.7-.2-3.3-.2-3.3zM9.9 14.6V8.9l5.2 2.9-5.2 2.8z"/></svg></a>
+      </div>
+    </div>
+
+    <div class="panel-links">
+      <div class="link-col">
+        <a href="/portfolio">Portfolio</a>
+        <a href="/our-story">Story</a>
+        <a href="/team">Team</a>
+        <a href="/careers">Careers</a>
+        <a href="/talent">Talent</a>
+      </div>
+      <div class="link-col">
+        <a href="/media-kit">Media Kit</a>
+        <a href="/diversity">Diversity</a>
+        <a href="mailto:info@drivecapital.com">Contact</a>
+        <a href="#">Investor Login</a>
+        <a href="/seed-program">Seed Program</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="sub-footer">
+    <span>&copy; Exclusive Studio</span>
+    <span>Built with fluid recalibration</span>
+  </div>
+
+  <script>
+    /* ============================================================
+       RECALIBRATION ENGINE (identical concept to Drive Capital)
+       - sync real viewport into --vw / --vh
+       - recompute on resize / orientation / visualViewport change
+       - everything sized in --u recalibrates automatically
+       ============================================================ */
+    const root = document.documentElement;
+    const readout = document.getElementById('readout');
+
+    function recalibrate() {
+      const vv = window.visualViewport;
+      const w = Math.round(vv ? vv.width : window.innerWidth);
+      const h = Math.round(vv ? vv.height : window.innerHeight);
+      root.style.setProperty('--vw', w + 'px');
+      root.style.setProperty('--vh', h + 'px');
+
+      const u = getComputedStyle(root).getPropertyValue('--u').trim();
+      readout.textContent =
+        `viewport: ${w} x ${h}\naspect: ${(w / h).toFixed(3)}\nfluid --u: ${u}`;
+    }
+
+    let raf = 0;
+    function onResize() {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => { recalibrate(); sizeCanvas(); });
+    }
+
+    window.addEventListener('resize', onResize);
+    window.addEventListener('orientationchange', onResize);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', onResize);
+    }
+
+    /* ------- Network map canvas (proportional coordinate mapping) ------- */
+    const canvas = document.getElementById('mapCanvas');
+    const ctx = canvas.getContext('2d');
+    const baseW = 1120, baseH = 700;
+    const rawSegments = [
+      {x1: 560, y1: 600, x2: 100, y2: 560},
+      {x1: 100, y1: 560, x2: 480, y2: 120},
+      {x1: 480, y1: 120, x2: 480, y2: 420},
+      {x1: 560, y1: 600, x2: 1080, y2: 660},
+      {x1: 553, y1: 384, x2: 1092, y2: 385},
+      {x1: 551, y1: 384, x2: 20, y2: 392}
+    ];
+    let segments = [];
+
+    function sizeCanvas() {
+      const box = canvas.parentElement;
+      canvas.width = box.clientWidth;
+      canvas.height = box.clientHeight;
+      // remap design coordinates proportionally to the live canvas size
+      segments = rawSegments.map(s => ({
+        sx1: (s.x1 / baseW) * canvas.width,
+        sy1: (s.y1 / baseH) * canvas.height,
+        sx2: (s.x2 / baseW) * canvas.width,
+        sy2: (s.y2 / baseH) * canvas.height
+      }));
+      drawMap();
+    }
+
+    function drawMap() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+      ctx.lineWidth = 1;
+      segments.forEach(s => {
+        ctx.beginPath();
+        ctx.moveTo(s.sx1, s.sy1);
+        ctx.lineTo(s.sx2, s.sy2);
+        ctx.stroke();
+      });
+      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      segments.forEach(s => {
+        ctx.beginPath();
+        ctx.arc(s.sx1, s.sy1, 3, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+
+    /* Same scroll-reveal feel as footer.html */
+    if (window.gsap && window.ScrollTrigger) {
+      gsap.registerPlugin(ScrollTrigger);
+      gsap.from('.garage-card', {
+        opacity: 0, y: 30, stagger: 0.12, duration: 0.8,
+        scrollTrigger: { trigger: '.garage', start: 'top 70%' }
+      });
+    }
+
+    /* ============================================================
+       LIVE LAYOUT EDITOR
+       - each slider writes a CSS variable on :root
+       - Export CSS prints the current :root block to copy/paste
+       ============================================================ */
+    const controls = [
+      { label: 'Section gap',    v: '--section-gap',    min: -260, max: 260, step: 1,    unit: 'px' },
+      { label: 'Footer height',  v: '--drive-height',   min: 20,   max: 130, step: 1,    unit: 'vh' },
+      { label: 'Headline X',     v: '--headline-x',     min: -20,  max: 100, step: 0.5,  unit: 'vw' },
+      { label: 'Headline Y',     v: '--headline-y',     min: -20,  max: 130, step: 0.5,  unit: 'vh' },
+      { label: 'Headline scale', v: '--headline-scale', min: 0.3,  max: 3,   step: 0.01, unit: '' },
+      { label: 'Headline font',  v: '--headline-font',  min: 1,    max: 10,  step: 0.1,  unit: '' },
+      { label: 'Map X',          v: '--map-x',          min: -20,  max: 100, step: 0.5,  unit: 'vw' },
+      { label: 'Map Y',          v: '--map-y',          min: -20,  max: 130, step: 0.5,  unit: 'vh' },
+      { label: 'Map width',      v: '--map-w',          min: 5,    max: 100, step: 0.5,  unit: 'vw' },
+      { label: 'Map height',     v: '--map-h',          min: 5,    max: 100, step: 0.5,  unit: 'vh' },
+      { label: 'Map scale',      v: '--map-scale',      min: 0.3,  max: 3,   step: 0.01, unit: '' },
+      { label: 'Follow X',       v: '--follow-x',       min: -20,  max: 100, step: 0.5,  unit: 'vw' },
+      { label: 'Follow Y',       v: '--follow-y',       min: -20,  max: 130, step: 0.5,  unit: 'vh' },
+      { label: 'Follow scale',   v: '--follow-scale',   min: 0.3,  max: 3,   step: 0.01, unit: '' },
+      { label: 'Links X',        v: '--links-x',        min: -20,  max: 100, step: 0.5,  unit: 'vw' },
+      { label: 'Links Y',        v: '--links-y',        min: -20,  max: 130, step: 0.5,  unit: 'vh' },
+      { label: 'Links scale',    v: '--links-scale',    min: 0.3,  max: 3,   step: 0.01, unit: '' },
+      { label: 'Links font',     v: '--links-font',     min: 0.5,  max: 4,   step: 0.05, unit: '' }
+    ];
+
+    const controlsEl = document.getElementById('controls');
+    const defaults = {};
+
+    controls.forEach(c => {
+      const cur = parseFloat(getComputedStyle(root).getPropertyValue(c.v));
+      defaults[c.v] = cur;
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.innerHTML =
+        '<label><span>' + c.label + '</span><span id="val_' + c.v + '">' + cur + c.unit + '</span></label>' +
+        '<input type="range" min="' + c.min + '" max="' + c.max + '" step="' + c.step + '" value="' + cur +
+        '" data-var="' + c.v + '" data-unit="' + c.unit + '">';
+      controlsEl.appendChild(row);
+    });
+
+    controlsEl.addEventListener('input', e => {
+      const inp = e.target;
+      if (!inp.dataset.var) return;
+      const val = inp.value + inp.dataset.unit;
+      root.style.setProperty(inp.dataset.var, val);
+      document.getElementById('val_' + inp.dataset.var).textContent = val;
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => { recalibrate(); sizeCanvas(); });
+    });
+
+    document.getElementById('reset').addEventListener('click', () => {
+      controls.forEach(c => {
+        root.style.setProperty(c.v, defaults[c.v] + c.unit);
+        const inp = controlsEl.querySelector('[data-var="' + c.v + '"]');
+        inp.value = defaults[c.v];
+        document.getElementById('val_' + c.v).textContent = defaults[c.v] + c.unit;
+      });
+      requestAnimationFrame(() => { recalibrate(); sizeCanvas(); });
+    });
+
+    document.getElementById('export').addEventListener('click', () => {
+      const lines = controls.map(c =>
+        '  ' + c.v + ': ' + getComputedStyle(root).getPropertyValue(c.v).trim() + ';'
+      );
+      document.getElementById('exportBox').value = ':root {\n' + lines.join('\n') + '\n}';
+    });
+
+    document.getElementById('copy').addEventListener('click', async () => {
+      const box = document.getElementById('exportBox');
+      if (!box.value) box.value = 'Click Export CSS first.';
+      try { await navigator.clipboard.writeText(box.value); }
+      catch (e) { box.select(); document.execCommand('copy'); }
+    });
+
+    document.getElementById('toggle').addEventListener('click', () => {
+      const ed = document.getElementById('editor');
+      ed.classList.toggle('collapsed');
+      document.getElementById('toggle').textContent =
+        ed.classList.contains('collapsed') ? '[show]' : '[hide]';
+    });
+
+    recalibrate();
+    sizeCanvas();
+  </script>
+</body>
+</html>

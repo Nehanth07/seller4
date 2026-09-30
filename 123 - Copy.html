@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interrentcars - Premium Car Rental</title>
+    <!-- Tailwind CSS for rapid styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;700;800&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* Custom Font Loading */
+        @font-face {
+            font-family: 'Telegraf';
+            font-style: normal;
+            font-weight: 400;
+            src: url('./telegraf/PPTelegraf-Regular.woff2') format('woff2');
+            font-display: swap;
+            text-rendering: optimizeLegibility;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #000;
+            color: #fff;
+            overflow: hidden;
+            /* Prevent scrolling for the full-screen hero feel */
+        }
+
+        /* Custom slide transitions for right-to-left slide over */
+        .slide {
+            visibility: hidden;
+            transform: translateX(100%);
+            z-index: 1;
+            will-change: transform;
+            transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1), visibility 1.2s;
+        }
+
+        .slide.is-active {
+            visibility: visible;
+            transform: translateX(0);
+            z-index: 10;
+            transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1), visibility 1.2s;
+        }
+
+        .slide.is-leaving {
+            visibility: visible;
+            transform: translateX(-15%);
+            /* Slight parallax push back */
+            filter: brightness(0.5);
+            /* Darken as it gets covered */
+            z-index: 5;
+            transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1), filter 1.2s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+
+        /* Text Animation */
+        .slide-text {
+            opacity: 0;
+            transform: translateY(40px);
+            /* Slides up from slightly below */
+            transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .slide.is-active .slide-text {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Wait for 1.2s slide duration + 0.5s delay = 1.7s */
+        .slide.is-active h3.slide-text {
+            transition-delay: 1.5s;
+        }
+
+        /* Stagger paragraph slightly after the heading = 1.9s */
+        .slide.is-active p.slide-text {
+            transition-delay: 1.5s;
+        }
+
+        .slide:not(.is-active) .slide-text {
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            transition-delay: 0s;
+        }
+
+        .spin-slow {
+            animation: spin 15s linear infinite;
+        }
+
+        /* Subtle gradient to ensure text readability over bright images */
+        .text-overlay-gradient {
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.3) 40%, transparent 100%);
+        }
+
+        /* Book Now Button Animation */
+        .btn-book {
+            padding: 0.4rem 1rem;
+            /* Mobile padding */
+            border-radius: 50px;
+            border: 1px solid #fff;
+            color: #fff;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            transition: color 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (min-width: 768px) {
+            .btn-book {
+                padding: 0.6rem 1.6rem;
+                /* Desktop padding */
+            }
+        }
+
+        .btn-book::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #fff;
+            z-index: -1;
+            transform: scaleY(0);
+            transform-origin: center;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .btn-book:hover {
+            color: #000;
+            transform: scale(1.05);
+        }
+
+        .btn-book:hover::before {
+            transform: scaleY(1);
+        }
+
+        /* Book Now Arrow Animation (Left to Right) */
+        @keyframes book-arrow-slide {
+            0% {
+                transform: translateX(-6px);
+                opacity: 0;
+            }
+
+            30% {
+                transform: translateX(-2px);
+                opacity: 1;
+            }
+
+            70% {
+                transform: translateX(2px);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateX(6px);
+                opacity: 0;
+            }
+        }
+
+        .btn-book:hover .book-arrow {
+            animation: book-arrow-slide 1.2s infinite ease-in-out;
+        }
+
+        .book-arrow {
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        /* Nav Toggle Animation Mechanics */
+        :root {
+            --line-color: #ffffff;
+            --line-height: 2px;
+            --line-width: 32px;
+            --gap: 8px;
+            --collapse-dist: 5px;
+        }
+
+        .nav-toggle {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-end;
+            gap: var(--gap);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            -webkit-user-select: none;
+            user-select: none;
+            width: 40px;
+        }
+
+        .line {
+            height: var(--line-height);
+            background-color: var(--line-color);
+            display: block;
+            transform-origin: center;
+            will-change: transform, translate, rotate, width;
+            scale: 1 1;
+            translate: 0 0;
+            rotate: 0deg;
+            transition:
+                rotate 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0s,
+                translate 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.3s,
+                width 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.3s,
+                opacity 0.2s ease 0.3s,
+                scale 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0s;
+        }
+
+        .l1 {
+            width: var(--line-width);
+        }
+
+        .l2 {
+            width: calc(var(--line-width) * 0.55);
+        }
+
+        @keyframes wave-expand {
+
+            0%,
+            100% {
+                width: calc(var(--line-width) * 0.55);
+            }
+
+            50% {
+                width: calc(var(--line-width) * 0.85);
+            }
+        }
+
+        @keyframes wave-contract {
+
+            0%,
+            100% {
+                width: var(--line-width);
+            }
+
+            50% {
+                width: calc(var(--line-width) * 0.7);
+            }
+        }
+
+        .nav-toggle:not(.active):hover .l1 {
+            animation: wave-contract 0.6s infinite ease-in-out;
+        }
+
+        .nav-toggle:not(.active):hover .l2 {
+            animation: wave-expand 0.6s infinite ease-in-out;
+            animation-delay: 0.1s;
+        }
+
+        .nav-toggle.active .line {
+            width: var(--line-width);
+            transition:
+                translate 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0s,
+                width 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0s,
+                rotate 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.3s,
+                opacity 0.2s ease 0s,
+                scale 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0s;
+        }
+
+        .nav-toggle.active .l1 {
+            translate: 0 var(--collapse-dist);
+            rotate: 45deg;
+        }
+
+        .nav-toggle.active .l2 {
+            translate: 0 calc(var(--collapse-dist) * -1);
+            rotate: -45deg;
+        }
+
+        .nav-toggle.active:hover .l1,
+        .nav-toggle.active:hover .l2 {
+            scale: 1.15;
+        }
+
+        .nav-toggle:active {
+            transform: scale(0.95);
+        }
+
+        /* Animated Menu Link Hover (Desktop & Mobile) */
+        .animated-link {
+            position: relative;
+            display: inline-block;
+            width: max-content;
+        }
+
+        .animated-link::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            left: 0;
+            background-color: currentColor;
+            transform: scaleX(0);
+            transform-origin: right;
+            /* Shrinks to the right when hovered out */
+            transition: transform 0.4s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+
+        .animated-link:hover::after {
+            transform-origin: left;
+            /* Grows from the left when hovered in */
+            transform: scaleX(1);
+        }
+
+        .desktop-link::after {
+            height: 1.5px;
+            bottom: -4px;
+        }
+
+        .mobile-link::after {
+            height: 5px;
+            /* Matches the bold underline look */
+            bottom: 4px;
+            /* Sits cleanly beneath the uppercase text */
+        }
+
+        /* Scroll Arrow Animation */
+        @keyframes scroll-arrow-slide {
+            0% {
+                transform: translateY(-10px) scale(1.3);
+                opacity: 0;
+            }
+
+            30% {
+                transform: translateY(-3px) scale(1.3);
+                opacity: 1;
+            }
+
+            70% {
+                transform: translateY(3px) scale(1.3);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(10px) scale(1.3);
+                opacity: 0;
+            }
+        }
+
+        .scroll-container:hover .scroll-arrow {
+            animation: scroll-arrow-slide 1.2s infinite ease-in-out;
+        }
+
+        .scroll-arrow {
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+    </style>
+</head>
+
+<body class="antialiased">
+
+    <!-- Header Navigation -->
+    <header
+        class="fixed top-0 left-0 w-full flex justify-between items-center px-6 py-6 md:px-12 z-[70] mix-blend-difference text-white">
+        <!-- Logo -->
+        <a href="#" class="z-50 block hover:opacity-80 transition-opacity">
+            <div class="text-3xl md:text-4xl lg:text-[2.2rem] font-bold tracking-tight text-white"
+                style="font-family: 'Telegraf', sans-serif;">
+                INTERRENTCARS
+            </div>
+        </a>
+
+        <div class="flex items-center gap-6 lg:gap-10 z-50">
+            <!-- Desktop Nav -->
+            <nav class="hidden md:flex items-center gap-8 lg:gap-10 text-xs font-semibold tracking-[0.15em] uppercase">
+                <a href="#" class="animated-link desktop-link">Work</a>
+                <a href="#" class="animated-link desktop-link">Vision</a>
+                <a href="#" class="animated-link desktop-link">The Agency</a>
+                <a href="#" class="animated-link desktop-link">Contact</a>
+            </nav>
+
+            <!-- Book Now Button (Desktop) -->
+            <a href="#" class="btn-book hidden md:inline-flex group text-xs font-semibold tracking-[0.15em] uppercase">
+                Book Now
+                <svg class="book-arrow w-4 h-4 ml-2" fill="none" stroke="currentColor" stroke-width="2.5"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7-7m7-7H3"></path>
+                </svg>
+            </a>
+
+            <!-- Mobile Actions (Book Now + Divider + Hamburger) -->
+            <div class="flex md:hidden items-center gap-3">
+                <a href="#" class="btn-book group text-[10px] font-semibold tracking-wider uppercase">
+                    Book Now
+                    <!-- Increased to w-4 h-4 for better visibility on small screens -->
+                    <svg class="book-arrow w-4 h-4 ml-1.5" fill="none" stroke="currentColor" stroke-width="2.5"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7-7m7-7H3"></path>
+                    </svg>
+                </a>
+                <div class="w-[1px] h-5 bg-white/40"></div>
+                <button id="nav-toggle" class="nav-toggle cursor-pointer p-2">
+                    <span class="line l1"></span>
+                    <span class="line l2"></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-menu"
+        class="fixed inset-0 bg-white z-[60] transform translate-x-full transition-transform duration-500 ease-[cubic-bezier(0.77,0,0.175,1)] flex flex-col text-black h-screen w-full md:hidden">
+
+        <!-- Navigation Links -->
+        <nav class="flex flex-col px-6 flex-grow gap-2 pt-32">
+            <a href="#" class="animated-link mobile-link text-[3.5rem] leading-tight font-normal tracking-wide">WORK</a>
+            <a href="#"
+                class="animated-link mobile-link text-[3.5rem] leading-tight font-normal tracking-wide">VISION</a>
+            <a href="#" class="animated-link mobile-link text-[3.5rem] leading-tight font-normal tracking-wide">THE
+                AGENCY</a>
+            <a href="#"
+                class="animated-link mobile-link text-[3.5rem] leading-tight font-normal tracking-wide">CONTACT</a>
+        </nav>
+
+        <!-- Footer Text -->
+        <div class="px-6 py-8 text-gray-500 text-sm">
+            © Interrentcars 2026
+        </div>
+    </div>
+
+    <!-- Main Hero Slider -->
+    <main class="relative w-full h-screen">
+        <div id="slider" class="relative w-full h-full">
+
+            <!-- Slide 1: Video Background Slide -->
+            <article class="slide is-active absolute inset-0 w-full h-full">
+                <!-- Background Video with object-cover for perfect aspect ratio handling -->
+                <video class="absolute inset-0 w-full h-full object-cover" autoplay loop muted playsinline>
+                    <source src="IMG_8751.MP4" type="video/mp4">
+                    <source
+                        src="https://assets.mixkit.co/videos/preview/mixkit-driving-a-car-on-a-mountain-road-13176-large.mp4"
+                        type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <!-- Dark Gradient for Text -->
+                <div class="absolute inset-0 text-overlay-gradient mix-blend-multiply"></div>
+
+                <!-- Content -->
+                <div class="absolute bottom-24 left-6 md:bottom-32 md:left-12 max-w-2xl z-20">
+                    <h3 class="slide-text text-6xl md:text-[5.5rem] font-light tracking-tight mb-4 md:mb-6">The Journey
+                    </h3>
+                    <p
+                        class="slide-text text-base md:text-xl font-light leading-relaxed max-w-md md:max-w-xl text-white/90">
+                        Experience the freedom of the open road with our premium selection of vehicles, tailored for
+                        your ultimate driving adventure.
+                    </p>
+                </div>
+            </article>
+
+            <!-- Slide 2: Video Background Slide -->
+            <article class="slide absolute inset-0 w-full h-full">
+                <!-- Background Video with object-cover for perfect aspect ratio handling -->
+                <video class="absolute inset-0 w-full h-full object-cover" autoplay loop muted playsinline>
+                    <source src="clip.mp4" type="video/mp4">
+                    <source
+                        src="https://assets.mixkit.co/videos/preview/mixkit-city-traffic-on-a-bridge-at-night-34692-large.mp4"
+                        type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <div class="absolute inset-0 text-overlay-gradient mix-blend-multiply"></div>
+
+                <!-- Content -->
+                <div class="absolute bottom-24 left-6 md:bottom-32 md:left-12 max-w-2xl z-20">
+                    <h3 class="slide-text text-6xl md:text-[5.5rem] font-light tracking-tight mb-4 md:mb-6">Mitwit</h3>
+                    <p
+                        class="slide-text text-base md:text-xl font-light leading-relaxed max-w-md md:max-w-xl text-white/90">
+                        Reinventing modern workspaces to empower teams and cultivate a culture of deep innovation.
+                    </p>
+                </div>
+            </article>
+
+            <!-- Slide 3: Video Background Slide -->
+            <article class="slide absolute inset-0 w-full h-full">
+                <!-- Background Video with object-cover for perfect aspect ratio handling -->
+                <video class="absolute inset-0 w-full h-full object-cover" autoplay loop muted playsinline>
+                    <source src="IMG_8753.MOV" type="video/quicktime">
+                    <source
+                        src="https://assets.mixkit.co/videos/preview/mixkit-car-driving-through-a-pine-forest-4286-large.mp4"
+                        type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <div class="absolute inset-0 text-overlay-gradient mix-blend-multiply"></div>
+
+                <!-- Content -->
+                <div class="absolute bottom-24 left-6 md:bottom-32 md:left-12 max-w-2xl z-20">
+                    <h3 class="slide-text text-6xl md:text-[5.5rem] font-light tracking-tight mb-4 md:mb-6">Saaj Paris
+                    </h3>
+                    <p
+                        class="slide-text text-base md:text-xl font-light leading-relaxed max-w-md md:max-w-xl text-white/90">
+                        A fresh approach to elegance, blending timeless Parisian chic with striking contemporary design.
+                    </p>
+                </div>
+            </article>
+
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="absolute bottom-8 left-6 md:bottom-12 md:left-12 flex items-center gap-3 z-30" id="pagination">
+            <!-- Pagination dots will be injected by JS -->
+        </div>
+
+        <!-- Scroll Down Indicator -->
+        <div
+            class="scroll-container absolute bottom-6 right-6 md:bottom-10 md:right-10 w-24 h-24 md:w-32 md:h-32 flex items-center justify-center z-30 mix-blend-difference cursor-pointer">
+            <!-- Rotating SVG Text -->
+            <svg class="absolute inset-0 w-full h-full spin-slow" viewBox="0 0 100 100">
+                <path id="circlePath" d="M 50, 50 m -35, 0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0" fill="none" />
+                <text fill="white" font-size="10.5" font-weight="600" letter-spacing="3.5">
+                    <textPath href="#circlePath">SCROLL • SCROLL • SCROLL •</textPath>
+                </text>
+            </svg>
+            <!-- Center Arrow (Bigger with longer stem) -->
+            <svg class="scroll-arrow w-8 h-8 md:w-10 md:h-10 text-white" fill="none" stroke="currentColor"
+                stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v20m0 0l-7-7m7 7l7-7"></path>
+            </svg>
+        </div>
+    </main>
+
+    <!-- JavaScript for Slider Functionality -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Mobile Menu Functionality
+            const mobileMenu = document.getElementById('mobile-menu');
+            const navToggle = document.getElementById('nav-toggle');
+
+            navToggle.addEventListener('click', () => {
+                navToggle.classList.toggle('active');
+                if (navToggle.classList.contains('active')) {
+                    mobileMenu.classList.remove('translate-x-full');
+                    mobileMenu.classList.add('translate-x-0');
+                } else {
+                    mobileMenu.classList.add('translate-x-full');
+                    mobileMenu.classList.remove('translate-x-0');
+                }
+            });
+
+            // Slider Functionality
+            const slides = document.querySelectorAll('.slide');
+            const paginationContainer = document.getElementById('pagination');
+            let currentSlideIndex = 0;
+            let slideInterval;
+            const intervalTime = 6000; // 6 seconds per slide
+
+            // Initialize Pagination
+            slides.forEach((_, index) => {
+                const dot = document.createElement('button');
+                dot.setAttribute('aria-label', `Go to slide ${index + 1}`);
+
+                // Base inactive classes with relative positioning for the inner filler
+                dot.className = 'relative overflow-hidden rounded-full transition-all duration-500 ease-out bg-white/50 hover:bg-white w-2 h-2';
+
+                // Create filler element for timer effect using hardware-accelerated transform
+                const filler = document.createElement('span');
+                filler.className = 'filler absolute top-0 left-0 h-full w-full bg-white origin-left';
+                filler.style.transform = 'scaleX(0)';
+                filler.style.transitionProperty = 'transform';
+                filler.style.transitionTimingFunction = 'linear';
+                filler.style.transitionDuration = '0ms';
+
+                dot.appendChild(filler);
+
+                dot.addEventListener('click', () => {
+                    if (currentSlideIndex !== index) goToSlide(index);
+                });
+                paginationContainer.appendChild(dot);
+            });
+
+            const dots = paginationContainer.querySelectorAll('button');
+
+            // Function to change slides
+            function goToSlide(index, isInit = false) {
+                // Manage slide transitions
+                if (!isInit) {
+                    const previousSlide = slides[currentSlideIndex];
+                    previousSlide.classList.remove('is-active');
+                    previousSlide.classList.add('is-leaving');
+
+                    // Remove 'is-leaving' after animation finishes to reset it for the future
+                    setTimeout(() => {
+                        previousSlide.classList.remove('is-leaving');
+                    }, 1200); // Matches the 1.2s CSS transition duration
+                } else {
+                    slides[currentSlideIndex].classList.remove('is-active');
+                }
+
+                const currentDot = dots[currentSlideIndex];
+                currentDot.className = 'relative overflow-hidden rounded-full transition-all duration-500 ease-out bg-white/50 hover:bg-white w-2 h-2';
+                const currentFiller = currentDot.querySelector('.filler');
+                currentFiller.style.transitionDuration = '0ms';
+                currentFiller.style.transform = 'scaleX(0)';
+
+                // Update index
+                currentSlideIndex = index;
+
+                // Set new active slide and dot
+                slides[currentSlideIndex].classList.add('is-active');
+
+                // Restart video if the slide has one
+                const activeVideo = slides[currentSlideIndex].querySelector('video');
+                if (activeVideo) {
+                    activeVideo.currentTime = 0;
+                    activeVideo.play().catch(e => console.log('Autoplay prevented', e));
+                }
+
+                const newDot = dots[currentSlideIndex];
+                // Set the track background (bg-white/30) and expand width
+                newDot.className = 'relative overflow-hidden rounded-full transition-all duration-500 ease-out bg-white/30 w-8 h-2';
+                const newFiller = newDot.querySelector('.filler');
+
+                // Force layout reflow before starting animation to ensure it transitions smoothly from 0
+                void newFiller.offsetWidth;
+
+                // Animate scale matching the interval time
+                newFiller.style.transitionDuration = `${intervalTime}ms`;
+                newFiller.style.transform = 'scaleX(1)';
+
+                // Reset interval when user clicks to prevent sudden jumps
+                resetInterval();
+            }
+
+            // Function to move to the next slide automatically
+            function nextSlide() {
+                let nextIndex = (currentSlideIndex + 1) % slides.length;
+                goToSlide(nextIndex);
+            }
+
+            // Interval management
+            function startInterval() {
+                slideInterval = setInterval(nextSlide, intervalTime);
+            }
+
+            function resetInterval() {
+                clearInterval(slideInterval);
+                startInterval();
+            }
+
+            // Initialize the first slide to trigger the filler animation on load
+            goToSlide(0, true);
+        });
+    </script>
+</body>
+
+</html>

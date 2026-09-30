@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drive Capital - Footer Mimic</title>
+  <style>
+    /*
+      ============================================================
+      SEAMLESS RECALIBRATION SYSTEM
+      ============================================================
+      The whole layout is described in ONE fluid unit: --u.
+      --u is derived from the viewport, so when the aspect ratio
+      or window size changes, every size that uses --u recalculates
+      automatically. No breakpoints needed for the core scaling.
+
+      We also expose --vw and --vh from JS (see bottom script) so
+      that mobile browser UI bars and odd aspect ratios stay exact.
+    */
+    :root {
+      /* JS keeps these in sync with the REAL viewport on every resize */
+      --vw: 100vw;
+      --vh: 100vh;
+
+      /*
+        Fluid base unit.
+        - clamp(min, preferred, max)
+        - preferred is a blend of width AND height, so the layout
+          reacts to ASPECT RATIO, not just width.
+        - vmin makes it shrink on the smaller axis (portrait/landscape safe).
+      */
+      --u: clamp(8px, calc(0.6vw + 0.6vh), 22px);
+
+      /* Everything below is expressed in multiples of --u */
+      --gap: calc(var(--u) * 2);
+      --pad: calc(var(--u) * 3);
+      --headline: clamp(34px, calc(4.2vw + 2.4vh), 132px);
+
+      --bg: #0c0d11;
+      --text: #f4f5f7;
+      --muted: #9aa0ad;
+      --line: #262b36;
+      --accent: #9ab6ff;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Avenir Next", "Segoe UI", Helvetica, Arial, sans-serif;
+      /* use the JS-synced viewport height so it is exact on any device */
+      min-height: var(--vh);
+    }
+
+    .footer {
+      padding: var(--pad);
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap);
+      /* container also scales with the unit system */
+      min-height: var(--vh);
+      justify-content: space-between;
+    }
+
+    .headline {
+      margin: 0;
+      font-size: var(--headline);
+      line-height: 0.92;
+      letter-spacing: 0.01em;
+      text-transform: uppercase;
+      max-width: 18ch;
+    }
+
+    .map {
+      position: relative;
+      width: 100%;
+      /* aspect-ratio keeps the map perfectly proportional at every size */
+      aspect-ratio: 1656 / 865;
+      border: 1px solid var(--line);
+      border-radius: calc(var(--u) * 0.8);
+      overflow: hidden;
+      background: #11141b;
+    }
+
+    .map img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      opacity: 0.9;
+    }
+
+    .columns {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
+      gap: var(--gap);
+      align-items: start;
+      padding-top: var(--gap);
+      border-top: 1px solid var(--line);
+    }
+
+    .col-title {
+      font-size: calc(var(--u) * 0.9);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0 0 var(--u);
+    }
+
+    .links {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: calc(var(--u) * 0.8);
+    }
+
+    .links a {
+      text-decoration: none;
+      color: var(--text);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: calc(var(--u) * 1.15);
+      transition: color .2s ease;
+    }
+
+    .links a:hover { color: var(--accent); }
+
+    .social {
+      display: flex;
+      gap: var(--gap);
+    }
+
+    .social a {
+      color: var(--muted);
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: calc(var(--u) * 0.95);
+      transition: color .2s ease;
+    }
+
+    .social a:hover { color: var(--text); }
+
+    .baseline {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: var(--u);
+      color: var(--muted);
+      font-size: calc(var(--u) * 0.85);
+      border-top: 1px solid var(--line);
+      padding-top: var(--gap);
+    }
+
+    /* Readout box to visualize the live recalibration values */
+    .readout {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: rgba(20, 24, 33, 0.85);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 11px;
+      line-height: 1.5;
+      color: #cdd3df;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      pointer-events: none;
+    }
+
+    /* Only ONE structural breakpoint is needed; the fluid unit does the rest */
+    @media (max-width: 720px) {
+      .columns { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="readout" id="readout"></div>
+
+  <footer class="footer">
+    <h2 class="headline">The Greatest Emerging Market For VC Is America</h2>
+
+    <div class="map">
+      <img src="https://images.ctfassets.net/mq81gy7w2znw/2CbQC44LRYuVSZyLveMQD8/add8aaf426baafe554bad76ac27da4a3/footer-palceholder-map.png" alt="Map of North America">
+    </div>
+
+    <div class="columns">
+      <div>
+        <p class="col-title">Explore</p>
+        <ul class="links">
+          <li><a href="/portfolio">Portfolio</a></li>
+          <li><a href="/our-story">Story</a></li>
+          <li><a href="/team">Team</a></li>
+          <li><a href="/careers">Careers</a></li>
+          <li><a href="/talent">Talent</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <p class="col-title">More</p>
+        <ul class="links">
+          <li><a href="/media-kit">Media Kit</a></li>
+          <li><a href="/diversity">Diversity Reports</a></li>
+          <li><a href="mailto:info@drivecapital.com">Contact</a></li>
+          <li><a href="https://drive-capital.lpx.fund/">Investor Login</a></li>
+          <li><a href="/seed-program">Seed Program</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <p class="col-title">Social</p>
+        <div class="social">
+          <a href="https://www.linkedin.com/company/drivecapital/">LinkedIn</a>
+          <a href="https://twitter.com/drivecapital">Twitter</a>
+          <a href="https://www.youtube.com/c/DriveCapital">YouTube</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="baseline">
+      <span>&copy; Drive Capital</span>
+      <span>Columbus, OH</span>
+    </div>
+  </footer>
+
+  <script>
+    /*
+      ============================================================
+      THE RECALIBRATION ENGINE
+      ============================================================
+      1. Read the REAL viewport size (visualViewport is the most
+         accurate, especially on mobile with dynamic browser bars).
+      2. Publish it as CSS variables --vw / --vh (in pixels).
+      3. Because every layout size is written in terms of these
+         (or in vw/vh directly), the browser recomputes the whole
+         page instantly whenever the values change.
+      4. We recalc on resize AND on orientation/visualViewport
+         changes so ANY aspect ratio change is captured.
+
+      This is the same idea Studio Freight / fluid sites use:
+      one source of truth for viewport size, then derive everything.
+    */
+    const root = document.documentElement;
+    const readout = document.getElementById('readout');
+
+    function recalibrate() {
+      const vv = window.visualViewport;
+      const w = Math.round(vv ? vv.width : window.innerWidth);
+      const h = Math.round(vv ? vv.height : window.innerHeight);
+
+      // publish exact pixel viewport so mobile UI bars don't break layout
+      root.style.setProperty('--vw', w + 'px');
+      root.style.setProperty('--vh', h + 'px');
+
+      // read back the computed fluid unit for the on-screen debug readout
+      const unit = getComputedStyle(root).getPropertyValue('--u').trim();
+      const ratio = (w / h).toFixed(3);
+      readout.textContent =
+        `viewport: ${w} x ${h}\naspect: ${ratio}\nfluid --u: ${unit}`;
+    }
+
+    // requestAnimationFrame debounce keeps it smooth during drag-resize
+    let raf = 0;
+    function onResize() {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(recalibrate);
+    }
+
+    window.addEventListener('resize', onResize);
+    window.addEventListener('orientationchange', onResize);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', onResize);
+      window.visualViewport.addEventListener('scroll', onResize);
+    }
+
+    recalibrate();
+  </script>
+</body>
+</html>

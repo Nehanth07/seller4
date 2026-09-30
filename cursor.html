@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Junni Rebuild - Interactive Prototype</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0f1717;
+            --brand-green: #d4ff00; 
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            background: var(--bg-dark);
+            overflow-x: hidden;
+            font-family: sans-serif;
+            /* Allow cursor to change on hoverable items */
+            cursor: none;
+        }
+
+        /* Custom Cursor */
+        #cursor-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 150px; /* Slightly larger base for better filling */
+            height: 150px;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #cursor-svg {
+            width: 100%;
+            height: 100%;
+            fill: var(--brand-green); /* Default color */
+            font-size: 11.5px; /* Tuned for perfect fill */
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: fill 0.3s ease;
+        }
+
+        /* The central dot for selection */
+        #cursor-dot {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--brand-green);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Layout */
+        .section {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .hero h1 {
+            color: white;
+            font-size: 5vw;
+        }
+
+        /* The Grid Board */
+        .board-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 10px;
+            perspective: 1500px;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .row {
+            flex: 1;
+            display: flex;
+            gap: 10px;
+        }
+
+        .tile {
+            flex: 1;
+            position: relative;
+            transform-style: preserve-3d;
+            border-radius: 12px;
+        }
+
+        .tile-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: inherit;
+        }
+
+        .tile-front { background: #232f2f; }
+        .tile-back {
+            background: var(--brand-green);
+            transform: rotateX(180deg);
+        }
+
+        .reveal-content {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 20;
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .reveal-content h2 {
+            font-size: 8vw;
+            margin: 0;
+            color: black;
+        }
+
+        .scroll-spacer { height: 400vh; }
+        
+        /* Interactive element for testing expansion */
+        .hover-target {
+            pointer-events: auto;
+            color: white;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="cursor-wrapper">
+        <div id="cursor-dot"></div>
+        <svg id="cursor-svg" viewBox="0 0 100 100">
+            <path id="circlePath" d="M 50, 50 m -40, 0 a 40,40 0 1,1 80,0 a 40,40 0 1,1 -80,0" fill="transparent"/>
+            <text>
+                <textPath href="#circlePath">  SCROLL DOWN • SCROLL DOWN • </textPath>
+            </text>
+        </svg>
+    </div>
+
+    <section class="section hero">
+        <h1 class="hover-target">SCROLL TO MERGE</h1>
+    </section>
+
+    <div class="board-container" id="board"></div>
+
+    <div class="reveal-content" id="reveal">
+        <h2>howla</h2>
+        <p style="color: black; font-weight: bold;">自由に、ユニークに。</p>
+    </div>
+
+    <div class="scroll-spacer"></div>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        // 1. Initialize Grid
+        const ROWS = 5, COLS = 6;
+        const board = document.getElementById('board');
+        for (let i = 0; i < ROWS; i++) {
+            const row = document.createElement('div');
+            row.className = 'row';
+            for (let j = 0; j < COLS; j++) {
+                const tile = document.createElement('div');
+                tile.className = 'tile';
+                tile.innerHTML = `<div class="tile-face tile-front"></div><div class="tile-face tile-back"></div>`;
+                row.appendChild(tile);
+            }
+            board.appendChild(row);
+        }
+
+        // 2. Main Timeline
+        const tiles = document.querySelectorAll('.tile');
+        const rows = document.querySelectorAll('.row');
+        const reveal = document.getElementById('reveal');
+        const cursorSvg = document.getElementById('cursor-svg');
+        const cursorDot = document.getElementById('cursor-dot');
+
+        const tl = gsap.timeline({
+            scrollTrigger: {
+                trigger: ".scroll-spacer",
+                start: "top top",
+                end: "bottom bottom",
+                scrub: 1,
+            }
+        });
+
+        tl.to(tiles, {
+            rotateX: 180,
+            scale: 1.02,
+            stagger: { grid: [ROWS, COLS], from: "top", amount: 1.2 }
+        })
+        .to([board, rows], { gap: 0, padding: 0, duration: 0.5 }, "<0.5")
+        .to(tiles, { borderRadius: 0, duration: 0.3 }, "<")
+        // Color Flip: Switch cursor to black when background becomes green
+        .to(cursorSvg, { fill: "#000000", duration: 0.1 }, "<0.3")
+        .to(cursorDot, { backgroundColor: "#000000", duration: 0.1 }, "<")
+        .to(reveal, { opacity: 1, y: -20, duration: 0.5 })
+        // Contract to action point (small circle) at the end of scroll
+        .to(cursorSvg, { scale: 0.2, opacity: 0, duration: 0.4 })
+        .to(cursorDot, { scale: 3, duration: 0.4 }, "<");
+
+        // 3. Dynamic Cursor Logic
+        const cursor = document.getElementById('cursor-wrapper');
+        let mouseX = 0, mouseY = 0;
+        let pos = { x: 0, y: 0 };
+        let speed = 0;
+
+        window.addEventListener("mousemove", e => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        // Loop for smoothing and velocity contraction
+        gsap.ticker.add(() => {
+            const dt = 1.0 - Math.pow(1.0 - 0.15, gsap.ticker.deltaRatio());
+            pos.x += (mouseX - pos.x) * dt;
+            pos.y += (mouseY - pos.y) * dt;
+            
+            // Calculate speed for contraction
+            const dx = mouseX - pos.x;
+            const dy = mouseY - pos.y;
+            speed = Math.sqrt(dx*dx + dy*dy);
+            
+            // Map speed to scale: fast move = smaller (0.8), stalled = normal (1.0)
+            const dynamicScale = gsap.utils.clamp(0.8, 1.0, 1.0 - (speed / 100));
+            
+            gsap.set(cursor, { x: pos.x, y: pos.y });
+            // Only apply speed scaling if we haven't reached the end-scroll contraction
+            if (ScrollTrigger.getAll()[0].progress < 0.9) {
+                gsap.set(cursorSvg, { scale: dynamicScale });
+            }
+        });
+
+        // Infinite Rotation
+        gsap.to(cursorSvg, { rotation: 360, duration: 8, ease: "none", repeat: -1 });
+
+        // 4. Hover Interactions (Action Point Expansion)
+        const targets = document.querySelectorAll('.hover-target');
+        targets.forEach(target => {
+            target.addEventListener('mouseenter', () => {
+                gsap.to(cursorDot, { scale: 5, duration: 0.3, ease: "back.out" });
+            });
+            target.addEventListener('mouseleave', () => {
+                // Return to appropriate scale based on scroll position
+                const endScale = ScrollTrigger.getAll()[0].progress > 0.9 ? 3 : 1;
+                gsap.to(cursorDot, { scale: endScale, duration: 0.3 });
+            });
+        });
+    </script>
+</body>
+</html>
