@@ -1,0 +1,1515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interrentcars - Premium Car Rental</title>
+    <!-- Tailwind CSS for rapid styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lenis for smooth, heavy scrolling -->
+    <script src="https://unpkg.com/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+    <!-- GSAP for section reveal animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <!-- Google Fonts for typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;700;800&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* Strict lock to prevent horizontal sliding from the colossal text */
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        /* Lenis Required Styles */
+        html.lenis, html.lenis body {
+            height: auto;
+        }
+        .lenis.lenis-smooth {
+            scroll-behavior: auto !important;
+        }
+        .lenis.lenis-smooth [data-lenis-prevent] {
+            overscroll-behavior: contain;
+        }
+        .lenis.lenis-stopped {
+            overflow: hidden;
+        }
+        .lenis.lenis-smooth iframe {
+            pointer-events: none;
+        }
+
+        /* Custom Font Loading */
+        @font-face {
+            font-family: 'Telegraf';
+            font-style: normal;
+            font-weight: 400;
+            src: url('./telegraf/PPTelegraf-Regular.woff2') format('woff2');
+            font-display: swap;
+            text-rendering: optimizeLegibility;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #000;
+            color: #fff;
+            /* overflow: hidden; Removed to enable scrolling for the second page */
+        }
+
+        /* Custom slide transitions for right-to-left slide over */
+        .slide {
+            visibility: hidden;
+            transform: translateX(100%);
+            z-index: 1;
+            will-change: transform;
+            transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1), visibility 1.2s;
+        }
+
+        .slide.is-active {
+            visibility: visible;
+            transform: translateX(0);
+            z-index: 10;
+            transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1), visibility 1.2s;
+        }
+
+        .slide.is-leaving {
+            visibility: visible;
+            /* Keep the container perfectly still so the text falls straight down */
+            transform: translateX(0);
+            filter: brightness(0.5);
+            /* Darken as it gets covered */
+            z-index: 5;
+            transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1), filter 1.2s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+
+        /* Apply the parallax push-back strictly to the background video so text isn't dragged sideways */
+        .slide video {
+            transform: translateX(0);
+            transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+
+        .slide.is-leaving video {
+            transform: translateX(-15%);
+        }
+
+        /* Text Animation (Line Reveal) */
+        .slide-text {
+            transform: translateY(120%);
+            /* Exponential Ease-Out: Comes in very fast, slowly settles into place */
+            transition: transform 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: block;
+            will-change: transform;
+        }
+
+        .slide.is-active .slide-text {
+            transform: translateY(0);
+        }
+
+        /* Heading Slide IN (Wait for slide transition to almost finish) */
+        .slide.is-active h3.slide-text {
+            transition-delay: 1.0s;
+        }
+
+        /* Description Slide IN (0.5s delay after heading) */
+        .slide.is-active p.slide-text {
+            transition-delay: 1.5s;
+        }
+
+        /* Slide OUT transitions */
+        .slide:not(.is-active) .slide-text {
+            /* Exponential Ease-Out for sliding back down */
+            transform: translateY(120%);
+            transition: transform 1.0s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .slide:not(.is-active) h3.slide-text {
+            /* Heading falls AFTER the description to mirror the entrance */
+            transition-delay: 0.27s;
+        }
+
+        .slide:not(.is-active) p.slide-text {
+            /* Description falls FIRST */
+            transition-delay: 0s;
+        }
+
+        .spin-slow {
+            animation: spin 15s linear infinite;
+        }
+
+        /* Subtle gradient to ensure text readability over bright images */
+        .text-overlay-gradient {
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.3) 40%, transparent 100%);
+        }
+
+        /* Layered Button Animation */
+        .layered-btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50px;
+            overflow: hidden;
+            z-index: 1;
+            text-decoration: none;
+        }
+
+        .header-btn {
+            border: 1px solid #fff;
+            color: #fff;
+            padding: 0.4rem 1rem;
+        }
+        
+        @media (min-width: 768px) {
+            .header-btn {
+                padding: 0.6rem 1.6rem;
+            }
+        }
+
+        .vision-btn {
+            border: 1px solid #1a1a1a;
+            color: #1a1a1a;
+        }
+
+        /* Multiple Color Slide Effect Backgrounds */
+        .bg-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform: scaleY(0);
+            transform-origin: center;
+        }
+
+        .bg-layer-1 { 
+            background-color: #f0f0f0; 
+            z-index: -3;
+            transition: transform 0.5s cubic-bezier(0.85, 0, 0.15, 1) 0.2s; 
+        }
+        .bg-layer-2 { 
+            background-color: #D1FF00; 
+            z-index: -2; 
+            transition: transform 0.5s cubic-bezier(0.85, 0, 0.15, 1) 0.1s; 
+        }
+        .bg-layer-3 { 
+            background-color: #1a1a1a; 
+            z-index: -1; 
+            transition: transform 0.5s cubic-bezier(0.85, 0, 0.15, 1) 0s; 
+        }
+        
+        .layered-btn:hover .bg-layer-1 {
+            transform: scaleY(1);
+            transition-delay: 0s;
+        }
+        .layered-btn:hover .bg-layer-2 {
+            transform: scaleY(1);
+            transition-delay: 0.1s;
+        }
+        .layered-btn:hover .bg-layer-3 {
+            transform: scaleY(1);
+            transition-delay: 0.2s;
+        }
+
+        .btn-text, .btn-icon {
+            position: relative;
+            z-index: 2;
+            transition: color 0.2s ease 0.2s, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .layered-btn:hover .btn-text,
+        .layered-btn:hover .btn-icon {
+            color: #D1FF00;
+            transition-delay: 0.25s;
+        }
+        
+        .layered-btn:hover .btn-icon {
+            transform: translate(4px, -4px);
+        }
+
+        /* Nav Toggle Animation Mechanics */
+        :root {
+            --line-color: #ffffff;
+            --line-height: 2px;
+            --line-width: 32px;
+            --gap: 8px;
+            --collapse-dist: 5px;
+        }
+
+        .nav-toggle {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-end;
+            gap: var(--gap);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            -webkit-user-select: none;
+            user-select: none;
+            width: 40px;
+        }
+
+        .line {
+            height: var(--line-height);
+            background-color: var(--line-color);
+            display: block;
+            transform-origin: center;
+            will-change: transform, translate, rotate, width;
+            scale: 1 1;
+            translate: 0 0;
+            rotate: 0deg;
+            transition:
+                rotate 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0s,
+                translate 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.3s,
+                width 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.3s,
+                opacity 0.2s ease 0.3s,
+                scale 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0s;
+        }
+
+        .l1 {
+            width: var(--line-width);
+        }
+
+        .l2 {
+            width: calc(var(--line-width) * 0.55);
+        }
+
+        @keyframes wave-expand {
+
+            0%,
+            100% {
+                width: calc(var(--line-width) * 0.55);
+            }
+
+            50% {
+                width: calc(var(--line-width) * 0.85);
+            }
+        }
+
+        @keyframes wave-contract {
+
+            0%,
+            100% {
+                width: var(--line-width);
+            }
+
+            50% {
+                width: calc(var(--line-width) * 0.7);
+            }
+        }
+
+        .nav-toggle:not(.active):hover .l1 {
+            animation: wave-contract 0.6s infinite ease-in-out;
+        }
+
+        .nav-toggle:not(.active):hover .l2 {
+            animation: wave-expand 0.6s infinite ease-in-out;
+            animation-delay: 0.1s;
+        }
+
+        .nav-toggle.active .line {
+            width: var(--line-width);
+            transition:
+                translate 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0s,
+                width 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0s,
+                rotate 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.3s,
+                opacity 0.2s ease 0s,
+                scale 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0s;
+        }
+
+        .nav-toggle.active .l1 {
+            translate: 0 var(--collapse-dist);
+            rotate: 45deg;
+        }
+
+        .nav-toggle.active .l2 {
+            translate: 0 calc(var(--collapse-dist) * -1);
+            rotate: -45deg;
+        }
+
+        .nav-toggle.active:hover .l1,
+        .nav-toggle.active:hover .l2 {
+            scale: 1.15;
+        }
+
+        .nav-toggle:active {
+            transform: scale(0.95);
+        }
+
+        /* Animated Menu Link Hover (Desktop & Mobile) */
+        .animated-link {
+            position: relative;
+            display: inline-block;
+            width: max-content;
+        }
+
+        .animated-link::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            left: 0;
+            background-color: currentColor;
+            transform: scaleX(0);
+            transform-origin: right;
+            /* Shrinks to the right when hovered out */
+            transition: transform 0.4s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+
+        .animated-link:hover::after {
+            transform-origin: left;
+            /* Grows from the left when hovered in */
+            transform: scaleX(1);
+        }
+
+        .desktop-link::after {
+            height: 1.5px;
+            bottom: -4px;
+        }
+
+        .mobile-link::after {
+            height: 5px;
+            /* Matches the bold underline look */
+            bottom: 4px;
+            /* Sits cleanly beneath the uppercase text */
+        }
+
+        /* Fluid Segment Text Fill Animation */
+        .char {
+            color: #e5e5e5;
+            /* Transition removed here; animation is purely driven by JS loop for "alive" fluid feel */
+            will-change: color;
+        }
+
+        /* Staggered Split Text Reveal Animation */
+        .word-wrapper {
+            display: inline-flex;
+            overflow: hidden;
+            padding-bottom: 0.1em;
+            margin-right: 0.25em; /* Fallback, though JS inserts natural spaces */
+        }
+        
+        .letter {
+            display: inline-block;
+            transform: translateY(120%);
+            transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1); /* Matches hero slide curve */
+            will-change: transform;
+        }
+
+        .is-revealed .letter {
+            transform: translateY(0);
+        }
+
+        /* Scroll Arrow Animation */
+        @keyframes scroll-arrow-slide {
+            0% {
+                transform: translateY(-10px) scale(1.3);
+                opacity: 0;
+            }
+
+            30% {
+                transform: translateY(-3px) scale(1.3);
+                opacity: 1;
+            }
+
+            70% {
+                transform: translateY(3px) scale(1.3);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(10px) scale(1.3);
+                opacity: 0;
+            }
+        }
+
+        .scroll-container:hover .scroll-arrow {
+            animation: scroll-arrow-slide 1.2s infinite ease-in-out;
+        }
+
+        .scroll-arrow {
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+    </style>
+</head>
+
+<body class="antialiased overflow-x-hidden w-full">
+    <!-- Header Navigation Background (Drops down on scroll) -->
+    <div id="nav-bg"
+        class="fixed top-0 left-0 w-full h-[88px] lg:h-[104px] bg-white z-[65]" style="transform: translateY(-100%); will-change: transform;">
+    </div>
+
+    <!-- Header Navigation -->
+    <header
+        class="fixed top-0 left-0 w-full flex justify-between items-center px-6 py-6 md:px-12 z-[70] mix-blend-difference text-white">
+        <!-- Logo -->
+        <a href="#" class="z-50 block hover:opacity-80 transition-opacity">
+            <div class="text-3xl md:text-4xl lg:text-[2.2rem] font-bold tracking-tight text-white"
+                style="font-family: 'Telegraf', sans-serif;">
+                INTERRENTCARS
+            </div>
+        </a>
+
+        <div class="flex items-center gap-6 lg:gap-10 z-50">
+            <!-- Desktop Nav -->
+            <nav class="hidden md:flex items-center gap-8 lg:gap-10 text-xs font-semibold tracking-[0.15em] uppercase">
+                <a href="fleet.html" class="animated-link desktop-link">Fleet</a>
+                <a href="how-it-works.html" class="animated-link desktop-link">How It Works</a>
+                <a href="locations.html" class="animated-link desktop-link">Locations</a>
+                <a href="book.html" class="animated-link desktop-link">Book Now</a>
+            </nav>
+
+            <!-- Book Now Button (Desktop) -->
+            <a href="book.html" class="layered-btn header-btn hidden md:inline-flex group text-xs font-semibold tracking-[0.15em] uppercase">
+                <span class="bg-layer bg-layer-1"></span>
+                <span class="bg-layer bg-layer-2"></span>
+                <span class="bg-layer bg-layer-3"></span>
+                <span class="btn-text">Book Now</span>
+                <svg class="btn-icon w-4 h-4 ml-2" fill="none" stroke="currentColor" stroke-width="2.5"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7-7m7-7H3"></path>
+                </svg>
+            </a>
+
+            <!-- Mobile Actions (Book Now + Divider + Hamburger) -->
+            <div class="flex md:hidden items-center gap-3">
+                <a href="#" class="layered-btn header-btn group text-[10px] font-semibold tracking-wider uppercase">
+                    <span class="bg-layer bg-layer-1"></span>
+                    <span class="bg-layer bg-layer-2"></span>
+                    <span class="bg-layer bg-layer-3"></span>
+                    <span class="btn-text">Book Now</span>
+                    <svg class="btn-icon w-4 h-4 ml-1.5" fill="none" stroke="currentColor" stroke-width="2.5"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7-7m7-7H3"></path>
+                    </svg>
+                </a>
+                <div class="w-[1px] h-5 bg-white/40"></div>
+                <button id="nav-toggle" class="nav-toggle cursor-pointer p-2">
+                    <span class="line l1"></span>
+                    <span class="line l2"></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-menu"
+        class="fixed inset-0 bg-white z-[60] transform translate-x-full transition-transform duration-500 ease-[cubic-bezier(0.77,0,0.175,1)] flex flex-col text-black h-screen w-full md:hidden">
+
+        <!-- Navigation Links -->
+        <nav class="flex flex-col px-6 flex-grow gap-2 pt-32">
+            <a href="fleet.html" class="animated-link mobile-link text-[3.5rem] leading-tight font-normal tracking-wide">FLEET</a>
+            <a href="how-it-works.html"
+                class="animated-link mobile-link text-[3.5rem] leading-tight font-normal tracking-wide">HOW IT WORKS</a>
+            <a href="locations.html" class="animated-link mobile-link text-[3.5rem] leading-tight font-normal tracking-wide">LOCATIONS</a>
+            <a href="book.html"
+                class="animated-link mobile-link text-[3.5rem] leading-tight font-normal tracking-wide">BOOK NOW</a>
+        </nav>
+
+        <!-- Footer Text -->
+        <div class="px-6 py-8 text-gray-500 text-sm">
+            © Interrentcars 2026
+        </div>
+    </div>
+
+    <!-- Main Hero Slider -->
+    <main class="relative w-full h-screen z-0">
+        <div id="slider" class="relative w-full h-full bg-black">
+
+            <!-- Slider Dimmer Overlay (Fades in on scroll) -->
+            <div id="slider-dimmer" class="absolute inset-0 bg-black z-[25] pointer-events-none" style="opacity: 0; will-change: opacity;"></div>
+
+            <!-- Slide 1: Video Background Slide -->
+            <article class="slide is-active absolute inset-0 w-full h-full">
+                <!-- Background Video with object-cover for perfect aspect ratio handling -->
+                <video class="absolute inset-0 w-full h-full object-cover" autoplay loop muted playsinline>
+                    <source src="IMG_8751.MP4" type="video/mp4">
+                    <source
+                        src="https://assets.mixkit.co/videos/preview/mixkit-driving-a-car-on-a-mountain-road-13176-large.mp4"
+                        type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <!-- Dark Gradient for Text -->
+                <div class="absolute inset-0 text-overlay-gradient mix-blend-multiply"></div>
+
+                <!-- Content -->
+                <div class="absolute bottom-24 left-6 md:bottom-32 md:left-12 max-w-2xl z-20">
+                    <div class="overflow-hidden mb-4 md:mb-6 pb-2">
+                        <h3 class="slide-text text-6xl md:text-[5.5rem] font-light tracking-tight">The Journey</h3>
+                    </div>
+                    <div class="overflow-hidden pb-2">
+                        <p class="slide-text text-base md:text-xl font-light leading-relaxed max-w-md md:max-w-xl text-white/90">
+                            Experience the freedom of the open road with our premium selection of vehicles, tailored for
+                            your ultimate driving adventure.
+                        </p>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Slide 2: Video Background Slide -->
+            <article class="slide absolute inset-0 w-full h-full">
+                <!-- Background Video with object-cover for perfect aspect ratio handling -->
+                <video class="absolute inset-0 w-full h-full object-cover" autoplay loop muted playsinline>
+                    <source src="clip.mp4" type="video/mp4">
+                    <source
+                        src="https://assets.mixkit.co/videos/preview/mixkit-city-traffic-on-a-bridge-at-night-34692-large.mp4"
+                        type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <div class="absolute inset-0 text-overlay-gradient mix-blend-multiply"></div>
+
+                <!-- Content -->
+                <div class="absolute bottom-24 left-6 md:bottom-32 md:left-12 max-w-2xl z-20">
+                    <div class="overflow-hidden mb-4 md:mb-6 pb-2">
+                        <h3 class="slide-text text-6xl md:text-[5.5rem] font-light tracking-tight">Mitwit</h3>
+                    </div>
+                    <div class="overflow-hidden pb-2">
+                        <p class="slide-text text-base md:text-xl font-light leading-relaxed max-w-md md:max-w-xl text-white/90">
+                            Reinventing modern workspaces to empower teams and cultivate a culture of deep innovation.
+                        </p>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Slide 3: Video Background Slide -->
+            <article class="slide absolute inset-0 w-full h-full">
+                <!-- Background Video with object-cover for perfect aspect ratio handling -->
+                <video class="absolute inset-0 w-full h-full object-cover" autoplay loop muted playsinline>
+                    <source src="IMG_8753.MOV" type="video/quicktime">
+                    <source
+                        src="https://assets.mixkit.co/videos/preview/mixkit-car-driving-through-a-pine-forest-4286-large.mp4"
+                        type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <div class="absolute inset-0 text-overlay-gradient mix-blend-multiply"></div>
+
+                <!-- Content -->
+                <div class="absolute bottom-24 left-6 md:bottom-32 md:left-12 max-w-2xl z-20">
+                    <div class="overflow-hidden mb-4 md:mb-6 pb-2">
+                        <h3 class="slide-text text-6xl md:text-[5.5rem] font-light tracking-tight">Saaj Paris</h3>
+                    </div>
+                    <div class="overflow-hidden pb-2">
+                        <p class="slide-text text-base md:text-xl font-light leading-relaxed max-w-md md:max-w-xl text-white/90">
+                            A fresh approach to elegance, blending timeless Parisian chic with striking contemporary design.
+                        </p>
+                    </div>
+                </div>
+            </article>
+
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="absolute bottom-8 left-6 md:bottom-12 md:left-12 flex items-center gap-3 z-30" id="pagination">
+            <!-- Pagination dots will be injected by JS -->
+        </div>
+
+        <!-- Scroll Down Indicator -->
+        <div
+            class="scroll-container absolute bottom-6 right-6 md:bottom-10 md:right-10 w-24 h-24 md:w-32 md:h-32 flex items-center justify-center z-30 mix-blend-difference cursor-pointer">
+            <!-- Rotating SVG Text -->
+            <svg class="absolute inset-0 w-full h-full spin-slow" viewBox="0 0 100 100">
+                <path id="circlePath" d="M 50, 50 m -35, 0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0" fill="none" />
+                <text fill="white" font-size="10.5" font-weight="600" letter-spacing="3.5">
+                    <textPath href="#circlePath">SCROLL • SCROLL • SCROLL •</textPath>
+                </text>
+            </svg>
+            <!-- Center Arrow (Bigger with longer stem) -->
+            <svg class="scroll-arrow w-8 h-8 md:w-10 md:h-10 text-white" fill="none" stroke="currentColor"
+                stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v20m0 0l-7-7m7 7l7-7"></path>
+            </svg>
+        </div>
+    </main>
+
+    <!-- ============================================================
+         SECTION 2 — CINEMATIC SHRINK
+         Scroll-driven: letterbox bars slide in, then the video shrinks
+         from the LEFT edge (right edge stays pinned) to reveal the
+         description sliding into the exposed left half.
+    ============================================================ -->
+    <section id="cine" class="cine relative w-full bg-black">
+        <div class="cine-sticky">
+            <!-- Left description (revealed as the video shrinks) -->
+            <div class="cine-text">
+                <span class="cine-eyebrow">Interrentcars — The Drive</span>
+                <h2 class="cine-title">
+                    <span class="cine-line"><span>Rent the</span></span>
+                    <span class="cine-line"><span>extraordinary.</span></span>
+                </h2>
+                <p class="cine-desc">
+                    From weekend escapes to boardroom arrivals, every InterRent vehicle is delivered
+                    detailed, fuelled and ready. Choose the car. We handle the rest — no queues,
+                    no paperwork drama, just the open road.
+                </p>
+                <a href="fleet.html" class="layered-btn cine-btn group">
+                    <span class="bg-layer bg-layer-1"></span>
+                    <span class="bg-layer bg-layer-2"></span>
+                    <span class="bg-layer bg-layer-3"></span>
+                    <span class="btn-text">Explore the fleet</span>
+                    <svg class="btn-icon w-4 h-4 ml-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 19L19 5M5 5h14v14"></path>
+                    </svg>
+                </a>
+            </div>
+
+            <!-- Right-anchored video that shrinks from the left -->
+            <div class="cine-video">
+                <video class="cine-video-el" autoplay loop muted playsinline>
+                    <source src="IMG_8753.MOV" type="video/quicktime">
+                    <source src="clip.mp4" type="video/mp4">
+                    <source
+                        src="https://assets.mixkit.co/videos/preview/mixkit-driving-a-car-on-a-mountain-road-13176-large.mp4"
+                        type="video/mp4">
+                </video>
+                <!-- Cinematic letterbox bars (inside the video so they shrink with it) -->
+                <div class="cine-bar cine-bar-top"></div>
+                <div class="cine-bar cine-bar-bottom"></div>
+                <!-- Corner caption revealed with the cinematic mode -->
+                <div class="cine-caption">
+                    <span class="cine-caption-dot"></span> Now filming · your next journey
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <style>
+        .cine { height: 300vh; }
+        .cine-sticky {
+            position: sticky; top: 0; height: 100vh; width: 100%;
+            overflow: hidden; background: #000;
+        }
+        /* Right-anchored video: shrinking width moves the LEFT edge right, right edge pinned */
+        .cine-video {
+            position: absolute; top: 0; right: 0; height: 100%;
+            width: 100%; will-change: width; overflow: hidden;
+        }
+        .cine-video-el {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            object-fit: cover;
+        }
+        /* Letterbox bars */
+        .cine-bar {
+            position: absolute; left: 0; right: 0; height: 0;
+            background: #000; z-index: 5; will-change: height;
+        }
+        .cine-bar-top { top: 0; }
+        .cine-bar-bottom { bottom: 0; }
+        .cine-caption {
+            position: absolute; left: 1.5rem; bottom: calc(0px + 1.2rem); z-index: 6;
+            font-family: 'Barlow Condensed', 'Outfit', sans-serif;
+            letter-spacing: 0.2em; text-transform: uppercase; font-size: 0.72rem;
+            color: rgba(255,255,255,0.85); display: flex; align-items: center; gap: 0.6rem;
+            opacity: 0; will-change: opacity;
+        }
+        .cine-caption-dot { width: 8px; height: 8px; border-radius: 50%; background: #D1FF00; box-shadow: 0 0 12px #D1FF00; }
+        /* Left description */
+        .cine-text {
+            position: absolute; top: 50%; left: clamp(1.5rem, 5vw, 6rem);
+            transform: translateY(-50%);
+            width: min(46%, 640px); z-index: 4; color: #fff;
+            opacity: 0; will-change: opacity, transform;
+        }
+        .cine-eyebrow {
+            font-family: 'Barlow Condensed', 'Outfit', sans-serif;
+            letter-spacing: 0.25em; text-transform: uppercase; font-size: 0.8rem;
+            color: #D1FF00; display: inline-block; margin-bottom: 1.2rem;
+        }
+        .cine-title {
+            font-family: 'Outfit', sans-serif; font-weight: 300;
+            font-size: clamp(2.4rem, 5.2vw, 5rem); line-height: 0.98;
+            letter-spacing: -0.02em; margin: 0 0 1.6rem;
+        }
+        .cine-line { display: block; overflow: hidden; }
+        .cine-desc {
+            font-size: clamp(1rem, 1.2vw, 1.25rem); font-weight: 300;
+            line-height: 1.65; color: rgba(255,255,255,0.82); max-width: 46ch;
+            margin-bottom: 2.2rem;
+        }
+        .cine-btn { border: 1px solid #fff; color: #fff; padding: 0.85rem 1.8rem; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; }
+        @media (max-width: 860px) {
+            .cine-text { width: min(86%, 560px); }
+        }
+    </style>
+
+    <script>
+        (function () {
+            const section = document.getElementById('cine');
+            if (!section) return;
+            const video = section.querySelector('.cine-video');
+            const barTop = section.querySelector('.cine-bar-top');
+            const barBot = section.querySelector('.cine-bar-bottom');
+            const text = section.querySelector('.cine-text');
+            const caption = section.querySelector('.cine-caption');
+
+            const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+            const easeInOut = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
+
+            // Final resting width of the video (right half); left half exposed for text.
+            const MIN_WIDTH = 50;    // percent
+            const BAR_H = 11;        // vh per bar at full cinematic
+
+            let raf = null;
+            function update() {
+                raf = null;
+                const rect = section.getBoundingClientRect();
+                const scrollable = section.offsetHeight - window.innerHeight;
+                const p = clamp(-rect.top / scrollable, 0, 1);
+
+                // Phase 1: letterbox bars slide in (0 -> 0.30)
+                const barP = clamp(p / 0.30, 0, 1);
+                barTop.style.height = (BAR_H * barP) + 'vh';
+                barBot.style.height = (BAR_H * barP) + 'vh';
+                caption.style.opacity = barP;
+
+                // Phase 2: video shrinks from the left (0.32 -> 0.85)
+                const shrinkP = easeInOut(clamp((p - 0.32) / 0.53, 0, 1));
+                video.style.width = (100 - (100 - MIN_WIDTH) * shrinkP) + '%';
+
+                // Phase 3: description slides into the exposed left half (0.5 -> 0.9)
+                const textP = clamp((p - 0.5) / 0.4, 0, 1);
+                text.style.opacity = textP;
+                text.style.transform = `translateY(-50%) translateX(${(1 - textP) * 40}px)`;
+            }
+            function onScroll() { if (!raf) raf = requestAnimationFrame(update); }
+            window.addEventListener('scroll', onScroll, { passive: true });
+            window.addEventListener('resize', onScroll, { passive: true });
+            update();
+        })();
+    </script>
+
+    <!-- Combined Vision Section (Scroll Reveal & Animated Text) -->
+    <section id="vision-section" class="relative z-10 w-full min-h-screen bg-white text-black pt-[15vh] pb-32 px-6 md:px-12 flex flex-col justify-center overflow-hidden">
+        <div class="max-w-[1400px] w-full mx-auto mt-12 md:mt-24">
+            <!-- Huge Heading -->
+            <div id="vision-heading-container" class="flex flex-col items-start leading-[0.85] font-bold tracking-tighter mb-16 md:mb-32">
+                <h1 class="split-text-anim text-[15vw] md:text-[11rem] lg:text-[13rem] uppercase m-0 p-0">WHY WE</h1>
+                <div class="flex items-start uppercase m-0 p-0">
+                    <h1 class="split-text-anim text-[15vw] md:text-[11rem] lg:text-[13rem] m-0 p-0">DRIVE BEST</h1>
+                    <div class="flex flex-col text-[4vw] md:text-[3rem] lg:text-[4rem] ml-2 md:ml-4 mt-2 md:mt-6 leading-[0.8] font-medium overflow-hidden">
+                        <span class="letter" style="transition-delay: 1.4s">®</span>
+                        <span class="letter mt-2 md:mt-4" style="transition-delay: 1.5s">★</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Animated Paragraph Container (Uniform Font & Spacing) -->
+            <div class="w-full md:w-[80%] lg:w-[75%] ml-auto flex flex-col">
+                
+                <!-- Block 1 -->
+                <p class="text-fill-anim text-[7vw] md:text-[4rem] lg:text-[5.5rem] leading-[1.05] tracking-tight uppercase font-medium">
+                    EVERY CAR ARRIVES DETAILED, FUELLED AND FULLY INSURED 
+                    <span class="inline-block w-6 h-6 md:w-10 md:h-10 lg:w-12 lg:h-12 bg-black rounded-full align-middle mx-1 md:mx-2 transform -translate-y-1 md:-translate-y-2"></span> 
+                    TRANSPARENT PRICING, ZERO HIDDEN FEES AND DELIVERY WHEREVER YOU ARE 
+                    <span class="text-black align-middle text-[6vw] md:text-[3.5rem] lg:text-[4.5rem]">★</span> 
+                    THAT IS THE INTERRENT DIFFERENCE.
+                </p>
+
+                <!-- Block 2 (Arrow + Text) -->
+                <div class="mt-12 md:mt-20 flex items-start">
+                    <span class="inline-flex text-[#d96c34] mt-2 md:mt-4 mr-4 md:mr-8 flex-shrink-0">
+                        <svg class="w-10 h-10 md:w-16 md:h-16 lg:w-20 lg:h-20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 12h16m0 0l-6-6m6 6l-6 6"></path>
+                        </svg>
+                    </span>
+                    <p class="text-fill-anim text-[7vw] md:text-[4rem] lg:text-[5.5rem] leading-[1.05] tracking-tight uppercase font-medium">
+                        BOOK IN UNDER TWO MINUTES AND DRIVE AWAY THE SAME DAY
+                    </p>
+                </div>
+                
+                <!-- Button Container -->
+                <div class="mt-12 md:mt-16 ml-[3.5rem] md:ml-[6rem] lg:ml-[7rem]">
+                    <a href="how-it-works.html" class="layered-btn vision-btn px-6 py-3 md:px-8 md:py-4 text-xs md:text-sm font-semibold uppercase tracking-[0.15em] font-sans w-max">
+                        <span class="bg-layer bg-layer-1"></span>
+                        <span class="bg-layer bg-layer-2"></span>
+                        <span class="bg-layer bg-layer-3"></span>
+                        <span class="btn-text">How It Works</span>
+                        <svg class="btn-icon w-3 h-3 md:w-4 md:h-4 ml-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 19L19 5M5 5h14v14"></path>
+                        </svg>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================
+         SECTION 4 — ABOUT THE CARS (project-row list from thirdpage)
+         ============================================================ -->
+    <style>
+      .fleet-showcase { background:#f5f4f1; color:#111; padding:9vh 6vw 7vh; }
+      .fleet-showcase .fx-eyebrow { font-size:.72rem; letter-spacing:.28em; text-transform:uppercase; color:#8a8a86; margin-bottom:1.2rem; }
+      .fleet-showcase .fx-heading { font-family:'Outfit',sans-serif; font-size:clamp(2.4rem,6vw,5rem); font-weight:700; letter-spacing:-0.03em; line-height:1; margin:0 0 5vh; }
+      .car-row { display:flex; justify-content:space-between; align-items:center; padding:2.6vw 0; position:relative; cursor:pointer; border-top:1px solid rgba(0,0,0,0.12); }
+      .car-info { width:44%; position:relative; display:flex; flex-direction:column; }
+      .car-class { font-size:.72rem; letter-spacing:.22em; text-transform:uppercase; color:#a05a2c; margin-bottom:.6rem; }
+      .car-title { font-family:'Outfit',sans-serif; font-size:clamp(1.9rem,3.4vw,3.2rem); margin:0; font-weight:500; letter-spacing:-0.02em; }
+      .car-details { position:absolute; top:100%; left:0; width:88%; opacity:0; visibility:hidden; transform:translateY(40px); transition:all .5s cubic-bezier(0.19,1,0.22,1); padding-top:20px; }
+      .car-details p { font-size:1rem; line-height:1.6; color:#555; margin-bottom:24px; }
+      .car-price { font-weight:600; color:#111; }
+      .arrow-btn { background:#111; color:#fff; border:none; border-radius:50%; width:56px; height:56px; display:flex; align-items:center; justify-content:center; font-size:22px; cursor:pointer; transition:transform .3s ease; text-decoration:none; }
+      .arrow-btn:hover { transform:translateX(10px); }
+      .car-image { width:48%; aspect-ratio:16/10; overflow:hidden; }
+      .car-image img { width:100%; height:100%; object-fit:cover; transition:transform .8s cubic-bezier(0.19,1,0.22,1); will-change:transform; }
+      @media (min-width:768px){ .car-row:hover .car-details{ opacity:1; visibility:visible; transform:translateY(0); } .car-row:hover .car-image img{ transform:scale(1.05); } }
+      .fleet-brands { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:clamp(2rem,5vw,5rem); padding:6vh 0 1vh; margin-top:4vh; border-top:1px solid rgba(0,0,0,0.12); }
+      .fleet-brands span { font-family:'Outfit',sans-serif; font-weight:700; font-size:clamp(1rem,1.6vw,1.5rem); letter-spacing:.04em; color:#111; opacity:.55; transition:opacity .3s ease; text-transform:uppercase; }
+      .fleet-brands span:hover { opacity:1; }
+      .fleet-cta { display:flex; justify-content:center; margin-top:6vh; }
+      .show-all-btn { display:inline-flex; align-items:center; gap:.9rem; background:#111; color:#fff; text-decoration:none; padding:1.1rem 2.4rem; border-radius:100px; font-size:.8rem; letter-spacing:.18em; text-transform:uppercase; font-weight:600; transition:background .3s ease, gap .3s ease; }
+      .show-all-btn:hover { background:#a05a2c; gap:1.4rem; }
+      @media (max-width:768px){ .car-row{ flex-direction:column; align-items:flex-start; gap:1.4rem; } .car-info,.car-image{ width:100%; } .car-details{ position:static; opacity:1; visibility:visible; transform:none; width:100%; } }
+    </style>
+    <section id="fleet-showcase" class="fleet-showcase">
+      <p class="fx-eyebrow">Interrentcars — The Collection</p>
+      <h2 class="fx-heading">Meet the fleet.</h2>
+
+      <div class="car-row">
+        <div class="car-info">
+          <span class="car-class">Executive Sedan</span>
+          <h3 class="car-title">Mercedes-Benz S-Class</h3>
+          <div class="car-details">
+            <p>Whisper-quiet luxury with massaging seats, adaptive suspension and a chauffeur-grade rear cabin. The definitive way to arrive.</p>
+            <span class="car-price">From $240 / day</span>
+          </div>
+        </div>
+        <div class="car-image"><img src="https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=1200&q=80" alt="Mercedes-Benz S-Class" loading="lazy"></div>
+      </div>
+
+      <div class="car-row">
+        <div class="car-info">
+          <span class="car-class">Sports</span>
+          <h3 class="car-title">Porsche 911 Carrera</h3>
+          <div class="car-details">
+            <p>A rear-engine icon engineered for the perfect drive. Instant response, timeless silhouette and a soundtrack you'll remember.</p>
+            <span class="car-price">From $390 / day</span>
+          </div>
+        </div>
+        <div class="car-image"><img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&q=80" alt="Porsche 911 Carrera" loading="lazy"></div>
+      </div>
+
+      <div class="car-row">
+        <div class="car-info">
+          <span class="car-class">Luxury SUV</span>
+          <h3 class="car-title">Range Rover Autobiography</h3>
+          <div class="car-details">
+            <p>Commanding presence with limousine comfort. All-terrain capability wrapped in hand-finished leather and quiet confidence.</p>
+            <span class="car-price">From $310 / day</span>
+          </div>
+        </div>
+        <div class="car-image"><img src="https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=1200&q=80" alt="Range Rover Autobiography" loading="lazy"></div>
+      </div>
+
+      <div class="car-row">
+        <div class="car-info">
+          <span class="car-class">Grand Tourer</span>
+          <h3 class="car-title">BMW 8 Series Coupé</h3>
+          <div class="car-details">
+            <p>Effortless power meets long-distance grace. A driver's car dressed for the boulevard, ready for the open road.</p>
+            <span class="car-price">From $280 / day</span>
+          </div>
+        </div>
+        <div class="car-image"><img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?w=1200&q=80" alt="BMW 8 Series" loading="lazy"></div>
+      </div>
+
+      <div class="fleet-brands">
+        <span>Mercedes</span><span>Porsche</span><span>BMW</span><span>Audi</span><span>Land Rover</span><span>Tesla</span>
+      </div>
+
+      <div class="fleet-cta">
+        <a href="fleet.html" class="show-all-btn">Show All Cars
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 12h16m0 0l-6-6m6 6l-6 6"/></svg>
+        </a>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SECTION 5 — EXCLUSIVE SERVICE (garage hover tiles)
+         ============================================================ -->
+    <style>
+      .exclusive { background:#0e0e0e; color:#f4f4f2; padding:10vh 6vw; }
+      .exclusive .fx-eyebrow { color:#8a8a86; }
+      .exclusive .fx-heading { color:#f4f4f2; }
+      .exclusive-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:2.4vw; }
+      .ex-card { cursor:pointer; display:flex; flex-direction:column; }
+      .ex-card-img { position:relative; width:100%; aspect-ratio:4/3; overflow:hidden; margin-bottom:1.2rem; border-radius:6px; }
+      .ex-card-img img { width:100%; height:100%; object-fit:cover; transition:transform .8s cubic-bezier(0.19,1,0.22,1); }
+      .ex-card-title { font-family:'Outfit',sans-serif; font-size:1.35rem; font-weight:500; margin:0; letter-spacing:-0.01em; }
+      .ex-card-details { opacity:0; visibility:hidden; max-height:0; transform:translateY(-10px); transition:all .5s cubic-bezier(0.19,1,0.22,1); overflow:hidden; }
+      .ex-card-details p { font-size:.95rem; line-height:1.5; color:#a5a5a2; margin:0; }
+      .ex-card:hover .ex-card-img img { transform:scale(1.05); }
+      .ex-card:hover .ex-card-details { opacity:1; visibility:visible; max-height:200px; transform:translateY(0); margin-top:.8rem; }
+      @media (max-width:900px){ .exclusive-grid{ grid-template-columns:1fr; } .ex-card-details{ opacity:1; visibility:visible; max-height:200px; transform:none; margin-top:.8rem; } }
+    </style>
+    <section id="exclusive" class="exclusive">
+      <p class="fx-eyebrow">Interrentcars — Beyond the keys</p>
+      <h2 class="fx-heading">Exclusive services.</h2>
+      <div class="exclusive-grid">
+        <div class="ex-card">
+          <div class="ex-card-img"><img src="https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=900&q=80" alt="Chauffeur" loading="lazy"></div>
+          <h3 class="ex-card-title">Private Chauffeur</h3>
+          <div class="ex-card-details"><p>Sit back while a professional driver handles the road. Perfect for events, meetings and effortless nights out.</p></div>
+        </div>
+        <div class="ex-card">
+          <div class="ex-card-img"><img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=900&q=80" alt="Airport delivery" loading="lazy"></div>
+          <h3 class="ex-card-title">Airport Delivery</h3>
+          <div class="ex-card-details"><p>Your car, keys in hand, waiting the moment you land. Door-to-terminal delivery across every location.</p></div>
+        </div>
+        <div class="ex-card">
+          <div class="ex-card-img"><img src="https://images.unsplash.com/photo-1521791136064-7986c2920216?w=900&q=80" alt="Concierge" loading="lazy"></div>
+          <h3 class="ex-card-title">24/7 Concierge</h3>
+          <div class="ex-card-details"><p>A dedicated team on call around the clock — itinerary changes, upgrades and roadside support, instantly.</p></div>
+        </div>
+        <div class="ex-card">
+          <div class="ex-card-img"><img src="https://images.unsplash.com/photo-1502877338535-766e1452684a?w=900&q=80" alt="Long-term" loading="lazy"></div>
+          <h3 class="ex-card-title">Long-Term Leasing</h3>
+          <div class="ex-card-details"><p>Flexible monthly plans with maintenance included. All the freedom of ownership, none of the commitment.</p></div>
+        </div>
+        <div class="ex-card">
+          <div class="ex-card-img"><img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=900&q=80" alt="Weddings" loading="lazy"></div>
+          <h3 class="ex-card-title">Weddings &amp; Events</h3>
+          <div class="ex-card-details"><p>Make the entrance unforgettable. Curated vehicles, ribbons and a driver dressed for the occasion.</p></div>
+        </div>
+        <div class="ex-card">
+          <div class="ex-card-img"><img src="https://images.unsplash.com/photo-1552960562-daf630e9278b?w=900&q=80" alt="Corporate" loading="lazy"></div>
+          <h3 class="ex-card-title">Corporate Fleet</h3>
+          <div class="ex-card-details"><p>Scalable business accounts with consolidated billing and priority vehicles for your entire team.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SECTIONS 6 & 7 — DOCUMENTS + FAQ (reveal-block from how-it-works)
+         ============================================================ -->
+    <style>
+      .home_service { position:relative; width:100vw; height:100vh; background:#000; font-family:'Plus Jakarta Sans',sans-serif; }
+      .home_service_inner { position:relative; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4rem; overflow:hidden; background:#f0f0f0; }
+      .home_service_title { position:relative; font-size:21vw; font-weight:800; text-transform:uppercase; letter-spacing:-0.03em; height:21vw; width:100%; display:flex; justify-content:center; line-height:1; font-family:'Plus Jakarta Sans',sans-serif; }
+      .service-layer { position:absolute; white-space:nowrap; color:transparent; -webkit-text-stroke:1.5px rgba(26,26,26,0.15); will-change:transform,opacity; clip-path:inset(80% 0 0 0); }
+      .service-layer[data-ty="0"] { z-index:10; -webkit-text-stroke:1.5px rgba(26,26,26,1); clip-path:none; }
+      .service-layer.merged { color:#1a1a1a; -webkit-text-stroke:0px transparent; }
+      .home_service_list { list-style:none; width:95%; max-width:1400px; opacity:0; }
+      .home_service_item { display:flex; align-items:center; padding:1rem 2rem; border-bottom:1px solid rgba(0,0,0,0.05); cursor:pointer; position:relative; z-index:1; overflow:hidden; transition:background-color 0s, padding-left .5s cubic-bezier(0.16,1,0.3,1); }
+      .home_service_item:hover { background-color:#D1FF00; padding-left:4.5rem; }
+      .home_service_item::before { content:""; position:absolute; top:0; left:0; width:100%; height:100%; background-color:#1a1a1a; z-index:-1; transform:scaleY(0); transform-origin:center; transition:transform .4s cubic-bezier(0.85,0,0.15,1); will-change:transform; }
+      .home_service_item:hover::before { transform:scaleY(1); }
+      .home_service_num { font-size:2.5rem; font-family:'Barlow Condensed',sans-serif; margin-right:3rem; color:transparent; -webkit-text-stroke:1px #1a1a1a; transition:all .4s ease; }
+      .home_service_item:hover .home_service_num { color:#D1FF00; -webkit-text-stroke:0px transparent; transform:scale(1.1); }
+      .home_service_block { flex:1; }
+      .home_service_name { display:flex; font-size:2.2rem; font-family:'Barlow Condensed',sans-serif; text-transform:uppercase; color:#1a1a1a; transition:color .4s ease; }
+      .home_service_item:hover .home_service_name, .home_service_item:hover .home_service_name_char, .home_service_item:hover .home_service_detail { color:#D1FF00; }
+      .home_service_detail { font-size:.95rem; color:#666; font-weight:500; transition:color .4s ease; }
+      .reveal-top { position:absolute; top:0; left:0; right:0; height:50vh; background-color:#000; transform-origin:top; z-index:50; will-change:transform; }
+      .reveal-blocks { position:absolute; top:50vh; bottom:0; left:0; right:0; display:flex; flex-direction:column; z-index:50; pointer-events:none; }
+      .reveal-block { flex:1; background-color:#000; transform-origin:center; will-change:transform; }
+    </style>
+
+    <section class="home_service">
+      <div class="home_service_inner">
+        <div class="reveal-top"></div>
+        <div class="reveal-blocks"><div class="reveal-block"></div><div class="reveal-block"></div><div class="reveal-block"></div></div>
+        <h2 class="home_service_title" data-fit="1">
+          <span class="service-layer" data-ty="60">WHAT YOU NEED</span>
+          <span class="service-layer" data-ty="40">WHAT YOU NEED</span>
+          <span class="service-layer" data-ty="20">WHAT YOU NEED</span>
+          <span class="service-layer" data-ty="0">WHAT YOU NEED</span>
+          <span class="service-layer" data-ty="-20">WHAT YOU NEED</span>
+          <span class="service-layer" data-ty="-40">WHAT YOU NEED</span>
+          <span class="service-layer" data-ty="-60">WHAT YOU NEED</span>
+        </h2>
+        <ul class="home_service_list">
+          <li class="home_service_item">
+            <span class="home_service_num">01</span>
+            <div class="home_service_block">
+              <div class="home_service_name" data-text="Drivers License"></div>
+              <p class="home_service_detail">A valid driver's license is required to rent and legally operate any InterRent vehicle.</p>
+            </div>
+          </li>
+          <li class="home_service_item">
+            <span class="home_service_num">02</span>
+            <div class="home_service_block">
+              <div class="home_service_name" data-text="ID Card"></div>
+              <p class="home_service_detail">A government-issued ID card is used to confirm your identity at the time of pickup.</p>
+            </div>
+          </li>
+          <li class="home_service_item">
+            <span class="home_service_num">03</span>
+            <div class="home_service_block">
+              <div class="home_service_name" data-text="Passport"></div>
+              <p class="home_service_detail">International renters can present a valid passport as primary proof of identity.</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="home_service">
+      <div class="home_service_inner">
+        <div class="reveal-top"></div>
+        <div class="reveal-blocks"><div class="reveal-block"></div><div class="reveal-block"></div><div class="reveal-block"></div></div>
+        <h2 class="home_service_title">
+          <span class="service-layer" data-ty="60">FAQ</span>
+          <span class="service-layer" data-ty="40">FAQ</span>
+          <span class="service-layer" data-ty="20">FAQ</span>
+          <span class="service-layer" data-ty="0">FAQ</span>
+          <span class="service-layer" data-ty="-20">FAQ</span>
+          <span class="service-layer" data-ty="-40">FAQ</span>
+          <span class="service-layer" data-ty="-60">FAQ</span>
+        </h2>
+        <ul class="home_service_list">
+          <li class="home_service_item">
+            <span class="home_service_num">01</span>
+            <div class="home_service_block">
+              <div class="home_service_name" data-text="Minimum Age"></div>
+              <p class="home_service_detail">Drivers must be at least 21. Premium and performance vehicles require a minimum age of 25.</p>
+            </div>
+          </li>
+          <li class="home_service_item">
+            <span class="home_service_num">02</span>
+            <div class="home_service_block">
+              <div class="home_service_name" data-text="Is Insurance Included"></div>
+              <p class="home_service_detail">Every rental includes comprehensive insurance. Reduced-excess and zero-excess upgrades are available.</p>
+            </div>
+          </li>
+          <li class="home_service_item">
+            <span class="home_service_num">03</span>
+            <div class="home_service_block">
+              <div class="home_service_name" data-text="Mileage Limits"></div>
+              <p class="home_service_detail">Daily rentals include 250 km per day. Unlimited-mileage packages can be added at checkout.</p>
+            </div>
+          </li>
+          <li class="home_service_item">
+            <span class="home_service_num">04</span>
+            <div class="home_service_block">
+              <div class="home_service_name" data-text="Delivery Options"></div>
+              <p class="home_service_detail">We deliver to homes, hotels and airports across all service areas, typically within the hour.</p>
+            </div>
+          </li>
+          <li class="home_service_item">
+            <span class="home_service_num">05</span>
+            <div class="home_service_block">
+              <div class="home_service_name" data-text="Cancellation Policy"></div>
+              <p class="home_service_detail">Free cancellation up to 48 hours before pickup. Flexible rebooking on all premium reservations.</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SECTION 8 — FOOTER (drive-capital style)
+         ============================================================ -->
+    <style>
+      .site-footer { --fu: clamp(8px, calc(0.6vw + 0.6vh), 22px); background:#0c0d11; color:#f4f5f7; font-family:'Outfit',sans-serif; padding:calc(var(--fu)*3); display:flex; flex-direction:column; gap:calc(var(--fu)*2); min-height:100vh; justify-content:space-between; }
+      .site-footer .sf-headline { margin:0; font-size:clamp(34px, calc(4.2vw + 2.4vh), 132px); line-height:0.92; letter-spacing:0.01em; text-transform:uppercase; max-width:18ch; font-weight:700; }
+      .sf-columns { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)) auto; gap:calc(var(--fu)*2); align-items:start; padding-top:calc(var(--fu)*2); border-top:1px solid #262b36; }
+      .sf-col-title { font-size:calc(var(--fu)*0.9); letter-spacing:0.2em; text-transform:uppercase; color:#9aa0ad; margin:0 0 var(--fu); }
+      .sf-links { list-style:none; margin:0; padding:0; display:grid; gap:calc(var(--fu)*0.8); }
+      .sf-links a, .sf-social a { text-decoration:none; color:#f4f5f7; text-transform:uppercase; letter-spacing:0.06em; font-size:calc(var(--fu)*1.15); transition:color .2s ease; }
+      .sf-links a:hover { color:#c8a37a; }
+      .sf-social { display:flex; gap:calc(var(--fu)*2); }
+      .sf-social a { color:#9aa0ad; letter-spacing:0.12em; font-size:calc(var(--fu)*0.95); }
+      .sf-social a:hover { color:#f4f5f7; }
+      .sf-baseline { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:var(--fu); color:#9aa0ad; font-size:calc(var(--fu)*0.85); border-top:1px solid #262b36; padding-top:calc(var(--fu)*2); }
+      @media (max-width:720px){ .sf-columns{ grid-template-columns:1fr; } }
+    </style>
+    <footer class="site-footer">
+      <h2 class="sf-headline">The extraordinary is one tap away.</h2>
+      <div class="sf-columns">
+        <div>
+          <p class="sf-col-title">Explore</p>
+          <ul class="sf-links">
+            <li><a href="fleet.html">Fleet</a></li>
+            <li><a href="how-it-works.html">How It Works</a></li>
+            <li><a href="locations.html">Locations</a></li>
+            <li><a href="book.html">Book Now</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="sf-col-title">Company</p>
+          <ul class="sf-links">
+            <li><a href="#">About Us</a></li>
+            <li><a href="#">Careers</a></li>
+            <li><a href="mailto:hello@interrentcars.com">Contact</a></li>
+            <li><a href="#exclusive">Services</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="sf-col-title">Social</p>
+          <div class="sf-social">
+            <a href="#">Instagram</a>
+            <a href="#">LinkedIn</a>
+            <a href="#">YouTube</a>
+          </div>
+        </div>
+      </div>
+      <div class="sf-baseline">
+        <span>&copy; 2025 Interrentcars</span>
+        <span>Premium Car Rental</span>
+      </div>
+    </footer>
+
+    <!-- Reveal-block init for Documents + FAQ sections -->
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        if (typeof gsap === "undefined") return;
+        function setupSection(section) {
+          section.querySelectorAll('.home_service_name').forEach(el => {
+            const text = el.getAttribute('data-text') || '';
+            el.innerHTML = text.split('').map((char, i) =>
+              `<span class="home_service_name_char" style="transition-delay:${i * 15}ms">${char === ' ' ? '&nbsp;' : char}</span>`
+            ).join('');
+          });
+          const titleEl = section.querySelector('.home_service_title');
+          if (titleEl && titleEl.hasAttribute('data-fit')) {
+            const sampleLayer = titleEl.querySelector('.service-layer');
+            const fitTitle = () => {
+              titleEl.style.fontSize = '10vw';
+              const measured = sampleLayer.scrollWidth || 1;
+              const target = window.innerWidth * 0.92;
+              const px = (window.innerWidth * 0.10) * (target / measured);
+              titleEl.style.fontSize = px + 'px';
+              titleEl.style.height = px + 'px';
+            };
+            fitTitle();
+            window.addEventListener('resize', fitTitle);
+          }
+          const tl = gsap.timeline({ paused: true });
+          tl.to(section.querySelector('.reveal-top'), { scaleY: 0, duration: 1.2, ease: "power2.inOut" }, 0.2);
+          const blocks = section.querySelectorAll('.reveal-block');
+          tl.to(blocks[0], { scaleY: 0, duration: 0.8, ease: "power2.inOut" }, 0.2);
+          tl.to(blocks[1], { scaleY: 0, duration: 1.0, ease: "power2.inOut" }, 0.2);
+          tl.to(blocks[2], { scaleY: 0, duration: 1.2, ease: "power2.inOut" }, 0.2);
+          section.querySelectorAll('.service-layer').forEach((layer) => {
+            const val = parseFloat(layer.getAttribute('data-ty'));
+            tl.from(layer, { y: 400 + (Math.abs(val) * 10), opacity: 0, duration: 1.5, ease: "power3.out" }, 0.6);
+          });
+          tl.to(section.querySelector(".service-layer[data-ty='0']"), { className: "service-layer merged", duration: 0.1 }, "-=0.5");
+          tl.to(section.querySelector('.home_service_list'), { opacity: 1, duration: 0.8 }, "-=0.3");
+          tl.from(section.querySelectorAll('.home_service_item'), { opacity: 0, y: 20, stagger: 0.1, duration: 0.6 }, "-=0.5");
+          return tl;
+        }
+        document.querySelectorAll('.home_service').forEach(section => {
+          const tl = setupSection(section);
+          const io = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+              if (entry.isIntersecting) { tl.play(); io.unobserve(entry.target); }
+            });
+          }, { threshold: 0.3 });
+          io.observe(section);
+        });
+      });
+    </script>
+
+    <!-- JavaScript for Slider Functionality -->
+    <script>
+        // --- Premium "Heavy" Smooth Scrolling Initialization (Lenis) ---
+        const lenis = new Lenis({
+            duration: 1.2, // Reduced from 2.0 for faster settling
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Smooth ease-out
+            smoothWheel: true,
+            wheelMultiplier: 1.0, // Increased from 0.75 for less initial drag resistance
+            touchMultiplier: 2,
+            infinite: false,
+        });
+
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Navigation Background Dropdown & Slider Dimming on Scroll
+            const navBg = document.getElementById('nav-bg');
+            const sliderDimmer = document.getElementById('slider-dimmer');
+            
+            // Vision Section Animation Elements
+            const visionSection = document.getElementById('vision-section');
+            const fillTexts = document.querySelectorAll('.text-fill-anim');
+
+            // Pre-process fillTexts to split into characters for fluid sequential filling
+            fillTexts.forEach(text => {
+                if (text.dataset.initialized) return;
+                text.dataset.initialized = 'true';
+                
+                const newNodes = [];
+                text.childNodes.forEach(node => {
+                    if (node.nodeType === 3) { // Process only pure text nodes
+                        const textContent = node.textContent;
+                        for (let i = 0; i < textContent.length; i++) {
+                            const char = textContent[i];
+                            // Keep whitespace as normal text nodes to allow natural line wrapping
+                            if (char === ' ' || char === '\n' || char === '\t') {
+                                newNodes.push(document.createTextNode(char));
+                            } else {
+                                const span = document.createElement('span');
+                                span.textContent = char;
+                                span.className = 'char'; 
+                                newNodes.push(span);
+                            }
+                        }
+                    } else {
+                        // Keeps inline HTML icons and formatting untouched
+                        newNodes.push(node.cloneNode(true));
+                    }
+                });
+                text.innerHTML = '';
+                newNodes.forEach(node => text.appendChild(node));
+            });
+
+            // --- NEW: State array for "Alive" Ease-Out fluid scroll fill ---
+            const fillAnimData = Array.from(fillTexts).map(text => ({
+                element: text,
+                chars: text.querySelectorAll('.char'),
+                targetProgress: 0,
+                currentProgress: 0
+            }));
+
+            window.addEventListener('scroll', () => {
+                const scrollY = window.scrollY;
+                const vh = window.innerHeight;
+
+                // 1. Navbar Dropdown Logic
+                // Maps exactly 1:1 with scroll position to stay perfectly "in sync" with the page
+                const navHeight = navBg.offsetHeight || (window.innerWidth >= 1024 ? 104 : 88);
+                if (scrollY >= navHeight) {
+                    navBg.style.transform = `translateY(0px)`;
+                } else {
+                    navBg.style.transform = `translateY(${scrollY - navHeight}px)`;
+                }
+
+                // 2. Slider Dimming Logic
+                let dimOpacity = 0;
+                if (scrollY <= vh * 0.2) {
+                    // 0 to 20% scroll -> 0% to 10% opacity
+                    dimOpacity = (scrollY / (vh * 0.2)) * 0.1;
+                } else if (scrollY <= vh * 0.8) {
+                    // 20% to 80% scroll -> 10% to 100% opacity
+                    dimOpacity = 0.1 + ((scrollY - (vh * 0.2)) / (vh * 0.6)) * 0.9;
+                } else {
+                    // Beyond 80% scroll -> 100% opacity
+                    dimOpacity = 1;
+                }
+
+                if (sliderDimmer) {
+                    sliderDimmer.style.opacity = dimOpacity;
+                }
+
+                // 3. Vision Section Scroll Target Update
+                fillAnimData.forEach(data => {
+                    if (data.chars.length === 0) return;
+                    const textRect = data.element.getBoundingClientRect();
+
+                    // Active trigger zone: from 90% down the screen to 40% down the screen
+                    const start = vh * 0.9;
+                    const end = vh * 0.7; // Increased from 0.2 so it finishes filling earlier
+
+                    const scrollDistance = (start - end) + textRect.height;
+                    let progress = (start - textRect.top) / scrollDistance;
+
+                    // Update target. The loop handles the smooth ease-out catchup
+                    data.targetProgress = Math.max(0, Math.min(1, progress));
+                });
+                
+                // 4. Trigger Heading Reveal
+                const headingContainer = document.getElementById('vision-heading-container');
+                if (headingContainer) {
+                    const rect = headingContainer.getBoundingClientRect();
+                    // Trigger the slide-in when the top of the heading is 85% down the viewport
+                    if (rect.top < vh * 0.85) {
+                        headingContainer.classList.add('is-revealed');
+                    }
+                }
+            });
+
+            // 5. Setup Staggered Split Text Animation for Headings
+            const splitTexts = document.querySelectorAll('.split-text-anim');
+            let globalWordIndex = 0;
+            
+            splitTexts.forEach((heading) => {
+                const text = heading.textContent.trim();
+                heading.innerHTML = ''; // Clear original text
+                const words = text.split(' ');
+
+                words.forEach((word) => {
+                    const wordSpan = document.createElement('span');
+                    wordSpan.className = 'word-wrapper';
+
+                    word.split('').forEach((char, cIdx) => {
+                        const charSpan = document.createElement('span');
+                        charSpan.className = 'letter';
+                        charSpan.textContent = char;
+                        
+                        // Large delay between words (0.35s gap), very slight delay between letters (0.04s stagger)
+                        const delay = (globalWordIndex * 0.35) + (cIdx * 0.04); 
+                        charSpan.style.transitionDelay = `${delay}s`;
+                        wordSpan.appendChild(charSpan);
+                    });
+                    
+                    heading.appendChild(wordSpan);
+                    heading.appendChild(document.createTextNode(' '));
+                    globalWordIndex++;
+                });
+            });
+
+            // --- NEW: Animation Loop for Ease-Out Curve (Fast then Slow) ---
+            function updateFluidFill() {
+                fillAnimData.forEach(data => {
+                    if (data.chars.length === 0) return;
+                    
+                    // Lerp Formula: current += (target - current) * factor. 
+                    // This naturally moves fast initially, then slows down, creating the ease-out lag effect.
+                    data.currentProgress += (data.targetProgress - data.currentProgress) * 0.08;
+
+                    // Only paint if the change is visible to optimize performance
+                    if (Math.abs(data.targetProgress - data.currentProgress) > 0.001) {
+                        const totalChars = data.chars.length;
+                        const activeCount = data.currentProgress * totalChars;
+                        const spread = 7; // Increased from 10 to make the gradient tip wider and feel more filled
+
+                        data.chars.forEach((char, index) => {
+                            const distance = activeCount - index;
+                            if (distance >= spread) {
+                                char.style.color = '#000000'; // Filled
+                            } else if (distance <= 0) {
+                                char.style.color = '#e5e5e5'; // Unfilled
+                            } else {
+                                // Smooth visual gradient blend across the 'spread'
+                                const ratio = distance / spread; 
+                                // Apply ease-out to the color blending itself
+                                const easedRatio = 1 - Math.pow(1 - ratio, 3);
+                                const val = Math.round(229 * (1 - easedRatio)); // 229 is #e5e5e5
+                                char.style.color = `rgb(${val}, ${val}, ${val})`;
+                            }
+                        });
+                    }
+                });
+                requestAnimationFrame(updateFluidFill);
+            }
+            
+            // Kick off the loop
+            updateFluidFill();
+
+            // Mobile Menu Functionality
+            const mobileMenu = document.getElementById('mobile-menu');
+            const navToggle = document.getElementById('nav-toggle');
+
+            navToggle.addEventListener('click', () => {
+                navToggle.classList.toggle('active');
+                if (navToggle.classList.contains('active')) {
+                    mobileMenu.classList.remove('translate-x-full');
+                    mobileMenu.classList.add('translate-x-0');
+                } else {
+                    mobileMenu.classList.add('translate-x-full');
+                    mobileMenu.classList.remove('translate-x-0');
+                }
+            });
+
+            // Slider Functionality
+            const slides = document.querySelectorAll('.slide');
+            const paginationContainer = document.getElementById('pagination');
+            let currentSlideIndex = 0;
+            let slideInterval;
+            const intervalTime = 6000; // 6 seconds per slide
+
+            // Initialize Pagination
+            slides.forEach((_, index) => {
+                const dot = document.createElement('button');
+                dot.setAttribute('aria-label', `Go to slide ${index + 1}`);
+
+                // Base inactive classes with relative positioning for the inner filler
+                dot.className = 'relative overflow-hidden rounded-full transition-all duration-500 ease-out bg-white/50 hover:bg-white w-2 h-2';
+
+                // Create filler element for timer effect using hardware-accelerated transform
+                const filler = document.createElement('span');
+                filler.className = 'filler absolute top-0 left-0 h-full w-full bg-white origin-left';
+                filler.style.transform = 'scaleX(0)';
+                filler.style.transitionProperty = 'transform';
+                filler.style.transitionTimingFunction = 'linear';
+                filler.style.transitionDuration = '0ms';
+
+                dot.appendChild(filler);
+
+                dot.addEventListener('click', () => {
+                    if (currentSlideIndex !== index) goToSlide(index);
+                });
+                paginationContainer.appendChild(dot);
+            });
+
+            const dots = paginationContainer.querySelectorAll('button');
+
+            // Function to change slides
+            function goToSlide(index, isInit = false) {
+                // Manage slide transitions
+                if (!isInit) {
+                    const previousSlide = slides[currentSlideIndex];
+                    previousSlide.classList.remove('is-active');
+                    previousSlide.classList.add('is-leaving');
+
+                    // Remove 'is-leaving' after animation finishes to reset it for the future
+                    setTimeout(() => {
+                        previousSlide.classList.remove('is-leaving');
+                    }, 1200); // Matches the 1.2s CSS transition duration
+                } else {
+                    slides[currentSlideIndex].classList.remove('is-active');
+                }
+
+                const currentDot = dots[currentSlideIndex];
+                currentDot.className = 'relative overflow-hidden rounded-full transition-all duration-500 ease-out bg-white/50 hover:bg-white w-2 h-2';
+                const currentFiller = currentDot.querySelector('.filler');
+                currentFiller.style.transitionDuration = '0ms';
+                currentFiller.style.transform = 'scaleX(0)';
+
+                // Update index
+                currentSlideIndex = index;
+
+                // Set new active slide and dot
+                slides[currentSlideIndex].classList.add('is-active');
+
+                // Restart video if the slide has one
+                const activeVideo = slides[currentSlideIndex].querySelector('video');
+                if (activeVideo) {
+                    activeVideo.currentTime = 0;
+                    activeVideo.play().catch(e => console.log('Autoplay prevented', e));
+                }
+
+                const newDot = dots[currentSlideIndex];
+                // Set the track background (bg-white/30) and expand width
+                newDot.className = 'relative overflow-hidden rounded-full transition-all duration-500 ease-out bg-white/30 w-8 h-2';
+                const newFiller = newDot.querySelector('.filler');
+
+                // Force layout reflow before starting animation to ensure it transitions smoothly from 0
+                void newFiller.offsetWidth;
+
+                // Animate scale matching the interval time
+                newFiller.style.transitionDuration = `${intervalTime}ms`;
+                newFiller.style.transform = 'scaleX(1)';
+
+                // Reset interval when user clicks to prevent sudden jumps
+                resetInterval();
+            }
+
+            // Function to move to the next slide automatically
+            function nextSlide() {
+                let nextIndex = (currentSlideIndex + 1) % slides.length;
+                goToSlide(nextIndex);
+            }
+
+            // Interval management
+            function startInterval() {
+                slideInterval = setInterval(nextSlide, intervalTime);
+            }
+
+            function resetInterval() {
+                clearInterval(slideInterval);
+                startInterval();
+            }
+
+            // Initialize the first slide to trigger the filler animation on load
+            goToSlide(0, true);
+        });
+    </script>
+</body>
+</html>

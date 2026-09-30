@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page Runner</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f3efe5;
+      --panel: rgba(255, 252, 245, 0.9);
+      --panel-strong: #fffaf0;
+      --line: rgba(36, 35, 32, 0.16);
+      --text: #1f1c17;
+      --muted: #676056;
+      --accent: #146356;
+      --accent-strong: #0d4f44;
+      --shadow: 0 24px 60px rgba(43, 38, 31, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(20, 99, 86, 0.18), transparent 28%),
+        radial-gradient(circle at right, rgba(196, 155, 53, 0.18), transparent 24%),
+        linear-gradient(180deg, #fbf8f1 0%, var(--bg) 100%);
+      color: var(--text);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      padding: 28px;
+      border-right: 1px solid var(--line);
+      background: rgba(255, 248, 235, 0.78);
+      backdrop-filter: blur(18px);
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      font-size: 0.76rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent-strong);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 0.95;
+    }
+
+    .sidebar p,
+    .meta,
+    .dependency-list {
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin: 22px 0 14px;
+    }
+
+    button,
+    .open-link {
+      appearance: none;
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 16px;
+      font: inherit;
+      font-weight: 700;
+      background: var(--accent);
+      color: #f7f5ef;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: transform 160ms ease, background-color 160ms ease, opacity 160ms ease;
+      text-decoration: none;
+      text-align: center;
+    }
+
+    button:hover,
+    .open-link:hover {
+      transform: translateY(-1px);
+      background: var(--accent-strong);
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .open-link {
+      display: block;
+      margin-bottom: 18px;
+    }
+
+    .page-list {
+      list-style: none;
+      padding: 0;
+      margin: 20px 0 0;
+      display: grid;
+      gap: 8px;
+      max-height: 52vh;
+      overflow: auto;
+    }
+
+    .page-list button {
+      width: 100%;
+      justify-content: flex-start;
+      border-radius: 18px;
+      padding: 12px 14px;
+      background: var(--panel);
+      color: var(--text);
+      border: 1px solid transparent;
+      box-shadow: none;
+      font-weight: 600;
+    }
+
+    .page-list button:hover,
+    .page-list button.is-active {
+      background: var(--panel-strong);
+      border-color: rgba(20, 99, 86, 0.28);
+      color: var(--accent-strong);
+      transform: none;
+    }
+
+    .content {
+      padding: 28px;
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr);
+      gap: 16px;
+    }
+
+    .status-card,
+    .dependency-card,
+    .preview-shell {
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .status-card,
+    .dependency-card {
+      padding: 18px 20px;
+    }
+
+    .preview-shell {
+      overflow: hidden;
+      min-height: 72vh;
+    }
+
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(250, 246, 238, 0.88);
+    }
+
+    .preview-header strong {
+      display: block;
+      font-size: 1.1rem;
+    }
+
+    .preview-header span {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    iframe {
+      display: block;
+      width: 100%;
+      height: calc(72vh - 68px);
+      border: 0;
+      background: white;
+    }
+
+    .dependency-list {
+      margin: 10px 0 0;
+      padding-left: 18px;
+    }
+
+    .dependency-list strong {
+      color: var(--text);
+    }
+
+    @media (max-width: 960px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .page-list {
+        max-height: 28vh;
+      }
+
+      iframe {
+        height: 70vh;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <p class="eyebrow">Workspace Launcher</p>
+      <h1>Run every page in order.</h1>
+      <p>Start from this file after launching a local server. Use Previous and Next to step through each HTML page, or click any file in the list.</p>
+
+      <div class="toolbar">
+        <button id="prevButton" type="button">Previous</button>
+        <button id="nextButton" type="button">Next</button>
+      </div>
+
+      <a id="openLink" class="open-link" href="#" target="_blank" rel="noreferrer">Open current page</a>
+
+      <div class="meta" id="meta"></div>
+
+      <ol class="page-list" id="pageList"></ol>
+    </aside>
+
+    <main class="content">
+      <section class="status-card">
+        <strong id="currentName">Select a page</strong>
+        <div class="meta" id="currentPath"></div>
+      </section>
+
+      <section class="dependency-card">
+        <strong>Local files you need to keep in this folder</strong>
+        <ul class="dependency-list">
+          <li><strong>Shared runtime assets:</strong> IMG_8751.MP4, clip.mp4, IMG_8753.MOV.</li>
+          <li><strong>Pages that use those videos:</strong> 123 - Copy.html, 123.html, index.html.</li>
+          <li><strong>Missing from this workspace:</strong> telegraf/PPTelegraf-Regular.woff2, gellix/Gellix-Regular.woff2, gellix/Gellix-Regular.woff.</li>
+          <li><strong>Pages that expect those fonts:</strong> index.html, 123.html, 123 - Copy.html, &lt;!DOCTYPE html&gt;2.html, 2nd page.html, combined.html, Untitled-16.html, Untitled-3.html.</li>
+          <li><strong>Linked page chain already present in your files:</strong> index.html, thirdpage.html, thirdpagefinal.html, footer.html, opening-animation.html.</li>
+        </ul>
+      </section>
+
+      <section class="preview-shell">
+        <div class="preview-header">
+          <div>
+            <strong>Live preview</strong>
+            <span id="previewHint">Choose a page from the left.</span>
+          </div>
+        </div>
+        <iframe id="previewFrame" title="HTML page preview"></iframe>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const pages = [
+      "123 - Copy.html",
+      "123.html",
+      "29.html",
+      "2nd page.html",
+      "33.html",
+      "<!DOCTYPE html>.html",
+      "<!DOCTYPE html>2.html",
+      "Untitled-1.html",
+      "Untitled-111.html",
+      "Untitled-1111.html",
+      "Untitled-12.html",
+      "Untitled-13.html",
+      "Untitled-15.html",
+      "Untitled-16.html",
+      "Untitled-2.html",
+      "Untitled-3.html",
+      "Untitled-32.html",
+      "Untitled-3333.html",
+      "Untitled-35.html",
+      "Untitled-36.html",
+      "Untitled-4.html",
+      "Untitled-45.html",
+      "Untitled-5.html",
+      "Untitled-7.html",
+      "Untitled-8.html",
+      "adjustable footer .html",
+      "combined.html",
+      "create account.html",
+      "cursor.html",
+      "edpage.html",
+      "footer.html",
+      "footer_final.html",
+      "index.html",
+      "maybefooter.html",
+      "navanimation.html",
+      "navbar.html",
+      "navbar1.html",
+      "navbaropen.html",
+      "navbaropen2.html",
+      "opening-animation.html",
+      "reelongo.html",
+      "services.html",
+      "thirdpage.html",
+      "thirdpagefinal.html",
+      "thirdpagemoment.html"
+    ];
+
+    const pageList = document.getElementById("pageList");
+    const meta = document.getElementById("meta");
+    const currentName = document.getElementById("currentName");
+    const currentPath = document.getElementById("currentPath");
+    const previewHint = document.getElementById("previewHint");
+    const previewFrame = document.getElementById("previewFrame");
+    const openLink = document.getElementById("openLink");
+    const prevButton = document.getElementById("prevButton");
+    const nextButton = document.getElementById("nextButton");
+
+    const query = new URLSearchParams(window.location.search);
+    const requestedPage = query.get("page");
+    let currentIndex = Math.max(0, pages.indexOf(requestedPage));
+
+    function toHref(fileName) {
+      return encodeURI(fileName);
+    }
+
+    function syncUrl() {
+      const params = new URLSearchParams(window.location.search);
+      params.set("page", pages[currentIndex]);
+      window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
+    }
+
+    function renderList() {
+      pageList.innerHTML = "";
+      pages.forEach((fileName, index) => {
+        const item = document.createElement("li");
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = fileName;
+        if (index === currentIndex) {
+          button.classList.add("is-active");
+        }
+        button.addEventListener("click", () => {
+          currentIndex = index;
+          updatePage();
+        });
+        item.appendChild(button);
+        pageList.appendChild(item);
+      });
+    }
+
+    function updateButtons() {
+      prevButton.disabled = currentIndex === 0;
+      nextButton.disabled = currentIndex === pages.length - 1;
+    }
+
+    function updatePage() {
+      const fileName = pages[currentIndex];
+      const href = toHref(fileName);
+
+      syncUrl();
+      renderList();
+      updateButtons();
+
+      currentName.textContent = fileName;
+      currentPath.textContent = `File ${currentIndex + 1} of ${pages.length}`;
+      meta.textContent = `Showing ${pages.length} HTML files from this folder in alphabetical order.`;
+      previewHint.textContent = `Previewing ${fileName}`;
+      previewFrame.src = href;
+      openLink.href = href;
+      openLink.textContent = `Open ${fileName}`;
+      document.title = `Page Runner - ${fileName}`;
+    }
+
+    prevButton.addEventListener("click", () => {
+      if (currentIndex > 0) {
+        currentIndex -= 1;
+        updatePage();
+      }
+    });
+
+    nextButton.addEventListener("click", () => {
+      if (currentIndex < pages.length - 1) {
+        currentIndex += 1;
+        updatePage();
+      }
+    });
+
+    updatePage();
+  </script>
+</body>
+</html>

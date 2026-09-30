@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>24/7 Artists Nav Toggle</title>
+    <style>
+        /* --- 1. CONFIGURATION --- */
+        :root {
+            --bg-color: #111; 
+            --toggle-bg: #FFFFFF;
+            --line-color: #000000;
+            --line-height: 2px;
+            --line-width: 34px; 
+            --gap: 7px;
+            
+            /* Distance to move to center = gap + line-height */
+            /* Actually center-to-center distance:
+               Height(2) + Gap(7) = 9px distance between line centers */
+            --collapse-dist: 9px; 
+        }
+
+        body {
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        /* --- 2. TOGGLE CONTAINER --- */
+        .nav-toggle {
+            width: 80px;
+            height: 80px;
+            background-color: var(--toggle-bg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: var(--gap);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            
+            /* Clean up selection highlight on double click */
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        /* --- 3. THE LINES --- */
+        .line {
+            width: var(--line-width);
+            height: var(--line-height);
+            background-color: var(--line-color);
+            display: block;
+            
+            /* Physics & Animation Base */
+            transform-origin: center;
+            will-change: transform, translate, rotate;
+            
+            /* Using modern individual transform properties allows us to 
+               mix the 'dancing' scaleX animation with the 'X' formation 
+               without conflict. */
+            scale: 1 1;
+            translate: 0 0;
+            rotate: 0deg;
+
+            /* DEFAULT TRANSITION (Returning to Hamburger) 
+               Sequence: Rotate Back (0s delay) -> Then Translate Apart (0.3s delay)
+            */
+            transition: 
+                rotate 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0s,
+                translate 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.3s,
+                opacity 0.2s ease 0.3s,
+                scale 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0s;
+        }
+
+        /* --- 4. THE "DANCING" HOVER STATE --- */
+        /* Only apply dance when NOT active */
+        
+        @keyframes wave-expand {
+            0%, 100% { transform: scaleX(1); }
+            50% { transform: scaleX(1.25); } 
+        }
+
+        @keyframes wave-contract {
+            0%, 100% { transform: scaleX(1); }
+            50% { transform: scaleX(0.65); } 
+        }
+
+        @keyframes wave-pulse {
+            0%, 100% { transform: scaleX(1); }
+            50% { transform: scaleX(0.85); } 
+        }
+
+        /* The dance animations utilize 'transform' property specifically 
+           so they don't override the translate/rotate properties used for the X */
+        .nav-toggle:not(.active):hover .l1 {
+            animation: wave-pulse 0.6s infinite ease-in-out;
+        }
+        .nav-toggle:not(.active):hover .l2 {
+            animation: wave-contract 0.8s infinite ease-in-out;
+            animation-delay: 0.05s;
+        }
+        .nav-toggle:not(.active):hover .l3 {
+            animation: wave-expand 0.7s infinite ease-in-out;
+            animation-delay: 0.1s;
+        }
+
+        /* --- 5. THE "ACTIVE" X STATE --- */
+        
+        /* When active, we change the transition order:
+           Sequence: Translate Together (0s delay) -> Then Rotate (0.3s delay)
+        */
+        .nav-toggle.active .line {
+            transition: 
+                translate 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0s,
+                rotate 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.3s,
+                opacity 0.2s ease 0s,
+                scale 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0s; /* Added scale for hover effect */
+        }
+
+        /* Top Line: Move Down and Rotate */
+        .nav-toggle.active .l1 {
+            translate: 0 var(--collapse-dist);
+            rotate: 45deg;
+        }
+
+        /* Middle Line: Disappear quickly */
+        .nav-toggle.active .l2 {
+            opacity: 0;
+            /* Scale down slightly to look like it's being crushed */
+            transform: scaleX(0); 
+        }
+
+        /* Bottom Line: Move Up and Rotate */
+        .nav-toggle.active .l3 {
+            translate: 0 calc(var(--collapse-dist) * -1);
+            rotate: -45deg;
+        }
+
+        /* --- 6. INTERACTIVE X HOVER --- */
+        /* When active (X) and hovered, enlarge the cross */
+        .nav-toggle.active:hover .l1,
+        .nav-toggle.active:hover .l3 {
+            scale: 1.15;
+        }
+
+        /* Click Feedback */
+        .nav-toggle:active {
+            transform: scale(0.95);
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Added onclick handler to toggle the state -->
+    <div class="nav-toggle" onclick="this.classList.toggle('active')">
+        <span class="line l1"></span>
+        <span class="line l2"></span>
+        <span class="line l3"></span>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>24/7 Artists - Final Replica</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- 1. ROOT VARIABLES --- */
+        :root {
+            --color-black: #231E25;
+            --color-white: #FFF;
+            --color-brand-1: #FF55F8; /* Pink Brand Color */
+            --color-brand-2: #FF4337;
+            --font-family-gellix: 'Gellix', 'Inter', sans-serif;
+            
+            /* Bar Dimensions */
+            --large-height: 5.2222rem; 
+            --small-height: 3.8rem;
+            
+            /* Button Specifics */
+            --btn-fs: 1.2777rem;
+            --btn-padding: .3913em .6em .4413em;
+            --btn-spacing: -0.06em;
+        }
+
+        /* --- 2. RESET & LAYOUT --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            background-color: #111;
+            font-family: var(--font-family-gellix);
+            min-height: 200vh; /* Enables scrolling */
+            display: flex; 
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hero-placeholder {
+            margin-top: 30vh;
+            color: white;
+            text-align: center;
+            font-size: 4rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        /* --- 3. THE BAR CONTAINER --- */
+        .s__bar {
+            background-color: var(--color-white); 
+            
+            /* Borders: Remove Left/Bottom to anchor it visually to the corner */
+            border-top: 1px solid var(--color-black);
+            border-right: 1px solid var(--color-black);
+            border-bottom: 0; 
+            border-left: 0;
+
+            display: flex; 
+            align-items: stretch;
+            
+            /* POSITIONING: Fixed to Bottom-Left */
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            z-index: 100;
+            
+            /* Smooth Height Transition */
+            height: var(--large-height);
+            transition: height 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* The Neon LED Strip (Right Side) */
+        .s__bar::after {
+            content: '';
+            position: absolute;
+            right: -2px; 
+            top: 0;
+            width: 4px; 
+            height: 100%;
+            background-color: var(--color-brand-1);
+            box-shadow: 0 0 10px var(--color-brand-1), 0 0 5px var(--color-brand-1);
+            z-index: 101;
+            pointer-events: none;
+        }
+
+        /* --- 4. SCROLLED STATE (COLLAPSE) --- */
+        .s__bar.scrolled {
+            height: var(--small-height);
+        }
+
+        /* --- 5. SECTIONS COMMON --- */
+        .section {
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            border-right: 1px solid var(--color-black); 
+            height: 100%;
+        }
+        .section:last-child { border-right: none; }
+
+        /* --- 6. INFO SECTION (SLIDE ANIMATION) --- */
+        .info-sec {
+            font-size: 1rem;
+            line-height: 1.2;
+            font-weight: 500;
+            color: var(--color-black);
+            white-space: nowrap;
+            overflow: hidden;
+            
+            /* Open State */
+            max-width: 400px;
+            padding: 0 35px;
+            opacity: 1;
+            
+            /* Slide Animation Logic */
+            transition: 
+                max-width 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+                padding 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 0.5s ease-out;
+        }
+
+        /* Closed State */
+        .s__bar.scrolled .info-sec {
+            max-width: 0;
+            padding: 0;
+            opacity: 0;
+            border-right: 0px solid transparent; 
+        }
+
+        /* --- 7. LOGO SECTION --- */
+        .logo-sec { 
+            width: var(--large-height); 
+            flex-shrink: 0; 
+            transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .s__bar.scrolled .logo-sec { width: var(--small-height); }
+
+        .logo-circle {
+            width: 65%; height: 65%; border: 1px solid var(--color-black); border-radius: 50%;
+            display: flex; flex-direction: column; position: relative; color: var(--color-black); font-weight: 400;
+        }
+        .logo-line {
+            position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background-color: var(--color-black); transform: translateY(-50%);
+        }
+        .logo-num { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 0.9em; line-height: 1; }
+        .logo-num.top { padding-top: 2px; } .logo-num.bottom { padding-bottom: 2px; }
+        
+        /* --- 8. BRAND NAME --- */
+        .brand-sec { padding: 0 35px; font-weight: 800; font-size: 2rem; letter-spacing: -0.05em; color: var(--color-black); }
+        .s__bar.scrolled .brand-sec { padding: 0 25px; transition: padding 0.6s ease; }
+
+        /* --- 9. LOGIN BUTTON --- */
+        .login-sec { padding: 0 30px; }
+        .btn-login {
+            font-family: var(--font-family-gellix); background: transparent; border: 1px solid var(--color-black);
+            border-radius: 100px; padding: 10px 30px; font-size: 1.1rem; color: var(--color-black); text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        /* --- 10. CREATE ACCOUNT BUTTON (GLITCH) --- */
+        .cta-sec { padding: 0 25px; }
+
+        .btn-cta {
+            position: relative; display: inline-block; padding: var(--btn-padding);
+            font-size: var(--btn-fs); font-weight: 500; letter-spacing: var(--btn-spacing);
+            color: var(--color-black); text-decoration: none; border: 0; cursor: pointer; overflow: hidden; 
+            
+            /* Pixel Stepped Clip Path */
+            --clip-path: polygon(
+                0 10px, 5px 10px, 5px 5px, 10px 5px, 10px 0, 
+                calc(100% - 10px) 0, calc(100% - 10px) 5px, calc(100% - 5px) 5px, calc(100% - 5px) 10px, 100% 10px, 
+                100% calc(100% - 10px), calc(100% - 5px) calc(100% - 10px), calc(100% - 5px) calc(100% - 5px), calc(100% - 10px) calc(100% - 5px), calc(100% - 10px) 100%, 
+                10px 100%, 10px calc(100% - 5px), 5px calc(100% - 5px), 5px calc(100% - 10px), 0 calc(100% - 10px)
+            );
+            clip-path: var(--clip-path); -webkit-clip-path: var(--clip-path);
+            
+            transition: transform 0.6s ease;
+        }
+        
+        .s__bar.scrolled .btn-cta { transform: scale(0.9); }
+
+        /* Stripe Container - Stacked vertically (column) so cuts are horizontal */
+        .stripes-bg { 
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0; 
+            display: flex; flex-direction: column; z-index: 0; 
+        }
+        
+        /* Individual Stripes */
+        .stripe { 
+            flex: 1; width: 120%; margin-left: -10%; 
+            background: var(--color-brand-1); 
+            will-change: transform; 
+        }
+        
+        .btn-cta_inner { position: relative; z-index: 2; pointer-events: none; }
+
+        /* Glitch Keyframes (Left/Right Motion) */
+        @keyframes fmGlitch1 {
+            0% { transform: translateX(0); }
+            20% { transform: translateX(-4px); }
+            40% { transform: translateX(3px); }
+            60% { transform: translateX(-2px); }
+            80% { transform: translateX(4px); }
+            100% { transform: translateX(0); }
+        }
+        @keyframes fmGlitch2 {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(5px); }
+        }
+        @keyframes fmGlitch3 {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-3px); }
+            75% { transform: translateX(3px); }
+        }
+
+        /* Hover Assignments */
+        .btn-cta:hover .s1 { animation: fmGlitch2 0.4s infinite linear alternate; }
+        .btn-cta:hover .s2 { animation: fmGlitch1 0.2s infinite linear alternate-reverse; }
+        .btn-cta:hover .s3 { animation: fmGlitch3 0.3s infinite ease-in-out; }
+        .btn-cta:hover .s4 { animation: fmGlitch1 0.25s infinite linear alternate; }
+        .btn-cta:hover .s5 { animation: fmGlitch2 0.35s infinite linear alternate-reverse; }
+        .btn-cta:hover .s6 { animation: fmGlitch3 0.15s infinite ease-out; }
+        .btn-cta:hover .s7 { animation: fmGlitch1 0.3s infinite linear alternate; }
+        .btn-cta:hover .s8 { animation: fmGlitch2 0.45s infinite ease-in-out alternate-reverse; }
+
+    </style>
+</head>
+<body>
+
+    <div class="hero-placeholder">
+        Scroll Down<br>to see animation
+    </div>
+
+    <div class="s__bar" id="navbar">
+        <div class="section logo-sec">
+            <div class="logo-circle">
+                <div class="logo-num top">24</div>
+                <div class="logo-line"></div>
+                <div class="logo-num bottom">7</div>
+            </div>
+        </div>
+
+        <div class="section brand-sec">24/7Artists</div>
+
+        <div class="section info-sec">
+            A personalized music career<br>plan for independent artists.
+        </div>
+
+        <div class="section login-sec">
+            <a href="#" class="btn-login">Login</a>
+        </div>
+
+        <div class="section cta-sec">
+            <a href="#" class="btn-cta">
+                <div class="stripes-bg">
+                    <span class="stripe s1"></span>
+                    <span class="stripe s2"></span>
+                    <span class="stripe s3"></span>
+                    <span class="stripe s4"></span>
+                    <span class="stripe s5"></span>
+                    <span class="stripe s6"></span>
+                    <span class="stripe s7"></span>
+                    <span class="stripe s8"></span>
+                </div>
+                <span class="btn-cta_inner">Create Account</span>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Scroll detection to toggle the 'scrolled' class
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+    </script>
+
+</body>
+</html>

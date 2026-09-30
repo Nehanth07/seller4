@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FAQ</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@800&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background-color: #000; overflow: hidden; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    .home_service {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background: #000; 
+    }
+
+    .home_service_inner {
+      position: relative;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center; /* Centers the content vertically */
+      gap: 4rem; /* Balanced distance between title and list */
+      overflow: hidden;
+      background: #f0f0f0; 
+    }
+
+    /* --- Massive SERVICE Title --- */
+    .home_service_title {
+      position: relative;
+      font-size: 21vw;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: -0.03em;
+      height: 21vw;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      line-height: 1;
+    }
+
+    .service-layer {
+      position: absolute;
+      white-space: nowrap;
+      color: transparent;
+      -webkit-text-stroke: 1.5px rgba(26, 26, 26, 0.15);
+      will-change: transform, opacity;
+      clip-path: inset(80% 0 0 0); 
+    }
+
+    .service-layer[data-ty="0"] { 
+      z-index: 10; 
+      -webkit-text-stroke: 1.5px rgba(26, 26, 26, 1); 
+      clip-path: none; 
+    }
+    .service-layer.merged { color: #1a1a1a; -webkit-text-stroke: 0px transparent; }
+
+    /* --- Service List --- */
+    .home_service_list {
+      list-style: none;
+      width: 95%;
+      max-width: 1400px;
+      opacity: 0;
+    }
+
+    .home_service_item {
+      display: flex;
+      align-items: center;
+      padding: 1rem 2rem;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      cursor: pointer;
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+      transition: background-color 0s, padding-left 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .home_service_item:hover {
+      background-color: #D1FF00; 
+      padding-left: 4.5rem; 
+    }
+
+    .home_service_item::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #1a1a1a; 
+      z-index: -1;
+      transform: scaleY(0);      
+      transform-origin: center;  
+      transition: transform 0.4s cubic-bezier(0.85, 0, 0.15, 1);
+      will-change: transform;
+    }
+
+    .home_service_item:hover::before {
+      transform: scaleY(1);      
+    }
+
+    .home_service_num {
+      font-size: 2.5rem;
+      font-family: 'Barlow Condensed', sans-serif;
+      margin-right: 3rem;
+      color: transparent;
+      -webkit-text-stroke: 1px #1a1a1a;
+      transition: all 0.4s ease;
+    }
+
+    .home_service_item:hover .home_service_num {
+      color: #D1FF00;
+      -webkit-text-stroke: 0px transparent;
+      transform: scale(1.1);
+    }
+
+    .home_service_block { flex: 1; }
+
+    .home_service_name {
+      display: flex;
+      font-size: 2.2rem;
+      font-family: 'Barlow Condensed', sans-serif;
+      text-transform: uppercase;
+      color: #1a1a1a;
+      transition: color 0.4s ease;
+    }
+
+    .home_service_item:hover .home_service_name,
+    .home_service_item:hover .home_service_name_char,
+    .home_service_item:hover .home_service_detail {
+      color: #D1FF00;
+    }
+
+    .home_service_detail {
+      font-size: 0.95rem;
+      color: #666;
+      font-weight: 500;
+      transition: color 0.4s ease;
+    }
+
+    /* --- Reveal Transition Blocks --- */
+    .reveal-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 50vh;
+      background-color: #000;
+      transform-origin: top;
+      z-index: 50;
+      will-change: transform;
+    }
+    
+    .reveal-blocks {
+      position: absolute;
+      top: 50vh; 
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      flex-direction: column; 
+      z-index: 50;
+      pointer-events: none;
+    }
+    
+    .reveal-block {
+      flex: 1; 
+      background-color: #000;
+      transform-origin: center;
+      will-change: transform;
+    }
+  </style>
+</head>
+<body>
+
+  <section class="home_service">
+    <div class="home_service_inner">
+      
+      <div class="reveal-top"></div>
+
+      <div class="reveal-blocks">
+        <div class="reveal-block"></div>
+        <div class="reveal-block"></div>
+        <div class="reveal-block"></div>
+      </div>
+
+      <h2 class="home_service_title">
+        <span class="service-layer" data-ty="60">FAQ</span>
+        <span class="service-layer" data-ty="40">FAQ</span>
+        <span class="service-layer" data-ty="20">FAQ</span>
+        <span class="service-layer" data-ty="0">FAQ</span>
+        <span class="service-layer" data-ty="-20">FAQ</span>
+        <span class="service-layer" data-ty="-40">FAQ</span>
+        <span class="service-layer" data-ty="-60">FAQ</span>
+      </h2>
+
+      <ul class="home_service_list">
+        <li class="home_service_item">
+          <span class="home_service_num">01</span>
+          <div class="home_service_block">
+            <div class="home_service_name" data-text="Virtual Gallery"></div>
+            <p class="home_service_detail">Webブラウザで閲覧可能なバーチャルギャラリーの企画・デザイン・開発</p>
+          </div>
+        </li>
+        <li class="home_service_item">
+          <span class="home_service_num">02</span>
+          <div class="home_service_block">
+            <div class="home_service_name" data-text="NFT Solutions"></div>
+            <p class="home_service_detail">NFTの発行、プロジェクト運営、NFTを使ったWEBサービスの企画・デザイン・開発</p>
+          </div>
+        </li>
+        <li class="home_service_item">
+          <span class="home_service_num">03</span>
+          <div class="home_service_block">
+            <div class="home_service_name" data-text="AI Integration"></div>
+            <p class="home_service_detail">LLMを活用したチャットボットや、業務効率化のためのAIツールの導入支援</p>
+          </div>
+        </li>
+        <li class="home_service_item">
+          <span class="home_service_num">04</span>
+          <div class="home_service_block">
+            <div class="home_service_name" data-text="Web Experience"></div>
+            <p class="home_service_detail">GSAPやThree.jsを駆使した、没入感のあるインタラクティブなウェブサイト制作</p>
+          </div>
+        </li>
+        <li class="home_service_item">
+          <span class="home_service_num">05</span>
+          <div class="home_service_block">
+            <div class="home_service_name" data-text="Creative Strategy"></div>
+            <p class="home_service_detail">ブランドの価値を最大化するための、デジタル領域におけるクリエイティブ戦略立案</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      
+      document.querySelectorAll('.home_service_name').forEach(el => {
+        const text = el.getAttribute('data-text');
+        el.innerHTML = text.split('').map((char, i) => 
+          `<span class="home_service_name_char" style="transition-delay: ${i * 15}ms">${char === ' ' ? '&nbsp;' : char}</span>`
+        ).join('');
+      });
+
+      // Simple timeline that runs once on load since there's no scroll now
+      const tl = gsap.timeline();
+
+      tl.to(".reveal-top", {
+        scaleY: 0,
+        duration: 1.2,
+        ease: "power2.inOut"
+      }, 0.2);
+
+      tl.to(".reveal-block:nth-child(1)", { scaleY: 0, duration: 0.8, ease: "power2.inOut" }, 0.2);
+      tl.to(".reveal-block:nth-child(2)", { scaleY: 0, duration: 1.0, ease: "power2.inOut" }, 0.2);
+      tl.to(".reveal-block:nth-child(3)", { scaleY: 0, duration: 1.2, ease: "power2.inOut" }, 0.2);
+
+      const layers = document.querySelectorAll('.service-layer');
+      layers.forEach((layer) => {
+        const val = parseFloat(layer.getAttribute('data-ty'));
+        tl.from(layer, { 
+          y: 400 + (Math.abs(val) * 10), 
+          opacity: 0, 
+          duration: 1.5, 
+          ease: "power3.out" 
+        }, 0.6);
+      });
+
+      tl.to(".service-layer[data-ty='0']", {
+        className: "service-layer merged",
+        duration: 0.1
+      }, "-=0.5");
+
+      tl.to(".home_service_list", { opacity: 1, duration: 0.8 }, "-=0.3");
+      tl.from(".home_service_item", {
+        opacity: 0,
+        y: 20,
+        stagger: 0.1,
+        duration: 0.6,
+      }, "-=0.5");
+    });
+  </script>
+</body>
+</html>

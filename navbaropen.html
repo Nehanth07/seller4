@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>24/7 Artists Menu Replica</title>
+    <!-- Using Outfit to simulate the geometric feel of Gellix -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- 1. GLOBAL SETUP & VARS FROM SCREENSHOTS --- */
+        :root {
+            /* Simulating the variable structure from your screenshots */
+            --font-family-gellix: 'Outfit', sans-serif; 
+            --font-family-sans: var(--font-family-gellix);
+            --font-family-heading: var(--font-family-sans);
+            --font-family-text: var(--font-family-sans);
+            
+            --font-size-base: 18px;
+            --font-weight-base: 500;
+            --font-height-base: 1.33;
+            --font-spacing-base: 0;
+
+            /* Colors */
+            --color-pink: #FF40F5; 
+            --color-black: #231E25; /* Exact hex from screenshot */
+            --color-white: #FFFFFF;
+            --border-color: #000000;
+            
+            /* Toggle specific variables */
+            --toggle-bg: #FFFFFF;
+            --line-color: #000000;
+            --line-height: 2px;
+            --line-width: 32px; 
+            --gap: 7px;
+            --collapse-dist: 9px; 
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--color-black);
+            color: var(--color-black);
+            
+            /* Applying the referenced variables */
+            font-family: var(--font-family-text);
+            font-size: var(--font-size-base);
+            font-weight: var(--font-weight-base);
+            line-height: var(--font-height-base);
+            
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- 2. GRID LAYOUT SYSTEM --- */
+        .layout-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 90px 1fr 1fr 1fr 100px;
+            height: 100vh;
+            width: 100%;
+            background-color: var(--border-color);
+            gap: 1px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* --- 3. MASK & ANIMATION LOGIC --- */
+        
+        .grid-cell {
+            background-color: transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide-panel {
+            width: 100%;
+            height: 100%;
+            background-color: var(--color-pink);
+            display: flex;
+            align-items: center;
+            opacity: 0; 
+            transform: translateX(-100%);
+            animation: slideIn cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 1; transform: translateX(-100%); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* --- STAGGERED ENTRANCES --- */
+        .grid-cell:nth-child(1) .slide-panel { animation-duration: 0.8s; animation-delay: 0.05s; }
+        .grid-cell:nth-child(2) .slide-panel { animation-duration: 1.0s; animation-delay: 0.15s; }
+        .grid-cell:nth-child(3) .slide-panel { animation-duration: 1.1s; animation-delay: 0.1s; }
+        .grid-cell:nth-child(4) .slide-panel { animation-duration: 0.9s; animation-delay: 0.25s; }
+        .grid-cell:nth-child(5) .slide-panel { animation-duration: 1.0s; animation-delay: 0.2s; }
+        .grid-cell:nth-child(6) .slide-panel { animation-duration: 1.2s; animation-delay: 0.35s; }
+        .grid-cell:nth-child(7) .slide-panel { animation-duration: 0.85s; animation-delay: 0.3s; }
+        .grid-cell:nth-child(8) .slide-panel { animation-duration: 1.1s;  animation-delay: 0.4s; }
+        .grid-cell:nth-child(9) .slide-panel { animation-duration: 0.9s; animation-delay: 0.45s; }
+        .grid-cell:nth-child(10) .slide-panel { animation-duration: 1.0s; animation-delay: 0.5s; }
+
+
+        /* --- 4. COMPONENT STYLES --- */
+
+        .header-left { grid-column: 1 / 2; }
+        .header-right { grid-column: 2 / 3; }
+        
+        .header-content {
+            justify-content: space-between;
+            padding-right: 0;
+        }
+
+        .brand-section {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            padding: 0 2rem;
+            border-right: 1px solid var(--color-black);
+        }
+        
+        .brand-logo { font-weight: 700; font-size: 1.8rem; letter-spacing: -0.03em; }
+
+        .clock-circle {
+            width: 50px; height: 50px;
+            border: 1px solid var(--color-black); border-radius: 50%;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            font-size: 0.7rem; line-height: 1; margin-right: 20px;
+        }
+        .clock-divider { width: 100%; height: 1px; background: black; margin: 2px 0; }
+
+        .auth-buttons { display: flex; gap: 10px; padding: 0 2rem; }
+
+        /* BUTTON ANIMATION */
+        .btn-pill {
+            background: var(--color-black); 
+            color: var(--color-white);
+            padding: 0.6rem 1.4rem; 
+            border-radius: 50px;
+            text-decoration: none; 
+            font-weight: 500; 
+            font-size: 0.9rem;
+            position: relative;
+            overflow: hidden; 
+            z-index: 1; 
+            transition: color 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s;
+        }
+
+        .btn-pill::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--color-white); 
+            z-index: -1;
+            transform: scaleY(0); 
+            transform-origin: center; 
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .btn-pill:hover { transform: scale(1.05); color: var(--color-black); }
+        .btn-pill:hover::before { transform: scaleY(1); }
+
+        .toggle-wrapper {
+            width: 90px; height: 100%;
+            background: var(--color-white);
+            display: flex; align-items: center; justify-content: center;
+            border-left: 1px solid var(--color-black);
+        }
+
+        /* --- NAVIGATION LINKS INTERACTION --- */
+        .nav-link {
+            text-decoration: none; color: var(--color-black);
+            font-size: 6rem; font-weight: 600;
+            width: 100%; height: 100%;
+            display: flex; align-items: center;
+            position: relative; /* Context for absolute arrow */
+            
+            /* CHANGE HERE: Adjust this value to move words left/right */
+            padding-left: 10px; 
+            
+            letter-spacing: -0.04em;
+            transition: background-color 0.3s;
+        }
+        @media (max-width: 1024px) { .nav-link { font-size: 4rem; } }
+        @media (max-width: 768px) { .nav-link { font-size: 3rem; } }
+
+        .nav-link:hover { background-color: rgba(255,255,255, 0.1); }
+
+        /* ARROW: Positioned Absolute so it doesn't push text */
+        .arrow-icon {
+            width: 0.8em; height: 0.8em; 
+            
+            /* KEY CHANGE: Removed from flow */
+            position: absolute;
+            left: 10px; /* Aligned with the start */
+            
+            opacity: 0; 
+            transform: translateX(-20px);
+            /* Fast transition for arrow */
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        /* TEXT WRAPPER: Moves Right on Hover */
+        .nav-text {
+            display: inline-block;
+            transform: translateX(0);
+            /* Slower transition for text creates the "weight" difference */
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: transform;
+        }
+
+        /* HOVER STATES */
+        .nav-link.current .arrow-icon, 
+        .nav-link:hover .arrow-icon {
+            opacity: 1; 
+            transform: translateX(0);
+        }
+
+        .nav-link:hover .nav-text {
+            /* Text moves right slightly to "make room" for the arrow */
+            transform: translateX(60px); /* Increased move distance to clear the big arrow */
+        }
+
+        /* Footer Specifics */
+        .footer-left { grid-column: 1 / 2; }
+        .footer-right { grid-column: 2 / 3; }
+
+        .footer-grid-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            width: 100%; height: 100%;
+        }
+        
+        .footer-item {
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em;
+            text-transform: uppercase;
+            border-right: 1px solid var(--color-black);
+        }
+        .footer-item:last-child { border-right: none; }
+        
+        .social-icons { gap: 20px; font-size: 1.2rem; }
+
+        /* Toggle Animation */
+        .nav-toggle {
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            gap: var(--gap); cursor: pointer;
+        }
+        .line {
+            width: var(--line-width); height: var(--line-height);
+            background-color: var(--line-color); display: block;
+            transform-origin: center;
+            transition: translate 0.3s cubic-bezier(0.4, 0, 0.2, 1), rotate 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.3s, opacity 0.2s, scale 0.2s;
+        }
+        .nav-toggle.active .l1 { translate: 0 var(--collapse-dist); rotate: 45deg; }
+        .nav-toggle.active .l2 { opacity: 0; transform: scaleX(0); }
+        .nav-toggle.active .l3 { translate: 0 calc(var(--collapse-dist) * -1); rotate: -45deg; }
+        .nav-toggle.active:hover .l1, .nav-toggle.active:hover .l3 { scale: 1.15; }
+
+    </style>
+</head>
+<body>
+
+    <div class="layout-grid">
+        
+        <!-- ROW 1: HEADER -->
+        <div class="grid-cell header-left">
+            <div class="slide-panel"></div>
+        </div>
+
+        <div class="grid-cell header-right">
+            <div class="slide-panel header-content">
+                <div class="brand-section">
+                    <div class="clock-circle">
+                        <span>24</span><div class="clock-divider"></div><span>7</span>
+                    </div>
+                    <div class="brand-logo">24/7Artists</div>
+                </div>
+                
+                <div class="auth-buttons">
+                    <a href="#" class="btn-pill">Login</a>
+                    <a href="#" class="btn-pill">Signup</a>
+                </div>
+
+                <div class="toggle-wrapper">
+                    <div class="nav-toggle active" onclick="this.classList.toggle('active')">
+                        <span class="line l1"></span><span class="line l2"></span><span class="line l3"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ROW 2 -->
+        <div class="grid-cell">
+            <a href="#" class="slide-panel nav-link current">
+                <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                <span class="nav-text">Home</span>
+            </a>
+        </div>
+        <div class="grid-cell">
+            <a href="#" class="slide-panel nav-link">
+                <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                <span class="nav-text">Events</span>
+            </a>
+        </div>
+
+        <!-- ROW 3 -->
+        <div class="grid-cell">
+            <a href="#" class="slide-panel nav-link">
+                <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                <span class="nav-text">Shop</span>
+            </a>
+        </div>
+        <div class="grid-cell">
+            <a href="#" class="slide-panel nav-link">
+                <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                <span class="nav-text">Blog</span>
+            </a>
+        </div>
+
+        <!-- ROW 4 -->
+        <div class="grid-cell">
+            <a href="#" class="slide-panel nav-link">
+                <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                <span class="nav-text">About</span>
+            </a>
+        </div>
+        <div class="grid-cell">
+            <div class="slide-panel"></div>
+        </div>
+
+        <!-- ROW 5: FOOTER -->
+        <div class="grid-cell footer-left">
+            <div class="slide-panel"></div>
+        </div>
+        <div class="grid-cell footer-right">
+            <div class="slide-panel footer-grid-panel">
+                <div class="footer-item">©2026 24/7 Artists</div>
+                <div class="footer-item">Legal Notice</div>
+                <div class="footer-item social-icons">
+                    <span>f</span> <span>O</span> <span>X</span> <span>▶</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ReelOnGo Ops Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+      padding: 30px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    .card {
+      background: #020617;
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 520px;
+    }
+
+    label {
+      display: block;
+      margin-top: 12px;
+      font-size: 14px;
+      color: #94a3b8;
+    }
+
+    input, button {
+      margin-top: 6px;
+      padding: 10px;
+      width: 100%;
+      border-radius: 8px;
+      border: none;
+      font-size: 15px;
+    }
+
+    button {
+      margin-top: 20px;
+      background: #2563eb;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    .result {
+      margin-top: 25px;
+      padding: 15px;
+      border-radius: 10px;
+      display: none;
+    }
+
+    .LOW { background: #064e3b; }
+    .MEDIUM { background: #78350f; }
+    .HIGH { background: #7f1d1d; }
+    .CRITICAL { background: #581c87; }
+
+    .metric {
+      margin: 6px 0;
+      font-size: 15px;
+    }
+
+    .price {
+      font-size: 22px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🎬 ReelOnGo – Ops Availability Dashboard</h1>
+<p>Internal use only · Live calendar-based load check</p>
+
+<div class="card">
+  <label>Start Time (IST)</label>
+  <input type="datetime-local" id="start" />
+
+  <label>End Time (IST)</label>
+  <input type="datetime-local" id="end" />
+
+  <button onclick="analyze()">Check Availability</button>
+
+  <div id="result" class="result">
+    <div class="metric" id="window"></div>
+    <div class="metric" id="creators"></div>
+    <div class="metric" id="utilization"></div>
+    <div class="metric" id="traffic"></div>
+    <div class="price" id="price"></div>
+  </div>
+</div>
+
+<script>
+  // 🔗 HF Space backend URL
+  const BACKEND_URL = "https://low-key-007-reelongo.hf.space";
+
+  async function analyze() {
+    const start = document.getElementById("start").value;
+    const end = document.getElementById("end").value;
+
+    if (!start || !end) {
+      alert("Please select both start and end time");
+      return;
+    }
+
+    const res = await fetch(
+      `${BACKEND_URL}/analyze?start=${start}&end=${end}`
+    );
+
+    const data = await res.json();
+
+    const resultBox = document.getElementById("result");
+    resultBox.className = `result ${data.traffic_status}`;
+    resultBox.style.display = "block";
+
+    document.getElementById("window").innerText =
+      `Window: ${data.requested_window}`;
+
+    document.getElementById("creators").innerText =
+      `Busy: ${data.busy_creators} | Free: ${data.free_creators}`;
+
+    document.getElementById("utilization").innerText =
+      `Utilization: ${data.utilization_percent}%`;
+
+    document.getElementById("traffic").innerText =
+      `Traffic Status: ${data.traffic_status}`;
+
+    document.getElementById("price").innerText =
+      `Suggested Price: ₹${data.suggested_price.toLocaleString()}`;
+  }
+</script>
+
+</body>
+</html>
