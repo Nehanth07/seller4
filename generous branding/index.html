@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="format-detection" content="telephone=no">
+  <title>Generous — La Marque au Cœur ©</title>
+  <meta name="description" content="Agence conseil en stratégie de marque, branding et design d'espaces. Nous inventons des identités et des expériences pour valoriser les marques.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="is-loading">
+
+  <!-- Custom cursor -->
+  <div class="cursor" aria-hidden="true">
+    <div class="cursor__dot"></div>
+    <div class="cursor__ring"></div>
+  </div>
+
+  <!-- Loader -->
+  <div class="loader" id="loader" aria-hidden="true">
+    <div class="loader__inner">
+      <span class="loader__mark">G</span>
+      <span class="loader__count" id="loaderCount">0</span>
+    </div>
+  </div>
+
+  <div class="site-container">
+
+    <!-- Header -->
+    <header class="site-head site-head--white" id="siteHead">
+      <div class="u-container">
+        <a href="#top" class="site-head__logo" aria-label="Generous — accueil">
+          <span class="site-head__logo__sprite">
+            <span class="site-head__logo__text">Generous</span>
+          </span>
+        </a>
+
+        <button class="a-toggle" id="navToggle" aria-label="Ouvrir le menu" aria-expanded="false">
+          <span class="a__lines a__lines--open">
+            <span class="a__line"></span>
+            <span class="a__line"></span>
+          </span>
+          <span class="a__lines a__lines--close">
+            <span class="a__line"></span>
+            <span class="a__line"></span>
+          </span>
+        </button>
+
+        <div class="site-head__wrapper" id="navWrapper">
+          <nav class="nav-main" aria-label="Navigation principale">
+            <ul class="site-head__menu">
+              <li class="menu-item"><a href="#work" data-text="Work"><span class="menu-item__text">Work</span></a></li>
+              <li class="menu-item"><a href="#vision" data-text="Vision"><span class="menu-item__text">Vision</span></a></li>
+              <li class="menu-item"><a href="#agence" data-text="L'Agence"><span class="menu-item__text">L'Agence</span></a></li>
+              <li class="menu-item"><a href="#contact" data-text="Contact"><span class="menu-item__text">Contact</span></a></li>
+            </ul>
+          </nav>
+          <div class="site-head__copyright">© Generous Branding 2026</div>
+        </div>
+
+        <div class="site-head__overlay" id="navOverlay"></div>
+      </div>
+    </header>
+
+    <main class="l-front-page" id="top">
+
+      <!-- HERO SLIDER -->
+      <section class="s-hero-slider" id="hero">
+        <div class="s__inner">
+          <div class="s__slides" id="heroSlides">
+
+            <article class="sb-slide is-active" data-color="#1f3d3a">
+              <div class="sb__media">
+                <div class="sb__media__inner">
+                  <div class="sb__media__image" style="--img:linear-gradient(135deg,#20423d,#0c1f1d)"></div>
+                </div>
+              </div>
+              <div class="sb__content">
+                <h3 class="sb__title"><span>Atlas Offices</span></h3>
+                <p class="sb__text">Des espaces de travail pensés pour partager plus et travailler mieux.</p>
+              </div>
+            </article>
+
+            <article class="sb-slide" data-color="#2b2118">
+              <div class="sb__media">
+                <div class="sb__media__inner">
+                  <div class="sb__media__image" style="--img:linear-gradient(135deg,#3a2c1e,#160f09)"></div>
+                </div>
+              </div>
+              <div class="sb__content">
+                <h3 class="sb__title"><span>Verdant Parc</span></h3>
+                <p class="sb__text">Réveiller un lieu emblématique et enrichir l'expérience de visite.</p>
+              </div>
+            </article>
+
+            <article class="sb-slide" data-color="#101827">
+              <div class="sb__media">
+                <div class="sb__media__inner">
+                  <div class="sb__media__image" style="--img:linear-gradient(135deg,#18233b,#080b12)"></div>
+                </div>
+              </div>
+              <div class="sb__content">
+                <h3 class="sb__title"><span>Saaj Studio</span></h3>
+                <p class="sb__text">Inventer un nouveau territoire de marque, du concept aux marqueurs.</p>
+              </div>
+            </article>
+
+            <article class="sb-slide" data-color="#2a1420">
+              <div class="sb__media">
+                <div class="sb__media__inner">
+                  <div class="sb__media__image" style="--img:linear-gradient(135deg,#3d1c2c,#160810)"></div>
+                </div>
+              </div>
+              <div class="sb__content">
+                <h3 class="sb__title"><span>Curiosità</span></h3>
+                <p class="sb__text">Saveurs italiennes & épicerie fine : une identité qui a du goût.</p>
+              </div>
+            </article>
+
+            <article class="sb-slide" data-color="#0f2320">
+              <div class="sb__media">
+                <div class="sb__media__inner">
+                  <div class="sb__media__image" style="--img:linear-gradient(135deg,#123a34,#05110f)"></div>
+                </div>
+              </div>
+              <div class="sb__content">
+                <h3 class="sb__title"><span>Calicéo</span></h3>
+                <p class="sb__text">La bulle de bien-être : un nouveau positionnement, un nouveau design.</p>
+              </div>
+            </article>
+
+          </div>
+
+          <div class="s__pagination" id="heroPagination"></div>
+
+          <div class="s__scroll-hint"><span>Scroll</span></div>
+        </div>
+      </section>
+
+      <!-- VISION MARQUEE -->
+      <section class="s-hero-vision" id="visionMarquee">
+        <div class="s__title">
+          <div class="s__title__inner">
+            <span>La Marque au Cœur —&nbsp;</span>
+            <span>La Marque au Cœur —&nbsp;</span>
+            <span>La Marque au Cœur —&nbsp;</span>
+            <span>La Marque au Cœur —&nbsp;</span>
+          </div>
+        </div>
+        <p class="s__baseline">Agence de branding · Paris</p>
+      </section>
+
+      <!-- INTRO STATEMENT -->
+      <section class="s-statement" id="vision">
+        <div class="u-container">
+          <p class="s-statement__text">
+            <span class="word">La</span> <span class="word">marque</span> <span class="word">au</span> <span class="word">cœur</span>
+            <span class="word">de</span> <span class="word">la</span> <span class="word">stratégie,</span>
+            <span class="word">de</span> <span class="word">l'identité,</span> <span class="word">du</span> <span class="word">design.</span>
+            <span class="word">Pour</span> <span class="word">Generous,</span> <span class="word">c'est</span>
+            <span class="word">la</span> <span class="word">conjugaison</span> <span class="word">de</span>
+            <span class="word">tous</span> <span class="word">les</span> <span class="word">marqueurs</span>
+            <span class="word">qui</span> <span class="word">fait</span> <span class="word">battre</span>
+            <span class="word">le</span> <span class="word">cœur</span> <span class="word">de</span> <span class="word">la</span> <span class="word">marque.</span>
+          </p>
+          <a href="#agence" class="btn-plain"><span>Notre vision</span></a>
+        </div>
+      </section>
+
+      <!-- WORK -->
+      <section class="s-work" id="work">
+        <div class="s-work__marquee" aria-hidden="true">
+          <div class="s-work__marquee-inner">
+            <span>Work</span><span>Work</span><span>Work</span><span>Work</span><span>Work</span><span>Work</span>
+            <span>Work</span><span>Work</span><span>Work</span><span>Work</span><span>Work</span><span>Work</span>
+          </div>
+        </div>
+
+        <div class="u-container">
+          <div class="s-work__grid">
+            <a class="work-card" href="#" style="--c:#20423d">
+              <div class="work-card__media"><span class="work-card__index">01</span></div>
+              <div class="work-card__meta">
+                <h3 class="work-card__title">Atlas Offices</h3>
+                <p class="work-card__desc">Espaces de travail flexibles pour entreprises en mouvement.</p>
+              </div>
+            </a>
+            <a class="work-card" href="#" style="--c:#3a2c1e">
+              <div class="work-card__media"><span class="work-card__index">02</span></div>
+              <div class="work-card__meta">
+                <h3 class="work-card__title">Verdant Parc</h3>
+                <p class="work-card__desc">Redonner sa place de pionnier à un parc emblématique.</p>
+              </div>
+            </a>
+            <a class="work-card" href="#" style="--c:#18233b">
+              <div class="work-card__media"><span class="work-card__index">03</span></div>
+              <div class="work-card__meta">
+                <h3 class="work-card__title">Comet Meetings</h3>
+                <p class="work-card__desc">Une nouvelle marque pour une nouvelle offre d'espaces partagés.</p>
+              </div>
+            </a>
+            <a class="work-card" href="#" style="--c:#3d1c2c">
+              <div class="work-card__media"><span class="work-card__index">04</span></div>
+              <div class="work-card__meta">
+                <h3 class="work-card__title">Curiosità</h3>
+                <p class="work-card__desc">Saveurs italiennes & épicerie fine, une marque qui a du goût.</p>
+              </div>
+            </a>
+            <a class="work-card" href="#" style="--c:#123a34">
+              <div class="work-card__media"><span class="work-card__index">05</span></div>
+              <div class="work-card__meta">
+                <h3 class="work-card__title">Calicéo</h3>
+                <p class="work-card__desc">La bulle de bien-être : un nouveau positionnement de marque.</p>
+              </div>
+            </a>
+            <a class="work-card" href="#" style="--c:#2a2417">
+              <div class="work-card__media"><span class="work-card__index">06</span></div>
+              <div class="work-card__meta">
+                <h3 class="work-card__title">Durance</h3>
+                <p class="work-card__desc">Une collection qui vibre de l'art de vivre provençal.</p>
+              </div>
+            </a>
+          </div>
+
+          <div class="s-work__cta">
+            <a href="#" class="btn-plain"><span>Voir tous les projets</span></a>
+          </div>
+        </div>
+      </section>
+
+      <!-- CLIENTS TICKER -->
+      <section class="s-clients" id="agence">
+        <div class="s-clients__row s-clients__row--a">
+          <span>Advini +</span><span>Calicéo +</span><span>Comet +</span><span>Durance +</span><span>Extia +</span><span>Kilo Shop +</span>
+          <span>Advini +</span><span>Calicéo +</span><span>Comet +</span><span>Durance +</span><span>Extia +</span><span>Kilo Shop +</span>
+        </div>
+        <div class="s-clients__row s-clients__row--b">
+          <span>Newton Offices +</span><span>Les Fermes +</span><span>Centrakor +</span><span>Thoiry +</span><span>Mitwit +</span><span>Saaj +</span>
+          <span>Newton Offices +</span><span>Les Fermes +</span><span>Centrakor +</span><span>Thoiry +</span><span>Mitwit +</span><span>Saaj +</span>
+        </div>
+      </section>
+
+      <!-- AGENCE STATEMENT -->
+      <section class="s-approach">
+        <div class="u-container">
+          <p class="s-approach__label">L'Agence</p>
+          <h2 class="s-approach__title">Faire de l'expérience une marque de fabrique et générer beaucoup d'émotion.</h2>
+          <div class="s-approach__cols">
+            <div class="s-approach__col">
+              <h4>Stratégie</h4>
+              <p>Plateforme de marque, positionnement, territoire d'expression et raison d'être.</p>
+            </div>
+            <div class="s-approach__col">
+              <h4>Identité</h4>
+              <p>Design d'identité, logo, système graphique, direction artistique et éditoriale.</p>
+            </div>
+            <div class="s-approach__col">
+              <h4>Design d'espace</h4>
+              <p>Concept, scénographie et expériences immersives au service de la marque.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="site-foot" id="contact">
+      <div class="u-container">
+        <div class="site-foot__top">
+          <a href="mailto:bonjour@example.com" class="site-foot__mail">bonjour@generous.example</a>
+        </div>
+
+        <div class="site-foot__grid">
+          <div class="site-foot__col">
+            <h5>Menu</h5>
+            <ul>
+              <li><a href="#work">Work</a></li>
+              <li><a href="#vision">Vision</a></li>
+              <li><a href="#agence">L'Agence</a></li>
+              <li><a href="#contact">Contact</a></li>
+            </ul>
+          </div>
+          <div class="site-foot__col">
+            <h5>Nous suivre</h5>
+            <ul>
+              <li><a href="#">Instagram</a></li>
+              <li><a href="#">LinkedIn</a></li>
+            </ul>
+          </div>
+          <div class="site-foot__col">
+            <h5>Contact</h5>
+            <ul>
+              <li><a href="#">50 Rue Sainte-Anne, 75002 Paris</a></li>
+              <li><a href="tel:+33100000000">+33 1 00 00 00 00</a></li>
+            </ul>
+          </div>
+          <div class="site-foot__col">
+            <h5>Crédits</h5>
+            <ul>
+              <li>Direction artistique — Generous</li>
+              <li>Recréation — démo</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="site-foot__bottom">
+          <span class="site-foot__brand">Generous</span>
+          <div class="site-foot__legal">
+            <a href="#">Mentions légales</a>
+            <a href="#">Gestion des cookies</a>
+            <span>© Generous Branding 2026</span>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Cookie banner -->
+  <div class="cookie" id="cookie">
+    <p class="cookie__text">Ce site utilise des cookies pour améliorer votre expérience et analyser le trafic.</p>
+    <div class="cookie__actions">
+      <button class="cookie__btn cookie__btn--ghost" data-cookie="refuse">Refuser</button>
+      <button class="cookie__btn" data-cookie="accept">Accepter</button>
+    </div>
+  </div>
+
+  <script src="assets/js/script.js"></script>
+</body>
+</html>

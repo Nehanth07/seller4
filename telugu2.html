@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telugu Badi - Page 2</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    
+    <!-- GSAP & Plugins -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <!-- Lenis for Smooth Scroll -->
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+
+    <style>
+        @font-face {
+            font-family: 'Gellix';
+            src: url(./gellix/Gellix-Regular.woff2) format('woff2'), url(./gellix/Gellix-Regular.woff) format('woff');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        :root {
+            --color-black: #000000;
+            --color-white: #ffffff;
+            --color-brand-red: #FF4337;
+            --color-brand-pink: #FF55F8;
+            --color-brand-teal: #00d4d8; 
+            --font-main: 'Outfit', sans-serif;
+            --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html.lenis { height: auto; }
+        .lenis.lenis-smooth { scroll-behavior: auto; }
+        .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+        .lenis.lenis-stopped { overflow: hidden; }
+
+        body {
+            font-family: var(--font-main);
+            color: var(--color-white);
+            background-color: var(--color-black);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        body.loaded { opacity: 1; }
+
+        /* --- Header / Menu --- */
+        .site-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 2rem 3rem;
+            z-index: 100;
+            display: flex;
+            justify-content: flex-end;
+            pointer-events: none;
+        }
+
+        .menu-btn {
+            pointer-events: auto;
+            width: 60px;
+            height: 60px;
+            background: var(--color-brand-teal);
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.3s var(--ease-out-expo);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .menu-btn:hover { transform: scale(1.1); }
+        .menu-btn svg { color: var(--color-black); width: 28px; height: 28px; stroke-width: 2.5; }
+
+        /* --- Hero Section --- */
+        .section-hero {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .hero-bg-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.4;
+        }
+
+        .hero-img {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            transform: scale(1.1);
+            transition: opacity 1.5s ease, transform 10s linear;
+        }
+        .hero-img.active { opacity: 1; transform: scale(1); }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            text-align: left;
+            width: 100%;
+            padding: 0 5vw;
+            max-width: 1800px;
+        }
+
+        h1.hero-title {
+            font-size: clamp(4rem, 12vw, 10rem);
+            font-weight: 800;
+            line-height: 0.8;
+            letter-spacing: -0.04em;
+            text-transform: uppercase;
+            color: var(--color-white);
+            mix-blend-mode: overlay;
+        }
+
+        /* --- Message Section (The Curtain) --- */
+        .section-message {
+            position: relative;
+            width: 100%;
+            height: 100vh; 
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .curtain-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .curtain-panel {
+            flex: 1; 
+            height: 100%;
+            background-color: var(--color-brand-red);
+            transform: translateY(100vh); 
+            will-change: transform, flex-grow; 
+            border-right: 1px solid #000; 
+        }
+        .curtain-panel:last-child { border-right: none; }
+
+        .message-container {
+            position: relative;
+            z-index: 5;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 0; 
+        }
+
+        .msg-block {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            padding: 0 2vw;
+            text-align: center;
+            opacity: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            perspective: 500px;
+        }
+
+        .msg-2 {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* --- WORD STYLES --- */
+        .line {
+            display: block;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 0px; 
+            transform-style: preserve-3d; 
+            position: relative;
+        }
+
+        .word {
+            display: inline-block;
+            font-size: clamp(4rem, 13.5vw, 16rem);
+            font-weight: 400;
+            line-height: 0.75;
+            letter-spacing: -0.05em;
+            color: var(--color-black);
+            white-space: nowrap;
+            position: relative;
+            transform-style: preserve-3d;
+            will-change: transform;
+        }
+
+        /* -----------------------------------------------------------
+           MANUAL WORD PLACEMENT: MOBILE (Base Setup)
+        ----------------------------------------------------------- */
+        /* Screen 1 ("Music Business") */
+        .word-the      { transform: translate(0px, 0px); }
+        .word-music    { transform: translate(0px, 0px); }
+        .word-business { transform: translate(0px, 0px); }
+        .word-can      { transform: translate(0px, 0px); }
+        .word-be       { transform: translate(0px, 0px); }
+        .word-hard     { transform: translate(0px, 0px); }
+
+        /* Screen 2 ("It doesn't have to be") */
+        .word-it-2      { transform: translate(-100px, 0px); }
+        .word-doesnt-2  { transform: translate(-100px, 0px); }
+        .word-have-2    { transform: translate(50px, 0px); }
+        .word-to-2      { transform: translate(50px, 0px); }
+        .word-be-2      { transform: translate(50px, 0px); }
+
+        /* Side Text ("Making money with music...") */
+        .word-making   { transform: translate(0px, 0px); }
+        .word-money    { transform: translate(0px, 0px); }
+        .word-with     { transform: translate(0px, 0px); }
+        .word-music-s  { transform: translate(0px, 0px); } 
+        .word-is       { transform: translate(0px, 0px); }
+        .word-hard-s   { transform: translate(0px, 0px); }
+        .word-and      { transform: translate(0px, 0px); }
+        .word-comes    { transform: translate(0px, 0px); }
+        .word-complex  { transform: translate(0px, 0px); }
+        .word-tasks    { transform: translate(0px, 0px); }
+
+
+        /* -----------------------------------------------------------
+           MANUAL WORD PLACEMENT: TABLET (768px and up)
+        ----------------------------------------------------------- */
+        @media (min-width: 768px) {
+            /* Screen 1 Overrides */
+            .word-the      { transform: translate(0vw, 0vh); }
+            .word-music    { transform: translate(0vw, 0vh); }
+            .word-business { transform: translate(0vw, 0vh); }
+            .word-can      { transform: translate(0vw, 0vh); }
+            .word-be       { transform: translate(0vw, 0vh); }
+            .word-hard     { transform: translate(0vw, 0vh); }
+
+            /* Screen 2 Overrides */
+            .word-it-2      { transform: translate(-5vw, 0vh); }
+            .word-doesnt-2  { transform: translate(-5vw, 0vh); }
+            .word-have-2    { transform: translate(3vw, 0vh); }
+            .word-to-2      { transform: translate(3vw, 0vh); }
+            .word-be-2      { transform: translate(3vw, 0vh); }
+
+            /* Side Text Overrides */
+            .word-making   { transform: translate(0vw, 0vh); }
+            .word-money    { transform: translate(0vw, 0vh); }
+            .word-with     { transform: translate(0vw, 0vh); }
+            .word-music-s  { transform: translate(0vw, 0vh); } 
+            .word-is       { transform: translate(0vw, 0vh); }
+            .word-hard-s   { transform: translate(0vw, 0vh); }
+            .word-and      { transform: translate(0vw, 0vh); }
+            .word-comes    { transform: translate(0vw, 0vh); }
+            .word-complex  { transform: translate(0vw, 0vh); }
+            .word-tasks    { transform: translate(0vw, 0vh); }
+        }
+
+
+        /* -----------------------------------------------------------
+           MANUAL WORD PLACEMENT: DESKTOP (1024px and up)
+        ----------------------------------------------------------- */
+        @media (min-width: 1024px) {
+            /* Screen 1 Overrides */
+            .word-the      { transform: translate(-21vw, 0vh); }
+            .word-music    { transform: translate(-22.75vw, 0vh); }
+            .word-business { transform: translate(26vw, -18vh); }
+            .word-can      { transform: translate(0vw, -15vh); }
+            .word-be       { transform: translate(0vw, -15vh); }
+            .word-hard     { transform: translate(0vw, -15vh); }
+
+            /* Screen 2 Overrides */
+            .word-it-2      { transform: translate(-10vw, 0vh); }
+            .word-doesnt-2  { transform: translate(-10vw, 0vh); }
+            .word-have-2    { transform: translate(10vw, 0vh); }
+            .word-to-2      { transform: translate(10vw, 0vh); }
+            .word-be-2      { transform: translate(10vw, 0vh); }
+
+            /* Side Text Overrides */
+            .word-making   { transform: translate(-2vw, -2vh); }
+            .word-money    { transform: translate(-2vw, -2vh); }
+            .word-with     { transform: translate(-2vw, -2vh); }
+            .word-music-s  { transform: translate(-2vw, -2vh); } 
+            .word-is       { transform: translate(-2vw, -2vh); }
+            .word-hard-s   { transform: translate(17.2vw, -5.17vh); }
+            .word-and      { transform: translate(-2vw, -6vh); }
+            .word-comes    { transform: translate(-2vw, -6vh); }
+            .word-complex  { transform: translate(-2vw, -6vh); }
+            .word-with1     { transform: translate(-2vw, -6vh); }
+            .word-tasks    { transform: translate(15vw, -9.2vh); }
+        }
+
+
+        /* --- SIDE TEXT STYLES --- */
+        .msg-text-side {
+            position: absolute;
+            top: 55%; 
+            right: 12%; 
+            width: 280px;
+            text-align: left;
+            opacity: 0; 
+            z-index: 20;
+        }
+
+        .msg-text-side .line {
+            text-align: left; 
+            margin-bottom: 5px;
+        }
+
+        .msg-text-side .word {
+            font-size: 1.2rem; 
+            font-weight: 500;
+            line-height: 1.3;
+            letter-spacing: 0;
+        }
+
+        @media (max-width: 1200px) {
+            .word { white-space: normal; }
+            .msg-text-side {
+                right: 5%;
+                width: 200px;
+            }
+            .msg-text-side .word { font-size: 1rem; }
+        }
+        
+        @media (max-width: 768px) {
+            .msg-text-side {
+                position: relative;
+                top: auto;
+                right: auto;
+                margin-top: 2rem;
+                width: 80%;
+                text-align: center;
+            }
+            .msg-text-side .line { text-align: center; }
+        }
+
+        /* --- Canvas --- */
+        .canvas-wrap {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40vh;
+            pointer-events: none;
+            z-index: 2;
+            opacity: 0.6;
+        }
+
+        /* --- Sticky Bar --- */
+        .sticky-bar {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            height: 80px;
+            background: var(--color-white);
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            padding: 0; 
+            border: 2px solid #000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transform: translateY(150%);
+            transition: transform 0.6s var(--ease-out-expo);
+            overflow: hidden; 
+        }
+
+        .sticky-bar.visible { transform: translateY(0); }
+
+        .sticky-section {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            border-right: 2px solid #000;
+        }
+        .sticky-section:last-child { border-right: none; }
+
+        .icon-circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 2px solid #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .icon-line {
+            width: 24px;
+            height: 2px;
+            background: #000;
+        }
+
+        .btn-login {
+            padding: 0.6rem 2.5rem;
+            border: 2px solid #000;
+            border-radius: 50px; 
+            text-decoration: none;
+            color: #000;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-login:hover { background: #f0f0f0; }
+
+        .btn-create {
+            background: var(--color-brand-pink);
+            color: #000;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 0 2rem;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+        }
+        .sticky-section.no-pad { padding: 0; }
+
+        @media (max-width: 768px) {
+            .sticky-bar { bottom: 1rem; left: 1rem; right: 1rem; height: 60px; }
+            .sticky-section { padding: 0 1rem; }
+            .btn-create { padding: 0 1rem; font-size: 0.9rem; }
+            .btn-login { padding: 0.4rem 1.5rem; font-size: 0.9rem; }
+            .icon-circle { width: 36px; height: 36px; }
+            .icon-line { width: 18px; }
+        }
+
+        /* --- Scroll Tracker --- */
+        #scroll-tracker {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #000;
+            color: #fff;
+            padding: 8px 12px;
+            font-family: monospace;
+            font-size: 16px;
+            font-weight: bold;
+            z-index: 10000;
+            border-radius: 4px;
+            pointer-events: none;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Distance Tracker -->
+    <div id="scroll-tracker">Scroll: 0</div>
+
+    <header class="site-header">
+        <div class="menu-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </div>
+    </header>
+
+    <main>
+        
+        <!-- Hero Section -->
+        <section class="section-hero" id="hero">
+            <div class="hero-bg-wrapper" id="hero-bg"></div>
+            <div class="hero-content">
+                <h1 class="hero-title js-split">
+                    Build your music<br>career step by step
+                </h1>
+            </div>
+            <div class="canvas-wrap">
+                <canvas id="canvas-hero"></canvas>
+            </div>
+        </section>
+
+        <!-- Main Animation Section -->
+        <section class="section-message" id="message">
+            
+            <div class="curtain-wrapper">
+                <div class="curtain-panel"></div>
+                <div class="curtain-panel"></div>
+                <div class="curtain-panel"></div>
+                <div class="curtain-panel"></div>
+                <div class="curtain-panel"></div>
+                <div class="curtain-panel"></div>
+            </div>
+
+            <div class="message-container">
+                
+                <!-- FIRST MESSAGE GROUP -->
+                <div class="msg-block msg-1">
+                    <div class="line">
+                        <div class="word word-the manual-anim">The</div>
+                        <div class="word">&nbsp;</div>
+                        <div class="word word-music manual-anim">Music</div>
+                        <div class="word">&nbsp;</div>
+                        <div class="word word-business manual-anim">Business</div>
+                    </div>
+                    <div class="line">
+                        <div class="word word-can manual-anim slide-left">can</div>
+                        <div class="word">&nbsp;</div>
+                        <div class="word word-be manual-anim slide-left">be</div>
+                        <div class="word">&nbsp;</div>
+                        <div class="word word-hard manual-anim slide-left">hard.</div>
+                    </div>
+
+                    <!-- Side Text -->
+                    <div class="msg-text-side">
+                        <div class="line">
+                            <div class="word word-making">Making</div>
+                            <div class="word">&nbsp;</div>
+                            <div class="word word-money">money</div>
+                            <div class="word">&nbsp;</div>
+                            <div class="word word-with">with</div>
+                            <div class="word">&nbsp;</div>
+                            <div class="word word-music-s">music</div>
+                            <div class="word">&nbsp;</div>
+                            <div class="word word-is">is</div>
+                            <div class="word">&nbsp;</div>
+                            <div class="word word-hard-s">hard</div>
+                        </div>
+                        <div class="line">
+                            <div class="word word-and">and</div>
+                            <div class="word">&nbsp;</div>
+                            <div class="word word-comes">comes</div>
+                            <div class="word">&nbsp;</div>
+                            <div class="word word-with1">with</div>
+                            <div class="word">&nbsp;</div>
+                            <div class="word word-complex">complex</div>
+                            <div class="word">&nbsp;</div>
+                            <div class="word word-tasks">tasks...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECOND MESSAGE GROUP (Continuation) -->
+                <div class="msg-block msg-2">
+                    <div class="line">
+                        <div class="word word-it-2">It</div>
+                        <div class="word">&nbsp;</div>
+                        <div class="word word-doesnt-2">doesn’t</div>
+                    </div>
+                    <div class="line">
+                        <div class="word word-have-2">have</div>
+                        <div class="word">&nbsp;</div>
+                        <div class="word word-to-2">to</div>
+                        <div class="word">&nbsp;</div>
+                        <div class="word word-be-2">be...</div>
+                    </div>
+                </div>
+
+                <div class="canvas-wrap" style="z-index: -1;">
+                    <canvas id="canvas-message"></canvas>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Sticky Bar -->
+    <div class="sticky-bar" id="sticky-bar">
+        <div class="sticky-section">
+            <div class="icon-circle">
+                <div class="icon-line"></div>
+            </div>
+        </div>
+        <div class="sticky-section">
+            <a href="#" class="btn-login">Login</a>
+        </div>
+        <div class="sticky-section no-pad" style="background: var(--color-brand-pink); border: none;">
+             <a href="#" class="btn-create" style="background: transparent;">Create Account</a>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. CONFIGURATION ---
+        const config = {
+            outerPanelGrow: 3.25,    
+            innerPanelShrink: 0.65,
+            finalOuterGrow: 4.0,    
+            finalInnerShrink: 0.5,  
+            
+            finalZValue: -200,      
+            wordDuration: 0.8,      
+            wordStagger: 0.2,       
+            
+            durationSqueeze: 0.7,     
+            durationHold: 1.5,      
+            durationTransition: 2.2, 
+            
+            totalPinHeight: 4000    
+        };
+
+        // --- 2. Setup Smooth Scroll (Lenis) ---
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            direction: 'vertical',
+            gestureDirection: 'vertical',
+            smooth: true,
+        });
+
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
+        
+        // --- 3. Tracker Logic ---
+        const tracker = document.getElementById("scroll-tracker");
+        window.addEventListener("scroll", () => {
+            tracker.innerText = "Scroll: " + Math.round(window.scrollY);
+        });
+
+        // --- 4. Typography Splitting ---
+        function splitTextIntoWords(selector, classToADD = 'word-wrap') {
+            document.querySelectorAll(selector).forEach(el => {
+                const text = el.innerText;
+                el.innerHTML = '';
+                const words = text.split(' ');
+                words.forEach((word, index) => {
+                    const wordSpan = document.createElement('span');
+                    wordSpan.classList.add(classToADD);
+                    wordSpan.innerText = word;
+                    el.appendChild(wordSpan);
+                    
+                    if (index < words.length - 1) {
+                        const space = document.createElement('span');
+                        space.innerHTML = '&nbsp;';
+                        space.style.display = 'inline-block';
+                        el.appendChild(space); 
+                    }
+                });
+            });
+        }
+        splitTextIntoWords('.js-split', 'word-wrap'); 
+
+        // --- 5. Hero Background Slider ---
+        const bgContainer = document.getElementById('hero-bg');
+        const images = [
+            "linear-gradient(135deg, #e85d3f, #f5b642 48%, #176b75)",
+            "linear-gradient(135deg, #176b75, #5f4b8b 52%, #ed6a8a)",
+            "linear-gradient(135deg, #5f4b8b, #ed6a8a 50%, #f5b642)"
+        ];
+        
+        let currentImg = 0;
+        images.forEach((url, i) => {
+            const div = document.createElement('div');
+            div.className = `hero-img ${i === 0 ? 'active' : ''}`;
+            div.style.backgroundImage = `url(${url})`;
+            bgContainer.appendChild(div);
+        });
+
+        setInterval(() => {
+            const els = document.querySelectorAll('.hero-img');
+            if(els.length === 0) return;
+            els[currentImg].classList.remove('active');
+            currentImg = (currentImg + 1) % els.length;
+            els[currentImg].classList.add('active');
+        }, 5000);
+
+
+        // --- 6. Main GSAP Animations ---
+        window.addEventListener('load', () => {
+            document.body.classList.add('loaded');
+
+            // Hero Title Intro
+            gsap.to(".hero-title .word-wrap", {
+                y: 0,
+                duration: 1.5,
+                stagger: 0.05,
+                ease: "power4.out",
+                delay: 0.2
+            });
+            
+            // Sticky Bar Intro
+            gsap.to("#sticky-bar", {
+                scrollTrigger: {
+                    trigger: "body",
+                    start: "100px top",
+                    toggleActions: "play none none reverse"
+                },
+                y: 0,
+                duration: 0.5
+            });
+
+            // --- ANIMATION SEQUENCE ---
+            const panels = document.querySelectorAll(".curtain-panel");
+            const orderedPanels = [panels[1], panels[3], panels[4], panels[2], panels[0], panels[5]];
+
+            // 1. Curtain Entry (Slides UP)
+            const entryTl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: "#message",
+                    start: "top bottom", 
+                    end: "top top",      
+                    scrub: 1             
+                }
+            });
+
+            entryTl.to(orderedPanels, {
+                y: 0,
+                duration: 1,
+                stagger: 0.1, 
+                ease: "power2.inOut"
+            });
+
+            // 2. MASTER PINNED TIMELINE
+            const mainTl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: "#message",
+                    start: "top top",
+                    end: `+=${config.totalPinHeight}`,
+                    pin: true,
+                    scrub: 1, 
+                    anticipatePin: 1,
+                    invalidateOnRefresh: true, // ADDED: Ensures functional values re-calculate on window resize
+                    snap: {
+                        snapTo: "labels",
+                        duration: { min: 0.6, max: 1.2 }, 
+                        delay: 0.2, 
+                        ease: "power2.inOut" 
+                    }
+                }
+            });
+
+            // --- Step A: Squeeze Lines ---
+            mainTl.to([panels[0], panels[5]], { 
+                flexGrow: config.outerPanelGrow,  
+                duration: config.durationSqueeze, 
+                ease: "power1.inOut" 
+            }, "squeeze");
+
+            mainTl.to([panels[1], panels[2], panels[3], panels[4]], { 
+                flexGrow: config.innerPanelShrink, 
+                duration: config.durationSqueeze, 
+                ease: "power1.inOut" 
+            }, "squeeze");
+
+            // --- Step B: Text 1 depth ---
+            const words1 = document.querySelectorAll('.msg-1 .manual-anim');
+            mainTl.to(words1, {
+                z: config.finalZValue, 
+                duration: config.wordDuration, 
+                stagger: config.wordStagger,   
+                ease: "power2.inOut"
+            }, ">"); 
+
+            // --- Step B.5: Move ONLY Selected Words Left (TABLET & LAPTOP) ---
+            // We slide only elements with the '.slide-left' class instead of the whole line
+            const slideLeftWords = document.querySelectorAll('.slide-left');
+            mainTl.to(slideLeftWords, {
+                // If the screen is 768px or larger, it slides -20vw. Otherwise, it stays put at 0vw.
+                x: () => window.innerWidth >= 768 ? "-14vw" : "0vw", 
+                duration: 1.2,
+                ease: "power2.inOut"
+            }, ">"); // This plays AFTER the words shrink in Z space
+
+            // --- Step C: Side Text 1 slides in ---
+            mainTl.fromTo(".msg-text-side", 
+                { x: 300, opacity: 0 }, 
+                { 
+                    x: 0, 
+                    opacity: 1, 
+                    duration: 1.5, 
+                    ease: "power2.out" 
+                }, 
+                ">" // This plays AFTER the left shift movement
+            );
+
+            mainTl.addLabel("msg1");
+            mainTl.to({}, { duration: config.durationHold });
+
+            // --- Step D: Transition to Message 2 ---
+            // Slide msg-1 up and out
+            mainTl.to(".msg-1", {
+                y: -window.innerHeight,
+                opacity: 0, 
+                duration: config.durationTransition,
+                ease: "power2.inOut"
+            }, "transitionOut");
+
+            // Bring in msg-2 (SLOWER SLIDE UP)
+            const linesMsg2 = document.querySelectorAll(".msg-2 .line");
+            mainTl.set(".msg-2", { opacity: 1 });
+            
+            // INCREASED START Y AND DURATION FOR SLOW SLIDE UP
+            mainTl.fromTo(linesMsg2[0], 
+                { y: 800, opacity: 0 }, 
+                { y: 0, opacity: 1, duration: 4, ease: "power2.out" }, 
+                "transitionOut+=0.3" 
+            );
+
+            mainTl.fromTo(linesMsg2[1], 
+                { y: 1000, opacity: 0 }, 
+                { y: 0, opacity: 1, duration: 5, ease: "power2.out" },
+                "transitionOut+=0.5" 
+            );
+
+            mainTl.addLabel("msg2");
+            mainTl.to({}, { duration: 2 });
+
+            // Exit Message 2
+            mainTl.to(".msg-2", {
+                y: -window.innerHeight,
+                opacity: 0,
+                duration: 1.5,
+                ease: "power2.in"
+            });
+
+            // --- Step E: Final Line Squeeze ---
+            mainTl.to([panels[0], panels[5]], { 
+                flexGrow: config.finalOuterGrow,  
+                duration: 2, 
+                ease: "power1.inOut" 
+            }, "finalSqueeze");
+
+            mainTl.to([panels[1], panels[2], panels[3], panels[4]], { 
+                flexGrow: config.finalInnerShrink, 
+                duration: 2, 
+                ease: "power1.inOut" 
+            }, "finalSqueeze");
+
+            mainTl.to({}, { duration: 1 });
+
+        });
+
+        // --- 7. Canvas Visualizer ---
+        const initCanvas = (id, color) => {
+            const canvas = document.getElementById(id);
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let width, height;
+            let time = 0;
+
+            const resize = () => {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = canvas.parentElement.offsetHeight;
+            };
+            window.addEventListener('resize', resize);
+            resize();
+
+            const animate = () => {
+                ctx.clearRect(0, 0, width, height);
+                
+                const waves = 3;
+                const baseAmplitude = height * 0.15;
+                
+                for(let i = 0; i < waves; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, height);
+                    
+                    for (let x = 0; x <= width; x += 10) {
+                        const y = height - (
+                            Math.sin(x * 0.003 + time + i) * baseAmplitude +
+                            Math.sin(x * 0.01 + time * 1.5 + i) * (baseAmplitude * 0.5)
+                        ) - (i * 20); 
+                        
+                        ctx.lineTo(x, y);
+                    }
+                    
+                    ctx.lineTo(width, height);
+                    ctx.fillStyle = color || (i % 2 === 0 ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 67, 55, 0.05)'); 
+                    if(id === 'canvas-message') {
+                         ctx.fillStyle = (i % 2 === 0 ? 'rgba(0, 0, 0, 0.03)' : 'rgba(255, 255, 255, 0.05)'); 
+                    }
+                    ctx.fill();
+                }
+
+                time += 0.005;
+                requestAnimationFrame(animate);
+            };
+            animate();
+        };
+
+        initCanvas('canvas-hero');
+        initCanvas('canvas-message');
+
+    </script>
+</body>
+</html>

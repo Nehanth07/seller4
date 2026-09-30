@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interent Cars — The Internet-First Car Platform</title>
+  <meta name="description" content="Buy, subscribe, or insure your next car entirely online. Real-time pricing, smart matching, and instant financing — no dealership required." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Outfit:wght@200;300;400;500;700;800&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="assets/css/main.css" />
+
+  <script src="https://unpkg.com/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <style>
+    /* ---- Home-specific ---- */
+    .hero{
+      position:relative; min-height:100svh; display:flex; align-items:flex-end;
+      overflow:hidden; padding-bottom:clamp(3rem,8vh,6rem);
+    }
+    .hero-bg{ position:absolute; inset:-8% 0; z-index:0; }
+    .hero-bg .ph{ width:100%; height:116%; }
+    .hero-bg .grid-lines{
+      position:absolute; inset:0;
+      background-image:
+        linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+      background-size:70px 70px;
+    }
+    .hero-veil{
+      position:absolute; inset:0; z-index:1;
+      background:
+        radial-gradient(90% 70% at 20% 90%, rgba(0,170,255,.12), transparent 62%),
+        linear-gradient(to top, var(--ink) 4%, rgba(8,11,16,.4) 45%, rgba(8,11,16,.75) 100%);
+    }
+    .hero-inner{ position:relative; z-index:2; width:100%; }
+    .hero-title{ margin:.4rem 0 1.6rem; }
+    .hero-row{ display:flex; align-items:flex-end; justify-content:space-between; gap:2rem; flex-wrap:wrap; }
+    .hero-sub{ max-width:46ch; color:var(--fg-dim); }
+    .hero-speedline{ position:absolute; left:0; right:0; bottom:calc(100% + 10px); }
+    .scroll-cue{ font-family:var(--f-mono); letter-spacing:.25em; text-transform:uppercase; font-size:.7rem; color:var(--fg-faint); display:flex; flex-direction:column; align-items:center; gap:.6rem; }
+    .scroll-cue .bar{ width:1px; height:44px; background:linear-gradient(var(--blue),transparent); animation:drop 1.8s var(--ease) infinite; }
+    @keyframes drop{ 0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}100%{transform:scaleY(0);transform-origin:bottom} }
+
+    /* Manifesto (paper) */
+    .manifesto{ position:relative; }
+    .manifesto .big{ font-family:var(--f-display); font-size:clamp(2rem,6.5vw,5.5rem); line-height:1.02; text-transform:uppercase; letter-spacing:-.01em; max-width:20ch; }
+    .manifesto .big .accent{ color:var(--blue); }
+
+    /* Belief band */
+    .belief{ display:grid; grid-template-columns:1.2fr 1fr; gap:clamp(2rem,5vw,5rem); align-items:center; }
+    @media(max-width:900px){ .belief{ grid-template-columns:1fr; } }
+    .belief .frame{ aspect-ratio:4/5; border:1px solid var(--line); }
+
+    /* Stats strip */
+    .stats-strip{ display:grid; grid-template-columns:repeat(4,1fr); gap:clamp(1.4rem,3vw,3rem); }
+    @media(max-width:900px){ .stats-strip{ grid-template-columns:1fr 1fr; } }
+
+    /* Pillars preview */
+    .pillars-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:1.2rem; }
+    @media(max-width:900px){ .pillars-grid{ grid-template-columns:1fr; } }
+
+    /* Big closing CTA */
+    .closer{ text-align:center; }
+    .closer .huge{ font-family:var(--f-display); font-size:clamp(3rem,15vw,15rem); line-height:.9; text-transform:uppercase; }
+    .closer .huge .accent{ color:var(--blue); }
+  </style>
+</head>
+<body>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div class="hero-bg" data-parallax="0.12">
+      <div class="ph"><span class="plabel">Hero — sleek car on open road at dusk (video/image)</span></div>
+      <div class="grid-lines"></div>
+    </div>
+    <div class="hero-veil"></div>
+
+    <div class="hero-inner wrap">
+      <div style="position:relative;">
+        <svg class="speed-line draw hero-speedline" viewBox="0 0 1000 60" preserveAspectRatio="none">
+          <path class="sl-base"  pathLength="1000" d="M0,30 L300,30 L330,30 L360,28 L390,15 L420,45 L450,30 L500,30 L530,8 L560,52 L590,30 L1000,30" />
+          <path class="sl-pulse" pathLength="1000" d="M0,30 L300,30 L330,30 L360,28 L390,15 L420,45 L450,30 L500,30 L530,8 L560,52 L590,30 L1000,30" />
+        </svg>
+      </div>
+
+      <span class="eyebrow" data-fade>Internet-First &middot; Transparent &middot; Driver-Owned</span>
+      <h1 class="display hero-title reveal" data-reveal>
+        Buy your next car on the <span class="accent">internet.</span>
+      </h1>
+      <div class="hero-row">
+        <p class="hero-sub lead" data-fade>
+          Car ownership is still stuck in the age of the showroom. We rebuilt it end-to-end —
+          real-time market pricing, AI-matched financing, and one-click delivery. No dealership. No friction.
+        </p>
+        <div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap;">
+          <a class="btn solid" href="market.html" data-link>See the market <span class="arrow">&rarr;</span></a>
+          <a class="btn" href="platform.html" data-link>Our platform</a>
+        </div>
+      </div>
+    </div>
+
+    <div style="position:absolute; right:var(--gutter); bottom:2rem; z-index:3;" class="scroll-cue">
+      <span>Scroll</span><span class="bar"></span>
+    </div>
+  </section>
+
+  <!-- ============ MANIFESTO (paper) ============ -->
+  <section class="section paper manifesto">
+    <div class="wrap">
+      <span class="eyebrow" data-fade>The Shift</span>
+      <p class="big reveal" data-reveal>
+        We don't sell cars. We move <span class="accent">ownership</span> — into the 21st century where it belongs.
+      </p>
+      <div class="grid cols-2" style="margin-top:clamp(2.5rem,6vh,5rem);">
+        <p class="lead" data-fade>
+          When something as significant as a car purchase is treated as a "one-time negotiation" rather than
+          a transparent data transaction, buyers pay more, wait longer, and trust less.
+        </p>
+        <p class="lead" data-fade>
+          A car should not require three visits to a dealership and a weekend of stress. It should be as
+          straightforward as buying anything else online — priced fairly, delivered fast, backed by data.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STATS ============ -->
+  <section class="section tight">
+    <div class="wrap">
+      <span class="eyebrow" data-fade>The Numbers</span>
+      <h2 class="section-title reveal" data-reveal style="margin:1rem 0 clamp(2rem,5vh,3.5rem); max-width:16ch;">
+        The market is ready. The buyer is online.
+      </h2>
+      <div class="stats-strip">
+        <div class="stat" data-fade>
+          <div class="num"><span class="accent" data-count="76">0</span><span class="accent">%</span></div>
+          <div class="label">Of buyers start their search online</div>
+        </div>
+        <div class="stat" data-fade>
+          <div class="num"><span data-count="3" data-dec="1">0</span><span>hrs</span></div>
+          <div class="label">Average time wasted at a dealership</div>
+        </div>
+        <div class="stat" data-fade>
+          <div class="num"><span data-count="40">0</span>%</div>
+          <div class="label">Of buyers regret their financing deal</div>
+        </div>
+        <div class="stat" data-fade>
+          <div class="num"><span class="spark" data-count="12">0</span><span class="spark">%</span></div>
+          <div class="label">Online car sales CAGR through 2030</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ BELIEF / IMAGE ZOOM ============ -->
+  <section class="section">
+    <div class="wrap belief">
+      <div>
+        <span class="eyebrow spark" data-fade>Our Belief</span>
+        <h2 class="section-title reveal" data-reveal style="margin:1rem 0 1.6rem;">
+          The internet is the best dealership ever built.
+        </h2>
+        <p class="lead muted" data-fade>
+          Real-time data knows more about the right car for you than any salesperson does. Our platform
+          matches your needs, budget, and driving profile to verified inventory — then handles every step
+          from financing to front-door delivery.
+        </p>
+        <div style="margin-top:2rem; display:flex; gap:.6rem; flex-wrap:wrap;">
+          <span class="chip">Live market pricing</span>
+          <span class="chip">AI-matched financing</span>
+          <span class="chip">Verified inventory</span>
+        </div>
+      </div>
+      <div class="zoom-frame frame">
+        <div class="ph"><span class="plabel">Driver + connected dashboard (image)</span></div>
+        <div class="veil soft"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FEATURES PREVIEW ============ -->
+  <section class="section paper">
+    <div class="wrap">
+      <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:2rem; flex-wrap:wrap; margin-bottom:clamp(2rem,5vh,3.5rem);">
+        <div>
+          <span class="eyebrow" data-fade>Why Interent Cars</span>
+          <h2 class="section-title reveal" data-reveal style="margin-top:1rem; max-width:18ch;">Five gaps we were built to close.</h2>
+        </div>
+        <a class="btn" href="features.html" data-link style="--c:var(--blue-deep); color:var(--paper-ink);">All features <span class="arrow">&rarr;</span></a>
+      </div>
+      <div class="pillars-grid">
+        <div class="pillar" data-fade><div class="pnum">01</div><h3>Transparent Pricing</h3><p class="muted">Live market data surfaces the real price of every car — no hidden fees, no invoice mysteries, no negotiation theatre.</p></div>
+        <div class="pillar" data-fade><div class="pnum">02</div><h3>Instant Financing</h3><p class="muted">AI-underwriting delivers same-session loan approvals. Pre-qualify in 2 minutes with zero impact to your credit score.</p></div>
+        <div class="pillar" data-fade><div class="pnum">03</div><h3>Smart Matching</h3><p class="muted">Our recommendation engine cross-references 40+ parameters — usage patterns, insurance risk, resale value — to find your perfect car.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CLOSER ============ -->
+  <section class="section closer">
+    <div class="wrap">
+      <span class="eyebrow" data-fade>The Change We're Bringing</span>
+      <div class="huge reveal" data-reveal style="margin:1.5rem 0;">From showroom <span class="accent">drag</span> to one-click drive.</div>
+      <a class="btn solid" href="invest.html#contact" data-link style="margin-top:1rem;">Partner with us <span class="arrow">&rarr;</span></a>
+    </div>
+  </section>
+
+  <script src="assets/js/motion.js"></script>
+</body>
+</html>

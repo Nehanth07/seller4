@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Comparison Dashboard</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+        .card h2 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+            color: #333;
+        }
+        .card p {
+            margin: 8px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        .port-badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        .path-badge {
+            display: inline-block;
+            background: #f0f0f0;
+            color: #333;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        .open-btn {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.2s;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .open-btn:hover {
+            background: #764ba2;
+        }
+        .stats {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 30px;
+        }
+        .stats p {
+            margin: 8px 0;
+            color: #666;
+        }
+        .info-message {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Page Comparison Dashboard</h1>
+        <div class="info-message">
+            Click any "Open" button below to preview a page in a new tab. You can open multiple pages side-by-side to compare them.
+        </div>
+        <div class="projects-grid">
+
+            <div class="card">
+                <h2>247 Artists</h2>
+                <p>
+                    <span class="port-badge">Port 8001</span>
+                </p>
+                <div class="path-badge">/Users/ndevir939@apac.comcast.com/Desktop/timefasss/247artists</div>
+                <button class="open-btn" onclick="window.open('http://127.0.0.1:8001/', '_blank')">
+                    Open Page →
+                </button>
+            </div>
+
+            <div class="card">
+                <h2>Home Index</h2>
+                <p>
+                    <span class="port-badge">Port 8002</span>
+                </p>
+                <div class="path-badge">/Users/ndevir939@apac.comcast.com/Desktop/timefasss</div>
+                <button class="open-btn" onclick="window.open('http://127.0.0.1:8002/', '_blank')">
+                    Open Page →
+                </button>
+            </div>
+
+            <div class="card">
+                <h2>2nd Page</h2>
+                <p>
+                    <span class="port-badge">Port 8003</span>
+                </p>
+                <div class="path-badge">/Users/ndevir939@apac.comcast.com/Desktop/timefasss</div>
+                <button class="open-btn" onclick="window.open('http://127.0.0.1:8003/', '_blank')">
+                    Open Page →
+                </button>
+            </div>
+
+            <div class="card">
+                <h2>Page Runner</h2>
+                <p>
+                    <span class="port-badge">Port 8004</span>
+                </p>
+                <div class="path-badge">/Users/ndevir939@apac.comcast.com/Desktop/timefasss</div>
+                <button class="open-btn" onclick="window.open('http://127.0.0.1:8004/', '_blank')">
+                    Open Page →
+                </button>
+            </div>
+
+            <div class="card">
+                <h2>Reelongo</h2>
+                <p>
+                    <span class="port-badge">Port 8005</span>
+                </p>
+                <div class="path-badge">/Users/ndevir939@apac.comcast.com/Desktop/timefasss</div>
+                <button class="open-btn" onclick="window.open('http://127.0.0.1:8005/', '_blank')">
+                    Open Page →
+                </button>
+            </div>
+
+            <div class="card">
+                <h2>Book</h2>
+                <p>
+                    <span class="port-badge">Port 8006</span>
+                </p>
+                <div class="path-badge">/Users/ndevir939@apac.comcast.com/Desktop/timefasss</div>
+                <button class="open-btn" onclick="window.open('http://127.0.0.1:8006/', '_blank')">
+                    Open Page →
+                </button>
+            </div>
+
+            <div class="card">
+                <h2>Services</h2>
+                <p>
+                    <span class="port-badge">Port 8007</span>
+                </p>
+                <div class="path-badge">/Users/ndevir939@apac.comcast.com/Desktop/timefasss</div>
+                <button class="open-btn" onclick="window.open('http://127.0.0.1:8007/', '_blank')">
+                    Open Page →
+                </button>
+            </div>
+
+            <div class="card">
+                <h2>Locations</h2>
+                <p>
+                    <span class="port-badge">Port 8008</span>
+                </p>
+                <div class="path-badge">/Users/ndevir939@apac.comcast.com/Desktop/timefasss</div>
+                <button class="open-btn" onclick="window.open('http://127.0.0.1:8008/', '_blank')">
+                    Open Page →
+                </button>
+            </div>
+
+            <div class="card">
+                <h2>Fleet</h2>
+                <p>
+                    <span class="port-badge">Port 8009</span>
+                </p>
+                <div class="path-badge">/Users/ndevir939@apac.comcast.com/Desktop/timefasss</div>
+                <button class="open-btn" onclick="window.open('http://127.0.0.1:8009/', '_blank')">
+                    Open Page →
+                </button>
+            </div>
+
+            <div class="card">
+                <h2>How It Works</h2>
+                <p>
+                    <span class="port-badge">Port 8010</span>
+                </p>
+                <div class="path-badge">/Users/ndevir939@apac.comcast.com/Desktop/timefasss</div>
+                <button class="open-btn" onclick="window.open('http://127.0.0.1:8010/', '_blank')">
+                    Open Page →
+                </button>
+            </div>
+
+            <div class="card">
+                <h2>Interrent Cars</h2>
+                <p>
+                    <span class="port-badge">Port 8090</span>
+                </p>
+                <div class="path-badge">/Users/ndevir939@apac.comcast.com/Desktop/timefasss/interent-cars</div>
+                <button class="open-btn" onclick="window.open('http://127.0.0.1:8090/', '_blank')">
+                    Open Page →
+                </button>
+            </div>
+
+            <div class="card">
+                <h2>Smart Prehospital</h2>
+                <p>
+                    <span class="port-badge">Port 8092</span>
+                </p>
+                <div class="path-badge">/Users/ndevir939@apac.comcast.com/Desktop/timefasss/smart-prehospital</div>
+                <button class="open-btn" onclick="window.open('http://127.0.0.1:8092/', '_blank')">
+                    Open Page →
+                </button>
+            </div>
+
+            <div class="card">
+                <h2>Generous Branding</h2>
+                <p>
+                    <span class="port-badge">Port 8095</span>
+                </p>
+                <div class="path-badge">/Users/ndevir939@apac.comcast.com/Desktop/timefasss/generous branding</div>
+                <button class="open-btn" onclick="window.open('http://127.0.0.1:8095/', '_blank')">
+                    Open Page →
+                </button>
+            </div>
+
+            <div class="card">
+                <h2>Sydney Telugu Badi</h2>
+                <p>
+                    <span class="port-badge">Port 8097</span>
+                </p>
+                <div class="path-badge">/Users/ndevir939@apac.comcast.com/Desktop/timefasss/sydney-telugu-badi</div>
+                <button class="open-btn" onclick="window.open('http://127.0.0.1:8097/', '_blank')">
+                    Open Page →
+                </button>
+            </div>
+
+        </div>
+        <div class="stats">
+            <h2>Server Status</h2>
+            <p>✓ All servers are running</p>
+            <p>14 pages available for comparison</p>
+
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interrentcars — The Fleet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Outfit', sans-serif; background: #f5f4f1; color: #111; }
+        .hero-pad { padding-top: 160px; }
+        .car-card { cursor: pointer; }
+        .car-card .car-img { overflow: hidden; border-radius: 10px; aspect-ratio: 16/11; background: #e8e7e3; }
+        .car-card .car-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .8s cubic-bezier(0.19,1,0.22,1); }
+        .car-card:hover .car-img img { transform: scale(1.06); }
+        .filter-tab { padding: .6rem 1.4rem; border-radius: 100px; border: 1px solid rgba(0,0,0,0.15); font-size: .72rem; letter-spacing: .16em; text-transform: uppercase; cursor: pointer; transition: all .3s ease; }
+        .filter-tab.active, .filter-tab:hover { background: #111; color: #fff; border-color: #111; }
+        .book-mini { display: inline-flex; align-items: center; gap: .5rem; font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; color: #a05a2c; }
+    </style>
+</head>
+
+<body class="antialiased overflow-x-hidden">
+    <!-- Header -->
+    <header class="fixed top-0 left-0 w-full flex justify-between items-center px-6 py-6 md:px-12 z-[70] bg-white/90 backdrop-blur border-b border-black/5">
+        <a href="index.html" class="text-2xl md:text-3xl font-bold tracking-tight">INTERRENTCARS</a>
+        <nav class="hidden md:flex items-center gap-8 text-xs font-semibold tracking-[0.15em] uppercase">
+            <a href="fleet.html" class="text-black">Fleet</a>
+            <a href="how-it-works.html" class="text-black/60 hover:text-black transition">How It Works</a>
+            <a href="locations.html" class="text-black/60 hover:text-black transition">Locations</a>
+            <a href="book.html" class="text-black/60 hover:text-black transition">Book Now</a>
+        </nav>
+        <a href="book.html" class="hidden md:inline-flex bg-black text-white text-xs font-semibold tracking-[0.15em] uppercase px-5 py-3 rounded-full hover:bg-[#a05a2c] transition">Book Now</a>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero-pad px-6 md:px-12 pb-10">
+        <p class="text-xs tracking-[0.28em] uppercase text-black/50 mb-4">Interrentcars — The Collection</p>
+        <h1 class="text-[13vw] md:text-[7rem] leading-[0.9] font-bold tracking-tighter">The Fleet.</h1>
+        <p class="max-w-xl mt-6 text-lg text-black/60">Every vehicle is meticulously maintained, fully insured and delivered to your door. Choose your drive.</p>
+        <div class="flex flex-wrap gap-3 mt-10">
+            <span class="filter-tab active">All</span>
+            <span class="filter-tab">Sedan</span>
+            <span class="filter-tab">SUV</span>
+            <span class="filter-tab">Sports</span>
+            <span class="filter-tab">Electric</span>
+        </div>
+    </section>
+
+    <!-- Grid -->
+    <section class="px-6 md:px-12 pb-24">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10" id="fleet-grid"></div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-[#0c0d11] text-[#f4f5f7] px-8 py-16">
+        <h2 class="text-4xl md:text-6xl font-bold uppercase max-w-2xl leading-[0.92]">The extraordinary is one tap away.</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mt-16 pt-8 border-t border-white/10 text-sm uppercase tracking-wider">
+            <div class="flex flex-col gap-2">
+                <a href="fleet.html" class="hover:text-[#c8a37a]">Fleet</a>
+                <a href="how-it-works.html" class="hover:text-[#c8a37a]">How It Works</a>
+                <a href="locations.html" class="hover:text-[#c8a37a]">Locations</a>
+                <a href="book.html" class="hover:text-[#c8a37a]">Book Now</a>
+            </div>
+            <div class="flex flex-col gap-2 text-white/50">
+                <a href="#" class="hover:text-white">About</a>
+                <a href="#" class="hover:text-white">Careers</a>
+                <a href="mailto:hello@interrentcars.com" class="hover:text-white">Contact</a>
+            </div>
+        </div>
+        <div class="flex justify-between mt-12 text-xs text-white/40 uppercase tracking-wider">
+            <span>© 2025 Interrentcars</span><span>Premium Car Rental</span>
+        </div>
+    </footer>
+
+    <script>
+        const cars = [
+            { name: "Mercedes-Benz S-Class", type: "Executive Sedan", price: 240, img: "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=900&q=80" },
+            { name: "Porsche 911 Carrera", type: "Sports", price: 390, img: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=900&q=80" },
+            { name: "Range Rover Autobiography", type: "Luxury SUV", price: 310, img: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=900&q=80" },
+            { name: "BMW 8 Series Coupé", type: "Grand Tourer", price: 280, img: "https://images.unsplash.com/photo-1555215695-3004980ad54e?w=900&q=80" },
+            { name: "Audi RS7 Sportback", type: "Performance", price: 350, img: "https://images.unsplash.com/photo-1606152421802-db97b9c7a11b?w=900&q=80" },
+            { name: "Tesla Model S Plaid", type: "Electric", price: 300, img: "https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=900&q=80" },
+            { name: "Bentley Continental GT", type: "Grand Tourer", price: 620, img: "https://images.unsplash.com/photo-1621135802920-133df287f89c?w=900&q=80" },
+            { name: "Lamborghini Huracán", type: "Supercar", price: 890, img: "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=900&q=80" },
+            { name: "Rolls-Royce Ghost", type: "Ultra Luxury", price: 950, img: "https://images.unsplash.com/photo-1631295868223-63265b40d9e4?w=900&q=80" }
+        ];
+        const grid = document.getElementById('fleet-grid');
+        grid.innerHTML = cars.map(c => `
+            <a href="book.html" class="car-card block group">
+                <div class="car-img"><img src="${c.img}" alt="${c.name}" loading="lazy"></div>
+                <div class="flex justify-between items-start mt-4">
+                    <div>
+                        <p class="text-[0.7rem] tracking-[0.2em] uppercase text-[#a05a2c] mb-1">${c.type}</p>
+                        <h3 class="text-xl font-medium">${c.name}</h3>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-lg font-semibold">$${c.price}</p>
+                        <p class="text-xs text-black/40">/ day</p>
+                    </div>
+                </div>
+                <span class="book-mini mt-3">Reserve
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 12h16m0 0l-6-6m6 6l-6 6"/></svg>
+                </span>
+            </a>`).join('');
+
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+            });
+        });
+    </script>
+</body>
+
+</html>

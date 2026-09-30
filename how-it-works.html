@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interrentcars — How It Works</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Outfit', sans-serif; background: #f5f4f1; color: #111; }
+        .hero-pad { padding-top: 160px; }
+        .step { border-top: 1px solid rgba(0,0,0,0.12); padding: 3vw 0; display: grid; grid-template-columns: 1fr 3fr 2fr; gap: 2rem; align-items: center; }
+        .step-num { font-size: clamp(2rem,5vw,4rem); font-weight: 700; color: #a05a2c; letter-spacing: -0.03em; }
+        .step-title { font-size: clamp(1.6rem,3vw,2.6rem); font-weight: 500; letter-spacing: -0.02em; }
+        .step-desc { color: #555; line-height: 1.6; }
+        @media (max-width: 768px) { .step { grid-template-columns: 1fr; gap: .8rem; } }
+    </style>
+</head>
+
+<body class="antialiased overflow-x-hidden">
+    <header class="fixed top-0 left-0 w-full flex justify-between items-center px-6 py-6 md:px-12 z-[70] bg-white/90 backdrop-blur border-b border-black/5">
+        <a href="index.html" class="text-2xl md:text-3xl font-bold tracking-tight">INTERRENTCARS</a>
+        <nav class="hidden md:flex items-center gap-8 text-xs font-semibold tracking-[0.15em] uppercase">
+            <a href="fleet.html" class="text-black/60 hover:text-black transition">Fleet</a>
+            <a href="how-it-works.html" class="text-black">How It Works</a>
+            <a href="locations.html" class="text-black/60 hover:text-black transition">Locations</a>
+            <a href="book.html" class="text-black/60 hover:text-black transition">Book Now</a>
+        </nav>
+        <a href="book.html" class="hidden md:inline-flex bg-black text-white text-xs font-semibold tracking-[0.15em] uppercase px-5 py-3 rounded-full hover:bg-[#a05a2c] transition">Book Now</a>
+    </header>
+
+    <section class="hero-pad px-6 md:px-12 pb-10">
+        <p class="text-xs tracking-[0.28em] uppercase text-black/50 mb-4">Interrentcars — The Process</p>
+        <h1 class="text-[13vw] md:text-[7rem] leading-[0.9] font-bold tracking-tighter">How it works.</h1>
+        <p class="max-w-xl mt-6 text-lg text-black/60">From browse to boulevard in four simple steps. No paperwork queues, no hidden fees.</p>
+    </section>
+
+    <section class="px-6 md:px-12 pb-16">
+        <div class="step">
+            <div class="step-num">01</div>
+            <div><h3 class="step-title">Choose your car</h3></div>
+            <p class="step-desc">Browse the full fleet and pick the vehicle that fits your journey — from executive sedans to supercars.</p>
+        </div>
+        <div class="step">
+            <div class="step-num">02</div>
+            <div><h3 class="step-title">Pick dates &amp; location</h3></div>
+            <p class="step-desc">Select your pickup and return, or request door-to-door delivery to your home, hotel or airport.</p>
+        </div>
+        <div class="step">
+            <div class="step-num">03</div>
+            <div><h3 class="step-title">Verify &amp; book</h3></div>
+            <p class="step-desc">Upload your driver's license and ID once. Secure your reservation in under two minutes.</p>
+        </div>
+        <div class="step">
+            <div class="step-num">04</div>
+            <div><h3 class="step-title">Drive away</h3></div>
+            <p class="step-desc">Your fully detailed, fuelled and insured car arrives on time. All that's left is to enjoy the drive.</p>
+        </div>
+    </section>
+
+    <!-- Documents -->
+    <section class="px-6 md:px-12 pb-24">
+        <h2 class="text-3xl md:text-5xl font-bold tracking-tighter mb-10">What you'll need</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white rounded-xl p-8 border border-black/5">
+                <p class="text-[#a05a2c] text-sm tracking-widest uppercase mb-3">01</p>
+                <h3 class="text-2xl font-medium mb-3">Driver's License</h3>
+                <p class="text-black/60 leading-relaxed">A valid driver's license is required to rent and legally operate any InterRent vehicle.</p>
+            </div>
+            <div class="bg-white rounded-xl p-8 border border-black/5">
+                <p class="text-[#a05a2c] text-sm tracking-widest uppercase mb-3">02</p>
+                <h3 class="text-2xl font-medium mb-3">ID Card</h3>
+                <p class="text-black/60 leading-relaxed">A government-issued ID card is used to confirm your identity at the time of pickup.</p>
+            </div>
+            <div class="bg-white rounded-xl p-8 border border-black/5">
+                <p class="text-[#a05a2c] text-sm tracking-widest uppercase mb-3">03</p>
+                <h3 class="text-2xl font-medium mb-3">Passport</h3>
+                <p class="text-black/60 leading-relaxed">International renters can present a valid passport as primary proof of identity.</p>
+            </div>
+        </div>
+        <div class="mt-12"><a href="book.html" class="inline-flex items-center gap-3 bg-black text-white px-8 py-4 rounded-full text-xs tracking-[0.18em] uppercase font-semibold hover:bg-[#a05a2c] transition">Start Booking
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 12h16m0 0l-6-6m6 6l-6 6"/></svg></a></div>
+    </section>
+
+    <footer class="bg-[#0c0d11] text-[#f4f5f7] px-8 py-16">
+        <h2 class="text-4xl md:text-6xl font-bold uppercase max-w-2xl leading-[0.92]">The extraordinary is one tap away.</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mt-16 pt-8 border-t border-white/10 text-sm uppercase tracking-wider">
+            <div class="flex flex-col gap-2">
+                <a href="fleet.html" class="hover:text-[#c8a37a]">Fleet</a>
+                <a href="how-it-works.html" class="hover:text-[#c8a37a]">How It Works</a>
+                <a href="locations.html" class="hover:text-[#c8a37a]">Locations</a>
+                <a href="book.html" class="hover:text-[#c8a37a]">Book Now</a>
+            </div>
+            <div class="flex flex-col gap-2 text-white/50">
+                <a href="#" class="hover:text-white">About</a>
+                <a href="#" class="hover:text-white">Careers</a>
+                <a href="mailto:hello@interrentcars.com" class="hover:text-white">Contact</a>
+            </div>
+        </div>
+        <div class="flex justify-between mt-12 text-xs text-white/40 uppercase tracking-wider">
+            <span>© 2025 Interrentcars</span><span>Premium Car Rental</span>
+        </div>
+    </footer>
+</body>
+
+</html>
